@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { motion, type Variants } from "framer-motion";
 import {
   ArrowRight,
@@ -22,12 +22,185 @@ import {
   ChevronRight,
   ShieldCheck,
   Clock,
+  Sun,
+  Moon,
+  SlidersHorizontal,
 } from "lucide-react";
+
+// Interpolación lineal entre dos canales o valores
+function lerp(a: number, b: number, t: number) {
+  return Math.round(a + (b - a) * t);
+}
+
+function rgb(r: number, g: number, b: number) {
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
+// Interpolación por tramos para pasar por una rica escala de grises intermedios
+function sampleStops(stops: [number, [number, number, number]][], lum: number) {
+  const clamped = Math.max(0, Math.min(100, lum));
+  for (let i = 0; i < stops.length - 1; i++) {
+    const [p0, c0] = stops[i];
+    const [p1, c1] = stops[i + 1];
+    if (clamped >= p0 && clamped <= p1) {
+      const t = (clamped - p0) / (p1 - p0 || 1);
+      return [
+        lerp(c0[0], c1[0], t),
+        lerp(c0[1], c1[1], t),
+        lerp(c0[2], c1[2], t),
+      ] as [number, number, number];
+    }
+  }
+  return stops[stops.length - 1][1];
+}
+
+function getToneLabel(lum: number) {
+  if (lum <= 8) return "Negro Puro (Dark)";
+  if (lum <= 30) return "Gris Carbón";
+  if (lum <= 55) return "Gris Pizarra Medio";
+  if (lum <= 80) return "Gris Plata Claro";
+  return "Blanco (Light)";
+}
 
 export default function DynamoLanding() {
   const [activeStep, setActiveStep] = useState<number>(0);
+  // 0 = Negro (Dark) -> 20..80 = Escala de Grises -> 100 = Blanco (Light)
+  const [luminosity, setLuminosity] = useState<number>(0);
 
-  // Variantes de animación inspiradas en la referencia (suaves, con blur y spring)
+  // Cálculo continuo de la paleta según el nivel de luminosidad (0 - 100)
+  const bgPrimaryRGB = sampleStops(
+    [
+      [0, [5, 5, 5]], // #050505 Negro profundo
+      [25, [28, 28, 32]], // #1c1c20 Gris carbón oscuro
+      [50, [72, 72, 80]], // #484850 Gris neutro medio
+      [75, [175, 175, 184]], // #afafb8 Gris plata
+      [100, [248, 248, 250]], // #f8f8fa Blanco limpio
+    ],
+    luminosity
+  );
+
+  const bgSecondaryRGB = sampleStops(
+    [
+      [0, [8, 8, 11]],
+      [25, [36, 36, 42]],
+      [50, [84, 84, 94]],
+      [75, [190, 190, 198]],
+      [100, [238, 238, 243]],
+    ],
+    luminosity
+  );
+
+  const bgCardRGB = sampleStops(
+    [
+      [0, [12, 12, 15]],
+      [25, [44, 44, 52]],
+      [50, [56, 56, 64]],
+      [75, [215, 215, 222]],
+      [100, [255, 255, 255]],
+    ],
+    luminosity
+  );
+
+  const bgCardInnerRGB = sampleStops(
+    [
+      [0, [8, 8, 10]],
+      [25, [32, 32, 38]],
+      [50, [44, 44, 52]],
+      [75, [198, 198, 206]],
+      [100, [242, 242, 246]],
+    ],
+    luminosity
+  );
+
+  // El texto invierte suavemente al cruzar el umbral gris medio-claro (~58%) para mantener legibilidad total
+  const isLightModeSide = luminosity >= 58;
+
+  const textPrimary = isLightModeSide
+    ? rgb(
+        ...sampleStops(
+          [
+            [58, [24, 24, 28]],
+            [100, [9, 9, 11]],
+          ],
+          luminosity
+        )
+      )
+    : rgb(
+        ...sampleStops(
+          [
+            [0, [255, 255, 255]],
+            [57, [250, 250, 252]],
+          ],
+          luminosity
+        )
+      );
+
+  const textSecondary = isLightModeSide
+    ? rgb(
+        ...sampleStops(
+          [
+            [58, [52, 52, 60]],
+            [100, [63, 63, 70]],
+          ],
+          luminosity
+        )
+      )
+    : rgb(
+        ...sampleStops(
+          [
+            [0, [161, 161, 170]],
+            [57, [228, 228, 234]],
+          ],
+          luminosity
+        )
+      );
+
+  const textMuted = isLightModeSide
+    ? rgb(
+        ...sampleStops(
+          [
+            [58, [82, 82, 91]],
+            [100, [113, 113, 122]],
+          ],
+          luminosity
+        )
+      )
+    : rgb(
+        ...sampleStops(
+          [
+            [0, [113, 113, 122]],
+            [57, [200, 200, 210]],
+          ],
+          luminosity
+        )
+      );
+
+  const borderColor = isLightModeSide
+    ? `rgba(0, 0, 0, ${(0.1 + ((luminosity - 58) / 42) * 0.06).toFixed(2)})`
+    : `rgba(255, 255, 255, ${(0.08 + (luminosity / 58) * 0.1).toFixed(2)})`;
+
+  const gridLineColor = isLightModeSide
+    ? "rgba(0, 0, 0, 0.07)"
+    : "rgba(255, 255, 255, 0.06)";
+
+  const bgPrimary = rgb(...bgPrimaryRGB);
+  const bgSecondary = rgb(...bgSecondaryRGB);
+  const bgCard = rgb(...bgCardRGB);
+  const bgCardInner = rgb(...bgCardInnerRGB);
+  const navBg = `rgba(${bgPrimaryRGB[0]}, ${bgPrimaryRGB[1]}, ${bgPrimaryRGB[2]}, 0.82)`;
+
+  const themeVars = {
+    "--bg-primary": bgPrimary,
+    "--bg-secondary": bgSecondary,
+    "--bg-card": bgCard,
+    "--bg-card-inner": bgCardInner,
+    "--text-primary": textPrimary,
+    "--text-secondary": textSecondary,
+    "--text-muted": textMuted,
+    "--border-subtle": borderColor,
+  } as CSSProperties;
+
+  // Variantes de animación inspiradas en la referencia
   const fadeUpBlur: Variants = {
     hidden: { opacity: 0, y: 28, filter: "blur(8px)" },
     visible: {
@@ -156,53 +329,129 @@ export default function DynamoLanding() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-[#FF5B22]/30 selection:text-white">
-      {/* BARRA SUPERIOR + NAVEGACIÓN ESTILO REFERENCIA */}
+    <div
+      style={{
+        ...themeVars,
+        backgroundColor: bgPrimary,
+        color: textPrimary,
+      }}
+      className="min-h-screen font-sans selection:bg-[#FF5B22]/30 selection:text-white transition-colors duration-200"
+    >
+      {/* BARRA SUPERIOR + NAVEGACIÓN CON NIVELADOR DE LUMINOSIDAD */}
       <header className="fixed w-full top-0 z-50">
         {/* Top subtle announcement bar */}
-        <div className="bg-[#08080A]/90 backdrop-blur-md border-b border-white/[0.06] py-2 px-4 text-center">
+        <div
+          style={{
+            backgroundColor: navBg,
+            borderColor,
+          }}
+          className="backdrop-blur-md border-b py-2 px-4 text-center transition-colors duration-200"
+        >
           <a
             href="#caso-estudio"
-            className="inline-flex items-center gap-2 text-xs text-zinc-400 hover:text-white transition-colors"
+            style={{ color: textSecondary }}
+            className="inline-flex items-center gap-2 text-xs hover:opacity-100 transition-opacity"
           >
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#FF5B22] animate-pulse" />
             <span>
-              Caso de Estudio: <strong className="text-white font-medium">The Bellacy Studio</strong> escaló de $300 USD a $1.300 USD en 3 meses
+              Caso de Estudio:{" "}
+              <strong style={{ color: textPrimary }} className="font-medium">
+                The Bellacy Studio
+              </strong>{" "}
+              escaló de $300 USD a $1.300 USD en 3 meses
             </span>
-            <ChevronRight className="w-3.5 h-3.5 text-zinc-500" />
+            <ChevronRight className="w-3.5 h-3.5 opacity-60" />
           </a>
         </div>
 
-        <nav className="bg-[#050505]/75 backdrop-blur-xl border-b border-white/[0.07]">
-          <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-            <a href="#" className="flex items-center gap-2.5 group">
+        <nav
+          style={{
+            backgroundColor: navBg,
+            borderColor,
+          }}
+          className="backdrop-blur-xl border-b transition-colors duration-200"
+        >
+          <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
+            <a href="#" className="flex items-center gap-2.5 group shrink-0">
               <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#FF6B35] to-[#D93800] flex items-center justify-center shadow-[0_0_15px_rgba(255,91,34,0.4)]">
                 <Zap className="w-4 h-4 text-white fill-white" />
               </div>
-              <span className="text-xl font-semibold tracking-tight">
+              <span
+                style={{ color: textPrimary }}
+                className="text-xl font-semibold tracking-tight"
+              >
                 Dynamo<span className="text-[#FF5B22]">.</span>
               </span>
             </a>
 
-            <div className="hidden md:flex items-center gap-8 text-sm text-zinc-400">
-              <a href="#manifiesto" className="hover:text-white transition-colors">
+            <div
+              style={{ color: textSecondary }}
+              className="hidden lg:flex items-center gap-7 text-sm"
+            >
+              <a href="#manifiesto" className="hover:opacity-75 transition-opacity">
                 Sobre Nosotros
               </a>
-              <a href="#corporativo" className="hover:text-white transition-colors">
+              <a href="#corporativo" className="hover:opacity-75 transition-opacity">
                 Soluciones Corporativas
               </a>
-              <a href="#profesionales" className="hover:text-white transition-colors">
+              <a href="#profesionales" className="hover:opacity-75 transition-opacity">
                 Impulso Profesionales
               </a>
-              <a href="#caso-estudio" className="hover:text-white transition-colors">
+              <a href="#caso-estudio" className="hover:opacity-75 transition-opacity">
                 Caso de Estudio
               </a>
             </div>
 
             <div className="flex items-center gap-3">
+              {/* Barra compacta de Luminosidad en el Header */}
+              <div
+                style={{
+                  backgroundColor: bgCard,
+                  borderColor,
+                }}
+                className="hidden sm:flex items-center gap-2.5 px-3 py-1.5 rounded-xl border shadow-sm"
+                title="Nivelar tonos entre Negro (Dark), Grises intermedios y Blanco (Light)"
+              >
+                <button
+                  type="button"
+                  onClick={() => setLuminosity(0)}
+                  className="opacity-70 hover:opacity-100 transition-opacity cursor-pointer"
+                  aria-label="Modo Oscuro"
+                >
+                  <Moon className="w-3.5 h-3.5 text-[#FF6B35]" />
+                </button>
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  value={luminosity}
+                  onChange={(e) => setLuminosity(Number(e.target.value))}
+                  aria-label="Nivel de luminosidad"
+                  className="w-24 md:w-28 h-1.5 rounded-lg appearance-none cursor-pointer accent-[#FF5B22]"
+                  style={{
+                    background:
+                      "linear-gradient(to right, #050505 0%, #3f3f46 35%, #71717a 60%, #d4d4d8 82%, #ffffff 100%)",
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setLuminosity(100)}
+                  className="opacity-70 hover:opacity-100 transition-opacity cursor-pointer"
+                  aria-label="Modo Claro"
+                >
+                  <Sun className="w-3.5 h-3.5 text-amber-400" />
+                </button>
+                <span
+                  style={{ color: textMuted }}
+                  className="text-[10px] font-mono w-8 text-right"
+                >
+                  {luminosity}%
+                </span>
+              </div>
+
               <a
                 href="#agendar"
-                className="bg-gradient-to-b from-[#FF6B35] to-[#E84311] text-white px-5 py-2 rounded-lg text-xs md:text-sm font-medium hover:brightness-110 transition-all shadow-[0_0_20px_rgba(255,91,34,0.35)] border border-[#FF8559]/40 flex items-center gap-1.5"
+                className="bg-gradient-to-b from-[#FF6B35] to-[#E84311] text-white px-5 py-2 rounded-lg text-xs md:text-sm font-medium hover:brightness-110 transition-all shadow-[0_0_20px_rgba(255,91,34,0.35)] border border-[#FF8559]/40 flex items-center gap-1.5 shrink-0"
               >
                 Agendar Reunión
                 <ChevronRight className="w-4 h-4" />
@@ -212,8 +461,78 @@ export default function DynamoLanding() {
         </nav>
       </header>
 
+      {/* CONTROL FLOTANTE DE LUMINOSIDAD Y ESCALA DE GRISES (Abajo a la derecha) */}
+      <div
+        style={{
+          backgroundColor: bgCard,
+          borderColor,
+          color: textPrimary,
+        }}
+        className="fixed bottom-5 right-5 z-50 rounded-2xl border p-3.5 shadow-[0_15px_50px_rgba(0,0,0,0.45)] backdrop-blur-xl w-72 transition-colors duration-200"
+      >
+        <div className="flex items-center justify-between text-xs mb-2">
+          <span className="flex items-center gap-1.5 font-medium">
+            <SlidersHorizontal className="w-3.5 h-3.5 text-[#FF6B35]" />
+            Nivel de Luminosidad
+          </span>
+          <span
+            style={{ color: textMuted }}
+            className="font-mono text-[10px] uppercase"
+          >
+            {getToneLabel(luminosity)}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2.5 mb-2.5">
+          <Moon className="w-3.5 h-3.5 shrink-0 opacity-70" />
+          <input
+            type="range"
+            min={0}
+            max={100}
+            value={luminosity}
+            onChange={(e) => setLuminosity(Number(e.target.value))}
+            aria-label="Barra de luminosidad entre oscuro, grises y claro"
+            className="w-full h-2 rounded-lg appearance-none cursor-pointer accent-[#FF5B22]"
+            style={{
+              background:
+                "linear-gradient(to right, #050505 0%, #27272a 25%, #52525b 50%, #a1a1aa 75%, #fafafa 100%)",
+              border: `1px solid ${borderColor}`,
+            }}
+          />
+          <Sun className="w-3.5 h-3.5 shrink-0 text-amber-400" />
+        </div>
+
+        {/* Presets rápidos de Negro -> Grises -> Blanco */}
+        <div className="grid grid-cols-5 gap-1 text-[10px] font-mono">
+          {[
+            { label: "Dark", val: 0 },
+            { label: "Gris 25", val: 25 },
+            { label: "Gris 50", val: 50 },
+            { label: "Gris 75", val: 75 },
+            { label: "Light", val: 100 },
+          ].map((preset) => (
+            <button
+              key={preset.val}
+              type="button"
+              onClick={() => setLuminosity(preset.val)}
+              style={{
+                borderColor:
+                  Math.abs(luminosity - preset.val) <= 6
+                    ? "#FF5B22"
+                    : borderColor,
+                backgroundColor: bgCardInner,
+                color: textSecondary,
+              }}
+              className="py-1 rounded-md border text-center hover:opacity-100 transition-all cursor-pointer"
+            >
+              {preset.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* HERO SECTION CON VIDEO FIJO EN EL BANNER SUPERIOR (50% TRANSPARENCIA) */}
-      <section className="relative overflow-hidden min-h-[85vh] flex items-center pt-36 pb-24 md:pt-44 md:pb-32 px-6">
+      <section className="relative overflow-hidden min-h-[85vh] flex items-center pt-36 pb-24 md:pt-44 md:pb-32 px-6 text-white">
         {/* Video de fondo exclusivo del Hero */}
         <video
           src="https://res.cloudinary.com/ahsxrxpv/video/upload/v1792510146/6930814-uhd_3840_2160_25fps.mp4"
@@ -227,11 +546,15 @@ export default function DynamoLanding() {
         {/* Capa con 50% de transparencia solicitada */}
         <div className="absolute inset-0 bg-black/50 pointer-events-none" />
 
-        {/* Fundido inferior suave para conectar el video con el negro puro del sitio */}
-        <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#050505] via-[#050505]/80 to-transparent pointer-events-none" />
+        {/* Fundido inferior dinámico hacia el tono actual de la página */}
+        <div
+          style={{
+            background: `linear-gradient(to top, ${bgPrimary} 0%, transparent 100%)`,
+          }}
+          className="absolute inset-x-0 bottom-0 h-40 pointer-events-none transition-colors duration-200"
+        />
 
         <div className="relative z-10 max-w-7xl mx-auto w-full">
-          {/* Texto Hero alineado al estilo de la referencia */}
           <motion.div
             initial="hidden"
             animate="visible"
@@ -247,15 +570,15 @@ export default function DynamoLanding() {
 
             <motion.h1
               variants={fadeUpBlur}
-              className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight leading-tight mb-6"
+              className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight leading-tight mb-6 text-white"
             >
               Automatización y escalabilidad{" "}
-              <span className="text-zinc-400">para negocios modernos.</span>
+              <span className="text-zinc-300">para negocios modernos.</span>
             </motion.h1>
 
             <motion.p
               variants={fadeUpBlur}
-              className="text-base md:text-lg text-zinc-300 mb-9 max-w-xl font-light leading-relaxed"
+              className="text-base md:text-lg text-zinc-200 mb-9 max-w-xl font-light leading-relaxed"
             >
               Diseñamos ecosistemas digitales, optimizamos tu posicionamiento y
               construimos soluciones tecnológicas que convierten visitantes en
@@ -278,7 +601,7 @@ export default function DynamoLanding() {
                 href="#agendar"
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.98 }}
-                className="bg-white/[0.07] hover:bg-white/[0.12] text-white border border-white/[0.14] backdrop-blur-md px-7 py-3.5 rounded-xl text-sm md:text-base font-medium transition-all"
+                className="bg-white/[0.1] hover:bg-white/[0.16] text-white border border-white/[0.2] backdrop-blur-md px-7 py-3.5 rounded-xl text-sm md:text-base font-medium transition-all"
               >
                 Agendar Reunión
               </motion.a>
@@ -287,17 +610,17 @@ export default function DynamoLanding() {
         </div>
       </section>
 
-      {/* EL MANIFIESTO (SOBRE NOSOTROS) — Estilo 00:03 - 00:04 con grilla y revelación progresiva */}
+      {/* EL MANIFIESTO (SOBRE NOSOTROS) */}
       <section
         id="manifiesto"
-        className="relative py-28 md:py-36 px-6 border-t border-white/[0.06] overflow-hidden scroll-mt-20"
+        style={{ borderColor, backgroundColor: bgPrimary }}
+        className="relative py-28 md:py-36 px-6 border-t overflow-hidden scroll-mt-20 transition-colors duration-200"
       >
-        {/* Fondo de cuadrícula arquitectónica sutil idéntico al segundo 00:03 */}
+        {/* Fondo de cuadrícula arquitectónica sutil */}
         <div
-          className="absolute inset-0 pointer-events-none opacity-35"
+          className="absolute inset-0 pointer-events-none opacity-45"
           style={{
-            backgroundImage:
-              "linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px)",
+            backgroundImage: `linear-gradient(to right, ${gridLineColor} 1px, transparent 1px), linear-gradient(to bottom, ${gridLineColor} 1px, transparent 1px)`,
             backgroundSize: "4.5rem 4.5rem",
             maskImage:
               "radial-gradient(ellipse 70% 65% at 50% 50%, #000 30%, transparent 100%)",
@@ -314,12 +637,18 @@ export default function DynamoLanding() {
             variants={fadeUpBlur}
             className="mb-8"
           >
-            <span className="inline-block font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-300 border border-white/15 bg-white/[0.03] px-3.5 py-1.5 rounded-md">
+            <span
+              style={{
+                borderColor,
+                backgroundColor: bgCard,
+                color: textSecondary,
+              }}
+              className="inline-block font-mono text-[11px] uppercase tracking-[0.2em] border px-3.5 py-1.5 rounded-md"
+            >
               SOBRE NOSOTROS · EL MANIFIESTO
             </span>
           </motion.div>
 
-          {/* Titular Editorial con insignias integradas (Estilo 00:03 - 00:04) */}
           <motion.h2
             initial="hidden"
             whileInView="visible"
@@ -328,13 +657,22 @@ export default function DynamoLanding() {
             className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight mb-10 max-w-4xl mx-auto"
           >
             No somos una agencia tradicional;{" "}
-            <span className="inline-flex items-center justify-center align-middle mx-1 w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-b from-zinc-800 to-zinc-950 border border-white/15 shadow-inner">
+            <span
+              style={{ backgroundColor: bgCard, borderColor }}
+              className="inline-flex items-center justify-center align-middle mx-1 w-10 h-10 md:w-12 md:h-12 rounded-xl border shadow-inner"
+            >
               <Layers className="w-5 h-5 md:w-6 md:h-6 text-[#FF6B35]" />
             </span>{" "}
             somos arquitectos de{" "}
-            <span className="text-zinc-400">ecosistemas digitales</span>{" "}
-            <span className="inline-flex items-center justify-center align-middle mx-1 w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-b from-zinc-800 to-zinc-950 border border-white/15 shadow-inner">
-              <Zap className="w-5 h-5 md:w-6 md:h-6 text-white" />
+            <span style={{ color: textSecondary }}>ecosistemas digitales</span>{" "}
+            <span
+              style={{ backgroundColor: bgCard, borderColor }}
+              className="inline-flex items-center justify-center align-middle mx-1 w-10 h-10 md:w-12 md:h-12 rounded-xl border shadow-inner"
+            >
+              <Zap
+                style={{ color: textPrimary }}
+                className="w-5 h-5 md:w-6 md:h-6"
+              />
             </span>
             .
           </motion.h2>
@@ -347,23 +685,26 @@ export default function DynamoLanding() {
             variants={wordRevealContainer}
             className="max-w-4xl mx-auto mb-8"
           >
-            <p className="text-xl md:text-2xl font-light leading-relaxed text-zinc-200 flex flex-wrap justify-center gap-x-2 gap-y-1">
-              {manifestoWords.map((word, idx) => (
-                <motion.span
-                  key={idx}
-                  variants={wordRevealItem}
-                  className={
-                    word === "Dynamo" ||
-                    word === "Solutions" ||
-                    word === "democratizar" ||
-                    word === "escalabilidad."
-                      ? "text-white font-normal"
-                      : "text-zinc-300"
-                  }
-                >
-                  {word}
-                </motion.span>
-              ))}
+            <p className="text-xl md:text-2xl font-light leading-relaxed flex flex-wrap justify-center gap-x-2 gap-y-1">
+              {manifestoWords.map((word, idx) => {
+                const isHighlight =
+                  word === "Dynamo" ||
+                  word === "Solutions" ||
+                  word === "democratizar" ||
+                  word === "escalabilidad.";
+                return (
+                  <motion.span
+                    key={idx}
+                    variants={wordRevealItem}
+                    style={{
+                      color: isHighlight ? textPrimary : textSecondary,
+                    }}
+                    className={isHighlight ? "font-medium" : ""}
+                  >
+                    {word}
+                  </motion.span>
+                );
+              })}
             </p>
           </motion.div>
 
@@ -372,7 +713,8 @@ export default function DynamoLanding() {
             whileInView="visible"
             viewport={{ once: true, margin: "-60px" }}
             variants={fadeUpBlur}
-            className="text-base md:text-lg text-zinc-400 font-light leading-relaxed max-w-3xl mx-auto mb-12"
+            style={{ color: textSecondary }}
+            className="text-base md:text-lg font-light leading-relaxed max-w-3xl mx-auto mb-12"
           >
             Ya seas una empresa consolidada buscando dominar su sector, o un
             profesional independiente dando el salto digital, construimos la
@@ -381,15 +723,16 @@ export default function DynamoLanding() {
             negocio; tú te enfocas en lo que mejor sabes hacer.
           </motion.p>
 
-          {/* Píldoras de especialidades interactivas (Estilo inferior del frame 00:04) */}
+          {/* Píldoras de especialidades interactivas */}
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={staggerContainer}
-            className="pt-6 border-t border-white/[0.06] max-w-3xl mx-auto"
+            style={{ borderColor }}
+            className="pt-6 border-t max-w-3xl mx-auto"
           >
-            <div className="text-xs text-zinc-500 mb-4">
+            <div style={{ color: textMuted }} className="text-xs mb-4">
               Ecosistemas especializados para cada etapa de crecimiento
             </div>
             <div className="flex flex-wrap justify-center gap-2.5">
@@ -407,10 +750,15 @@ export default function DynamoLanding() {
                   href={chip.href}
                   variants={fadeUpBlur}
                   whileHover={{ y: -2 }}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#0E0E12] border border-white/[0.08] hover:border-[#FF5B22]/50 text-xs text-zinc-300 hover:text-white transition-all"
+                  style={{
+                    backgroundColor: bgCard,
+                    borderColor,
+                    color: textSecondary,
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border hover:border-[#FF5B22]/60 text-xs transition-all"
                 >
                   <span>{chip.label}</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 text-zinc-500" />
+                  <ArrowUpRight className="w-3.5 h-3.5 opacity-60" />
                 </motion.a>
               ))}
             </div>
@@ -418,8 +766,11 @@ export default function DynamoLanding() {
         </div>
       </section>
 
-      {/* RESUMEN EJECUTIVO DE LOS DOS ECOSISTEMAS (Bento Dual estilo 00:05) */}
-      <section className="py-24 px-6 border-t border-white/[0.06] bg-[#070709]">
+      {/* RESUMEN EJECUTIVO DE LOS DOS ECOSISTEMAS */}
+      <section
+        style={{ backgroundColor: bgSecondary, borderColor }}
+        className="py-24 px-6 border-t transition-colors duration-200"
+      >
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial="hidden"
@@ -428,12 +779,21 @@ export default function DynamoLanding() {
             variants={fadeUpBlur}
             className="text-center max-w-3xl mx-auto mb-16"
           >
-            <span className="inline-block font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-300 border border-white/15 bg-white/[0.03] px-3.5 py-1.5 rounded-md mb-5">
+            <span
+              style={{
+                borderColor,
+                backgroundColor: bgCard,
+                color: textSecondary,
+              }}
+              className="inline-block font-mono text-[11px] uppercase tracking-[0.2em] border px-3.5 py-1.5 rounded-md mb-5"
+            >
               DOS MODELOS DE ESCALABILIDAD
             </span>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight">
               Un Ecosistema.{" "}
-              <span className="text-zinc-400">Dos Caminos de Crecimiento.</span>
+              <span style={{ color: textSecondary }}>
+                Dos Caminos de Crecimiento.
+              </span>
             </h2>
           </motion.div>
 
@@ -449,23 +809,44 @@ export default function DynamoLanding() {
               href="#corporativo"
               variants={fadeUpBlur}
               whileHover={{ y: -4 }}
-              className="group relative rounded-3xl bg-[#0C0C0F] border border-white/[0.08] hover:border-white/[0.18] p-8 md:p-10 overflow-hidden transition-all flex flex-col justify-between"
+              style={{ backgroundColor: bgCard, borderColor }}
+              className="group relative rounded-3xl border p-8 md:p-10 overflow-hidden transition-all flex flex-col justify-between"
             >
-              {/* Glow cálido estilo referencia */}
               <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-[#FF5B22]/10 blur-3xl pointer-events-none group-hover:bg-[#FF5B22]/20 transition-all" />
 
-              {/* Ilustración superior estilo Bento 00:05 */}
-              <div className="relative h-36 mb-8 rounded-2xl bg-[#08080A] border border-white/[0.06] p-5 flex items-center justify-center gap-4 overflow-hidden">
-                <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-white/10 flex items-center justify-center">
-                  <Code2 className="w-5 h-5 text-zinc-300" />
+              <div
+                style={{ backgroundColor: bgCardInner, borderColor }}
+                className="relative h-36 mb-8 rounded-2xl border p-5 flex items-center justify-center gap-4 overflow-hidden"
+              >
+                <div
+                  style={{ backgroundColor: bgCard, borderColor }}
+                  className="w-12 h-12 rounded-xl border flex items-center justify-center"
+                >
+                  <Code2
+                    style={{ color: textSecondary }}
+                    className="w-5 h-5"
+                  />
                 </div>
                 <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#FF6B35] to-[#D43800] border border-[#FF946B]/50 flex items-center justify-center shadow-[0_0_30px_rgba(255,91,34,0.45)] group-hover:scale-110 transition-transform duration-500">
                   <Globe className="w-7 h-7 text-white" />
                 </div>
-                <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-white/10 flex items-center justify-center">
-                  <Target className="w-5 h-5 text-zinc-300" />
+                <div
+                  style={{ backgroundColor: bgCard, borderColor }}
+                  className="w-12 h-12 rounded-xl border flex items-center justify-center"
+                >
+                  <Target
+                    style={{ color: textSecondary }}
+                    className="w-5 h-5"
+                  />
                 </div>
-                <span className="absolute top-3 right-3 text-[10px] font-mono uppercase tracking-widest text-zinc-400 bg-white/[0.04] border border-white/[0.08] px-2.5 py-1 rounded-md">
+                <span
+                  style={{
+                    backgroundColor: bgCard,
+                    borderColor,
+                    color: textMuted,
+                  }}
+                  className="absolute top-3 right-3 text-[10px] font-mono uppercase tracking-widest border px-2.5 py-1 rounded-md"
+                >
                   ECOSISTEMA 01
                 </span>
               </div>
@@ -474,12 +855,18 @@ export default function DynamoLanding() {
                 <h3 className="text-2xl md:text-3xl font-semibold mb-3 tracking-tight">
                   Soluciones Corporativas
                 </h3>
-                <p className="text-zinc-400 mb-6 leading-relaxed text-sm md:text-base font-light">
+                <p
+                  style={{ color: textSecondary }}
+                  className="mb-6 leading-relaxed text-sm md:text-base font-light"
+                >
                   Desarrollo web a medida, campañas de publicidad (SEM/Meta) y
                   optimización SEO avanzada. Construimos la infraestructura
                   digital que tu empresa necesita para dominar el mercado.
                 </p>
-                <ul className="space-y-3 text-sm text-zinc-300">
+                <ul
+                  style={{ color: textSecondary }}
+                  className="space-y-3 text-sm"
+                >
                   <li className="flex items-center gap-3">
                     <CheckCircle2 className="w-4 h-4 text-[#FF6B35] shrink-0" />
                     <span>Desarrollo E-commerce & Web</span>
@@ -501,22 +888,37 @@ export default function DynamoLanding() {
               href="#profesionales"
               variants={fadeUpBlur}
               whileHover={{ y: -4 }}
-              className="group relative rounded-3xl bg-[#0C0C0F] border border-white/[0.08] hover:border-white/[0.18] p-8 md:p-10 overflow-hidden transition-all flex flex-col justify-between"
+              style={{ backgroundColor: bgCard, borderColor }}
+              className="group relative rounded-3xl border p-8 md:p-10 overflow-hidden transition-all flex flex-col justify-between"
             >
               <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-amber-500/10 blur-3xl pointer-events-none group-hover:bg-[#FF5B22]/20 transition-all" />
 
-              {/* Ilustración superior estilo Bento 00:05 */}
-              <div className="relative h-36 mb-8 rounded-2xl bg-[#08080A] border border-white/[0.06] p-5 flex items-center justify-center gap-4 overflow-hidden">
-                <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-white/10 flex items-center justify-center">
-                  <Handshake className="w-5 h-5 text-zinc-300" />
+              <div
+                style={{ backgroundColor: bgCardInner, borderColor }}
+                className="relative h-36 mb-8 rounded-2xl border p-5 flex items-center justify-center gap-4 overflow-hidden"
+              >
+                <div
+                  style={{ backgroundColor: bgCard, borderColor }}
+                  className="w-12 h-12 rounded-xl border flex items-center justify-center"
+                >
+                  <Handshake
+                    style={{ color: textSecondary }}
+                    className="w-5 h-5"
+                  />
                 </div>
                 <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#FF6B35] to-[#D43800] border border-[#FF946B]/50 flex items-center justify-center shadow-[0_0_30px_rgba(255,91,34,0.45)] group-hover:scale-110 transition-transform duration-500">
                   <Zap className="w-7 h-7 text-white" />
                 </div>
-                <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-white/10 flex items-center justify-center">
-                  <BotMessageSquare className="w-5 h-5 text-zinc-300" />
+                <div
+                  style={{ backgroundColor: bgCard, borderColor }}
+                  className="w-12 h-12 rounded-xl border flex items-center justify-center"
+                >
+                  <BotMessageSquare
+                    style={{ color: textSecondary }}
+                    className="w-5 h-5"
+                  />
                 </div>
-                <span className="absolute top-3 right-3 text-[10px] font-mono uppercase tracking-widest text-[#FF8B60] bg-[#FF5B22]/10 border border-[#FF5B22]/30 px-2.5 py-1 rounded-md">
+                <span className="absolute top-3 right-3 text-[10px] font-mono uppercase tracking-widest text-[#FF6B35] bg-[#FF5B22]/15 border border-[#FF5B22]/30 px-2.5 py-1 rounded-md">
                   MODELO 80/20
                 </span>
               </div>
@@ -525,12 +927,18 @@ export default function DynamoLanding() {
                 <h3 className="text-2xl md:text-3xl font-semibold mb-3 tracking-tight">
                   Impulso para Profesionales
                 </h3>
-                <p className="text-zinc-400 mb-6 leading-relaxed text-sm md:text-base font-light">
+                <p
+                  style={{ color: textSecondary }}
+                  className="mb-6 leading-relaxed text-sm md:text-base font-light"
+                >
                   Digitalizamos tu oficio sin costos iniciales de desarrollo.
                   Creamos tu plataforma de reservas, gestionamos tu presencia y
                   crecemos contigo bajo un modelo a comisión (80/20).
                 </p>
-                <ul className="space-y-3 text-sm text-zinc-300">
+                <ul
+                  style={{ color: textSecondary }}
+                  className="space-y-3 text-sm"
+                >
                   <li className="flex items-center gap-3">
                     <CheckCircle2 className="w-4 h-4 text-[#FF6B35] shrink-0" />
                     <span>Sin inversión inicial en web</span>
@@ -550,10 +958,11 @@ export default function DynamoLanding() {
         </div>
       </section>
 
-      {/* ECOSISTEMA 1 DETALLE: SOLUCIONES CORPORATIVAS (Bento Cards estilo 00:06) */}
+      {/* ECOSISTEMA 1 DETALLE: SOLUCIONES CORPORATIVAS */}
       <section
         id="corporativo"
-        className="py-28 md:py-36 px-6 bg-[#050505] border-t border-white/[0.06] scroll-mt-20"
+        style={{ backgroundColor: bgPrimary, borderColor }}
+        className="py-28 md:py-36 px-6 border-t scroll-mt-20 transition-colors duration-200"
       >
         <div className="max-w-7xl mx-auto">
           <motion.div
@@ -564,15 +973,25 @@ export default function DynamoLanding() {
             className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6"
           >
             <div className="max-w-2xl">
-              <span className="inline-block font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-300 border border-white/15 bg-white/[0.03] px-3.5 py-1.5 rounded-md mb-5">
+              <span
+                style={{
+                  borderColor,
+                  backgroundColor: bgCard,
+                  color: textSecondary,
+                }}
+                className="inline-block font-mono text-[11px] uppercase tracking-[0.2em] border px-3.5 py-1.5 rounded-md mb-5"
+              >
                 ECOSISTEMA 01 · SOLUCIONES CORPORATIVAS
               </span>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight">
                 Soluciones{" "}
-                <span className="text-zinc-400">Corporativas.</span>
+                <span style={{ color: textSecondary }}>Corporativas.</span>
               </h2>
             </div>
-            <p className="text-zinc-400 max-w-md text-sm md:text-base font-light leading-relaxed">
+            <p
+              style={{ color: textSecondary }}
+              className="max-w-md text-sm md:text-base font-light leading-relaxed"
+            >
               Orientado a empresas y PYMES que buscan escalar mediante inversión
               en infraestructura y pauta.
             </p>
@@ -592,32 +1011,43 @@ export default function DynamoLanding() {
                   key={index}
                   variants={fadeUpBlur}
                   whileHover={{ y: -5 }}
-                  className="group relative rounded-3xl bg-[#0B0B0E] border border-white/[0.08] hover:border-white/[0.18] p-7 md:p-8 flex flex-col justify-between overflow-hidden transition-all shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]"
+                  style={{ backgroundColor: bgCard, borderColor }}
+                  className="group relative rounded-3xl border p-7 md:p-8 flex flex-col justify-between overflow-hidden transition-all"
                 >
-                  {/* Ilustración interactiva superior estilo 00:06 */}
                   <div>
-                    <div className="relative h-40 mb-7 rounded-2xl bg-[#070709] border border-white/[0.06] p-4 flex flex-col justify-between overflow-hidden">
+                    <div
+                      style={{ backgroundColor: bgCardInner, borderColor }}
+                      className="relative h-40 mb-7 rounded-2xl border p-4 flex flex-col justify-between overflow-hidden"
+                    >
                       <div className="absolute -bottom-10 -right-10 w-36 h-36 rounded-full bg-[#FF5B22]/15 blur-2xl pointer-events-none group-hover:bg-[#FF5B22]/25 transition-all" />
 
                       <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-mono text-zinc-500">
+                        <span
+                          style={{ color: textMuted }}
+                          className="text-[11px] font-mono"
+                        >
                           [{pillar.code}] // {pillar.tag}
                         </span>
-                        <span className="inline-flex items-center gap-1 text-[10px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        <span className="inline-flex items-center gap-1 text-[10px] font-mono text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                           Running
                         </span>
                       </div>
 
                       <div className="flex items-center gap-3 my-auto">
-                        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#FF6B35] to-[#D43800] flex items-center justify-center shadow-[0_0_20px_rgba(255,91,34,0.35)] group-hover:scale-105 transition-transform">
+                        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#FF6B35] to-[#D43800] flex items-center justify-center shadow-[0_0_20px_rgba(255,91,34,0.35)] group-hover:scale-105 transition-transform shrink-0">
                           <Icon className="w-5 h-5 text-white" />
                         </div>
                         <div className="flex flex-wrap gap-1.5">
                           {pillar.metrics.map((m, idx) => (
                             <span
                               key={idx}
-                              className="text-[10px] font-mono text-zinc-300 bg-white/[0.04] border border-white/[0.07] px-2 py-1 rounded-md"
+                              style={{
+                                backgroundColor: bgCard,
+                                borderColor,
+                                color: textSecondary,
+                              }}
+                              className="text-[10px] font-mono border px-2 py-1 rounded-md"
                             >
                               {m}
                             </span>
@@ -626,17 +1056,26 @@ export default function DynamoLanding() {
                       </div>
                     </div>
 
-                    <h3 className="text-xl font-semibold mb-3.5 leading-snug text-white">
+                    <h3 className="text-xl font-semibold mb-3.5 leading-snug">
                       {pillar.title}
                     </h3>
-                    <p className="text-zinc-400 leading-relaxed text-sm md:text-[15px] font-light">
+                    <p
+                      style={{ color: textSecondary }}
+                      className="leading-relaxed text-sm md:text-[15px] font-light"
+                    >
                       {pillar.description}
                     </p>
                   </div>
 
-                  <div className="mt-8 pt-5 border-t border-white/[0.06] flex items-center justify-between text-xs text-zinc-500 font-mono">
+                  <div
+                    style={{ borderColor, color: textMuted }}
+                    className="mt-8 pt-5 border-t flex items-center justify-between text-xs font-mono"
+                  >
                     <span>CORPORATE // {pillar.code}</span>
-                    <span className="text-zinc-300 group-hover:text-[#FF6B35] transition-colors inline-flex items-center gap-1">
+                    <span
+                      style={{ color: textSecondary }}
+                      className="group-hover:text-[#FF6B35] transition-colors inline-flex items-center gap-1"
+                    >
                       Escala & Conversión <ArrowUpRight className="w-3.5 h-3.5" />
                     </span>
                   </div>
@@ -647,13 +1086,13 @@ export default function DynamoLanding() {
         </div>
       </section>
 
-      {/* ECOSISTEMA 2 DETALLE: IMPULSO PARA PROFESIONALES (Layout interactivo [01] [02] [03] + tarjetas 3D flotantes estilo 00:07 - 00:08) */}
+      {/* ECOSISTEMA 2 DETALLE: IMPULSO PARA PROFESIONALES */}
       <section
         id="profesionales"
-        className="py-28 md:py-36 px-6 bg-[#08080B] border-t border-b border-white/[0.06] scroll-mt-20 overflow-hidden"
+        style={{ backgroundColor: bgSecondary, borderColor }}
+        className="py-28 md:py-36 px-6 border-t border-b scroll-mt-20 overflow-hidden transition-colors duration-200"
       >
         <div className="max-w-7xl mx-auto">
-          {/* Header al estilo 00:07 */}
           <motion.div
             initial="hidden"
             whileInView="visible"
@@ -662,31 +1101,37 @@ export default function DynamoLanding() {
             className="grid lg:grid-cols-12 gap-8 items-end mb-16"
           >
             <div className="lg:col-span-7">
-              <span className="inline-block font-mono text-[11px] uppercase tracking-[0.2em] text-[#FF8B60] border border-[#FF5B22]/30 bg-[#FF5B22]/10 px-3.5 py-1.5 rounded-md mb-5">
+              <span className="inline-block font-mono text-[11px] uppercase tracking-[0.2em] text-[#FF6B35] border border-[#FF5B22]/30 bg-[#FF5B22]/10 px-3.5 py-1.5 rounded-md mb-5">
                 ECOSISTEMA 02 · MODELO 80/20
               </span>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight">
                 Impulso para{" "}
-                <span className="text-zinc-400">Profesionales.</span>
+                <span style={{ color: textSecondary }}>Profesionales.</span>
               </h2>
             </div>
             <div className="lg:col-span-5">
-              <p className="text-zinc-400 text-sm md:text-base font-light leading-relaxed mb-5">
+              <p
+                style={{ color: textSecondary }}
+                className="text-sm md:text-base font-light leading-relaxed mb-5"
+              >
                 Orientado a oficios, técnicos y profesionales independientes:
                 barberos, estética, técnicos y servicios de limpieza.
               </p>
               <a
                 href="#agendar"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.12] text-xs font-medium text-white transition-colors"
+                style={{
+                  backgroundColor: bgCard,
+                  borderColor,
+                  color: textPrimary,
+                }}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border text-xs font-medium hover:border-[#FF5B22]/50 transition-colors"
               >
                 Aplicar al Modelo 80/20 <ChevronRight className="w-3.5 h-3.5" />
               </a>
             </div>
           </motion.div>
 
-          {/* Cuerpo dividido: Izquierda pasos [01] [02] [03] / Derecha Tarjetas 3D Flotantes */}
           <div className="grid lg:grid-cols-12 gap-10 items-center">
-            {/* Columna izquierda: Los 3 pilares con numeración [01], [02], [03] como en 00:08 */}
             <motion.div
               initial="hidden"
               whileInView="visible"
@@ -702,29 +1147,42 @@ export default function DynamoLanding() {
                     variants={fadeUpBlur}
                     onMouseEnter={() => setActiveStep(index)}
                     onClick={() => setActiveStep(index)}
-                    className={`cursor-pointer rounded-2xl p-6 md:p-7 border transition-all duration-300 ${
-                      isSelected
-                        ? "bg-[#101015] border-[#FF5B22]/40 shadow-[0_10px_40px_rgba(0,0,0,0.6)]"
-                        : "bg-[#0B0B0E]/60 border-white/[0.06] hover:border-white/[0.14]"
-                    }`}
+                    style={{
+                      backgroundColor: isSelected ? bgCard : bgCardInner,
+                      borderColor: isSelected
+                        ? "rgba(255, 91, 34, 0.5)"
+                        : borderColor,
+                    }}
+                    className="cursor-pointer rounded-2xl p-6 md:p-7 border transition-all duration-300 shadow-sm"
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-3">
                         <span
+                          style={
+                            !isSelected
+                              ? {
+                                  backgroundColor: bgCard,
+                                  color: textMuted,
+                                }
+                              : undefined
+                          }
                           className={`font-mono text-xs px-2 py-0.5 rounded ${
                             isSelected
-                              ? "bg-[#FF5B22]/20 text-[#FF8B60] border border-[#FF5B22]/40"
-                              : "bg-white/[0.04] text-zinc-500"
+                              ? "bg-[#FF5B22]/20 text-[#FF6B35] border border-[#FF5B22]/40"
+                              : ""
                           }`}
                         >
                           [{pillar.code}]
                         </span>
-                        <h3 className="text-lg md:text-xl font-semibold text-white">
+                        <h3 className="text-lg md:text-xl font-semibold">
                           {pillar.title}
                         </h3>
                       </div>
                     </div>
-                    <p className="text-zinc-400 text-sm md:text-[15px] font-light leading-relaxed">
+                    <p
+                      style={{ color: textSecondary }}
+                      className="text-sm md:text-[15px] font-light leading-relaxed"
+                    >
                       {pillar.description}
                     </p>
                   </motion.div>
@@ -732,46 +1190,49 @@ export default function DynamoLanding() {
               })}
             </motion.div>
 
-            {/* Columna derecha: Escena de nodos y tarjetas flotantes en perspectiva (Estilo 00:08 y 00:12) */}
+            {/* Escena de tarjetas flotantes en perspectiva */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-              className="lg:col-span-6 relative min-h-[460px] rounded-3xl bg-[#060608] border border-white/[0.07] p-6 md:p-10 flex flex-col justify-between overflow-hidden"
+              style={{ backgroundColor: bgCardInner, borderColor }}
+              className="lg:col-span-6 relative min-h-[460px] rounded-3xl border p-6 md:p-10 flex flex-col justify-between overflow-hidden"
             >
-              {/* Resplandor central naranja estilo Kora AI */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 rounded-full bg-[#FF5B22]/15 blur-3xl pointer-events-none" />
 
-              {/* Tarjeta superior flotante: Modelo 80/20 */}
               <motion.div
                 animate={{
                   y: activeStep === 0 ? -4 : 0,
                   borderColor:
-                    activeStep === 0
-                      ? "rgba(255,91,34,0.5)"
-                      : "rgba(255,255,255,0.08)",
+                    activeStep === 0 ? "rgba(255,91,34,0.6)" : borderColor,
                 }}
-                className="relative z-10 self-end w-full sm:w-80 rounded-2xl bg-[#0E0E13]/95 border p-5 shadow-2xl -rotate-2"
+                style={{ backgroundColor: bgCard }}
+                className="relative z-10 self-end w-full sm:w-80 rounded-2xl border p-5 shadow-xl -rotate-2"
               >
-                <div className="flex items-center justify-between text-xs text-zinc-400 mb-2">
+                <div
+                  style={{ color: textMuted }}
+                  className="flex items-center justify-between text-xs mb-2"
+                >
                   <span className="font-mono uppercase text-[10px]">
                     [01] Modelo de Éxito Compartido
                   </span>
                   <ShieldCheck className="w-4 h-4 text-[#FF6B35]" />
                 </div>
                 <div className="flex items-baseline gap-3">
-                  <span className="text-3xl font-bold text-white">80 / 20</span>
-                  <span className="text-xs text-emerald-400 font-mono">
+                  <span className="text-3xl font-bold">80 / 20</span>
+                  <span className="text-xs text-emerald-500 font-mono">
                     +$0 Inversión Inicial
                   </span>
                 </div>
-                <div className="text-[11px] text-zinc-500 mt-1">
+                <div
+                  style={{ color: textMuted }}
+                  className="text-[11px] mt-1"
+                >
                   Si tú no ganas, nosotros tampoco
                 </div>
               </motion.div>
 
-              {/* Nodo Central Luminoso con icono (Estilo 00:08 / 00:12) */}
               <div className="relative z-10 my-6 flex items-center justify-center">
                 <div className="relative">
                   <div className="absolute -inset-4 rounded-3xl bg-[#FF5B22]/25 blur-xl animate-pulse" />
@@ -781,26 +1242,27 @@ export default function DynamoLanding() {
                 </div>
               </div>
 
-              {/* Tarjetas inferiores flotantes: IA WhatsApp 24/7 + Google Maps Local */}
               <div className="relative z-10 grid sm:grid-cols-2 gap-4">
                 <motion.div
                   animate={{
                     y: activeStep === 1 ? -4 : 0,
                     borderColor:
-                      activeStep === 1
-                        ? "rgba(255,91,34,0.5)"
-                        : "rgba(255,255,255,0.08)",
+                      activeStep === 1 ? "rgba(255,91,34,0.6)" : borderColor,
                   }}
-                  className="rounded-2xl bg-[#0E0E13]/95 border p-4 shadow-xl rotate-1"
+                  style={{ backgroundColor: bgCard }}
+                  className="rounded-2xl border p-4 shadow-lg rotate-1"
                 >
-                  <div className="flex items-center gap-2 text-xs font-medium text-white mb-1.5">
+                  <div className="flex items-center gap-2 text-xs font-medium mb-1.5">
                     <BotMessageSquare className="w-4 h-4 text-[#FF6B35]" />
                     <span>Asistente IA WhatsApp</span>
                   </div>
-                  <div className="text-[11px] text-zinc-400 leading-snug mb-2">
+                  <div
+                    style={{ color: textSecondary }}
+                    className="text-[11px] leading-snug mb-2"
+                  >
                     Atiende consultas, perfila clientes y agenda citas
                   </div>
-                  <div className="inline-flex items-center gap-1.5 text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">
+                  <div className="inline-flex items-center gap-1.5 text-[10px] font-mono text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded">
                     <Clock className="w-3 h-3" /> Activo 24/7
                   </div>
                 </motion.div>
@@ -809,20 +1271,22 @@ export default function DynamoLanding() {
                   animate={{
                     y: activeStep === 2 ? -4 : 0,
                     borderColor:
-                      activeStep === 2
-                        ? "rgba(255,91,34,0.5)"
-                        : "rgba(255,255,255,0.08)",
+                      activeStep === 2 ? "rgba(255,91,34,0.6)" : borderColor,
                   }}
-                  className="rounded-2xl bg-[#0E0E13]/95 border p-4 shadow-xl -rotate-1"
+                  style={{ backgroundColor: bgCard }}
+                  className="rounded-2xl border p-4 shadow-lg -rotate-1"
                 >
-                  <div className="flex items-center gap-2 text-xs font-medium text-white mb-1.5">
+                  <div className="flex items-center gap-2 text-xs font-medium mb-1.5">
                     <MapPin className="w-4 h-4 text-[#FF6B35]" />
                     <span>Autoridad Google Maps</span>
                   </div>
-                  <div className="text-[11px] text-zinc-400 leading-snug mb-2">
+                  <div
+                    style={{ color: textSecondary }}
+                    className="text-[11px] leading-snug mb-2"
+                  >
                     Posicionamiento local sin exponer tu dirección personal
                   </div>
-                  <div className="inline-flex items-center gap-1.5 text-[10px] font-mono text-[#FF8B60] bg-[#FF5B22]/10 px-2 py-0.5 rounded">
+                  <div className="inline-flex items-center gap-1.5 text-[10px] font-mono text-[#FF6B35] bg-[#FF5B22]/15 px-2 py-0.5 rounded">
                     ● Reservas Orgánicas
                   </div>
                 </motion.div>
@@ -832,7 +1296,7 @@ export default function DynamoLanding() {
         </div>
       </section>
 
-      {/* SECCIÓN EXCLUSIVA: EL CASO THE BELLACY STUDIO (Estilo Bento Showcase 00:10 & 00:14 - 00:15) */}
+      {/* SECCIÓN EXCLUSIVA: EL CASO THE BELLACY STUDIO */}
       <section
         id="caso-estudio"
         className="py-28 md:py-36 px-6 max-w-7xl mx-auto scroll-mt-20"
@@ -844,43 +1308,60 @@ export default function DynamoLanding() {
           variants={fadeUpBlur}
           className="text-center max-w-3xl mx-auto mb-16"
         >
-          <span className="inline-block font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-300 border border-white/15 bg-white/[0.03] px-3.5 py-1.5 rounded-md mb-5">
+          <span
+            style={{
+              borderColor,
+              backgroundColor: bgCard,
+              color: textSecondary,
+            }}
+            className="inline-block font-mono text-[11px] uppercase tracking-[0.2em] border px-3.5 py-1.5 rounded-md mb-5"
+          >
             CASO DE ESTUDIO EXCLUSIVO · THE BELLACY STUDIO
           </span>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight">
             Transformación digital con{" "}
-            <span className="text-zinc-400">resultados medibles.</span>
+            <span style={{ color: textSecondary }}>resultados medibles.</span>
           </h2>
         </motion.div>
 
-        {/* Contenedor Bento inspirado en el frame 00:14 - 00:15 */}
         <motion.div
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-60px" }}
           variants={staggerContainer}
-          className="rounded-[2rem] bg-[#0B0B0F] border border-white/[0.08] p-6 md:p-10 shadow-[0_25px_80px_rgba(0,0,0,0.8)]"
+          style={{ backgroundColor: bgCard, borderColor }}
+          className="rounded-[2rem] border p-6 md:p-10 shadow-2xl transition-colors duration-200"
         >
           <div className="grid lg:grid-cols-12 gap-6 items-stretch">
-            {/* Panel Izquierdo: Estado del Ecosistema (Estilo lista de estado en 00:15) */}
+            {/* Panel Izquierdo */}
             <motion.div
               variants={fadeUpBlur}
-              className="lg:col-span-4 rounded-2xl bg-[#08080B] border border-white/[0.07] p-6 flex flex-col justify-between"
+              style={{ backgroundColor: bgCardInner, borderColor }}
+              className="lg:col-span-4 rounded-2xl border p-6 flex flex-col justify-between"
             >
               <div>
-                <div className="text-xs font-mono uppercase tracking-wider text-zinc-500 mb-1">
+                <div
+                  style={{ color: textMuted }}
+                  className="text-xs font-mono uppercase tracking-wider mb-1"
+                >
                   Facturación Mensual
                 </div>
                 <div className="flex items-baseline gap-3 mb-6">
-                  <span className="text-zinc-500 line-through text-base">
+                  <span
+                    style={{ color: textMuted }}
+                    className="line-through text-base"
+                  >
                     $300 USD
                   </span>
-                  <span className="text-3xl md:text-4xl font-bold text-white">
+                  <span className="text-3xl md:text-4xl font-bold">
                     $1.300 USD
                   </span>
                 </div>
 
-                <div className="text-xs font-medium text-zinc-400 mb-3">
+                <div
+                  style={{ color: textSecondary }}
+                  className="text-xs font-medium mb-3"
+                >
                   Estrategia Implementada
                 </div>
                 <div className="space-y-2.5 text-xs">
@@ -892,11 +1373,12 @@ export default function DynamoLanding() {
                   ].map((item, i) => (
                     <div
                       key={i}
-                      className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-[#101015] border border-white/[0.05]"
+                      style={{ backgroundColor: bgCard, borderColor }}
+                      className="flex items-center justify-between px-3 py-2.5 rounded-xl border"
                     >
-                      <span className="text-zinc-300">{item.name}</span>
-                      <span className="inline-flex items-center gap-1 text-[10px] font-mono text-emerald-400">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      <span style={{ color: textSecondary }}>{item.name}</span>
+                      <span className="inline-flex items-center gap-1 text-[10px] font-mono text-emerald-500">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                         {item.status}
                       </span>
                     </div>
@@ -904,16 +1386,21 @@ export default function DynamoLanding() {
                 </div>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-white/[0.06] flex items-center justify-between text-xs text-zinc-500 font-mono">
+              <div
+                style={{ borderColor, color: textMuted }}
+                className="mt-6 pt-4 border-t flex items-center justify-between text-xs font-mono"
+              >
                 <span>ROI VERIFICADO</span>
-                <span className="text-white">+330%</span>
+                <span style={{ color: textPrimary }} className="font-bold">
+                  +330%
+                </span>
               </div>
             </motion.div>
 
-            {/* Panel Central: Tarjeta Naranja Cálida de Marca (Idéntica al centro del frame 00:15) */}
+            {/* Panel Central Naranja */}
             <motion.div
               variants={fadeUpBlur}
-              className="lg:col-span-4 rounded-2xl bg-gradient-to-br from-[#FF7A45] via-[#D94B1A] to-[#2A120A] border border-[#FF9B73]/30 p-7 flex flex-col justify-between relative overflow-hidden"
+              className="lg:col-span-4 rounded-2xl bg-gradient-to-br from-[#FF7A45] via-[#D94B1A] to-[#2A120A] border border-[#FF9B73]/30 p-7 flex flex-col justify-between relative overflow-hidden text-white"
             >
               <div className="absolute -right-8 -bottom-8 opacity-15 pointer-events-none">
                 <BarChart3 className="w-44 h-44 text-white" />
@@ -956,19 +1443,23 @@ export default function DynamoLanding() {
               </div>
             </motion.div>
 
-            {/* Panel Derecho: Narrativa íntegra de The Bellacy Studio */}
+            {/* Panel Derecho */}
             <motion.div
               variants={fadeUpBlur}
-              className="lg:col-span-4 rounded-2xl bg-[#08080B] border border-white/[0.07] p-7 flex flex-col justify-between"
+              style={{ backgroundColor: bgCardInner, borderColor }}
+              className="lg:col-span-4 rounded-2xl border p-7 flex flex-col justify-between"
             >
               <div>
-                <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-[#FF8B60] mb-4">
+                <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-[#FF6B35] mb-4">
                   <Activity className="w-4 h-4" />
                   Impacto Real & Medible
                 </div>
-                <p className="text-zinc-300 text-sm md:text-base font-light leading-relaxed">
+                <p
+                  style={{ color: textSecondary }}
+                  className="text-sm md:text-base font-light leading-relaxed"
+                >
                   &ldquo;Para{" "}
-                  <span className="text-white font-medium">
+                  <span style={{ color: textPrimary }} className="font-medium">
                     The Bellacy Studio
                   </span>
                   , el desafío no era la calidad de su servicio, sino su
@@ -976,7 +1467,7 @@ export default function DynamoLanding() {
                   posicionamiento local en Google Maps y lo potenciamos con
                   campañas de anuncios precisas. El resultado: en tan solo 3
                   meses, pasaron de una facturación de{" "}
-                  <span className="text-white font-medium">
+                  <span style={{ color: textPrimary }} className="font-medium">
                     $300 USD a $1.300 USD mensuales
                   </span>
                   , estableciendo un sistema predecible de adquisición de
@@ -984,18 +1475,19 @@ export default function DynamoLanding() {
                 </p>
               </div>
 
-              <div className="mt-8 pt-5 border-t border-white/[0.06] flex items-center justify-between">
+              <div
+                style={{ borderColor }}
+                className="mt-8 pt-5 border-t flex items-center justify-between"
+              >
                 <div>
-                  <div className="text-xs font-medium text-white">
-                    The Bellacy Studio
-                  </div>
-                  <div className="text-[11px] text-zinc-500">
+                  <div className="text-xs font-medium">The Bellacy Studio</div>
+                  <div style={{ color: textMuted }} className="text-[11px]">
                     Ecosistema Local + Pauta Digital
                   </div>
                 </div>
                 <a
                   href="#agendar"
-                  className="text-xs font-medium text-[#FF8B60] hover:text-white transition-colors inline-flex items-center gap-1"
+                  className="text-xs font-medium text-[#FF6B35] hover:opacity-80 transition-opacity inline-flex items-center gap-1"
                 >
                   Replicar sistema <ArrowRight className="w-3.5 h-3.5" />
                 </a>
@@ -1005,14 +1497,18 @@ export default function DynamoLanding() {
         </motion.div>
       </section>
 
-      {/* CTA FINAL + FOOTER CON WATERMARK GIGANTE (Estilo 00:18 - 00:21) */}
+      {/* CTA FINAL + FOOTER CON WATERMARK GIGANTE */}
       <section
         id="agendar"
         className="relative pt-28 pb-16 px-6 overflow-hidden scroll-mt-20"
       >
-        {/* Haz de luz horizontal superior estilo 00:18 */}
         <div className="max-w-5xl mx-auto mb-20 relative">
-          <div className="h-px w-full bg-gradient-to-r from-transparent via-white/35 to-transparent" />
+          <div
+            style={{
+              background: `linear-gradient(to right, transparent, ${borderColor}, transparent)`,
+            }}
+            className="h-px w-full"
+          />
           <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-48 h-6 bg-[#FF5B22]/25 blur-xl pointer-events-none" />
         </div>
 
@@ -1023,13 +1519,23 @@ export default function DynamoLanding() {
           variants={fadeUpBlur}
           className="max-w-3xl mx-auto text-center mb-24"
         >
-          <span className="inline-block font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-400 border border-white/15 bg-white/[0.03] px-3.5 py-1.5 rounded-md mb-6">
+          <span
+            style={{
+              borderColor,
+              backgroundColor: bgCard,
+              color: textSecondary,
+            }}
+            className="inline-block font-mono text-[11px] uppercase tracking-[0.2em] border px-3.5 py-1.5 rounded-md mb-6"
+          >
             EMPIEZA HOY
           </span>
           <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight mb-6">
-            ¿Listo para <span className="text-zinc-400">escalar?</span>
+            ¿Listo para <span style={{ color: textSecondary }}>escalar?</span>
           </h2>
-          <p className="text-zinc-400 text-base md:text-lg font-light mb-10 max-w-xl mx-auto leading-relaxed">
+          <p
+            style={{ color: textSecondary }}
+            className="text-base md:text-lg font-light mb-10 max-w-xl mx-auto leading-relaxed"
+          >
             Agenda una reunión estratégica de 30 minutos con nuestro equipo.
             Evaluaremos tu situación actual y diseñaremos un plan de acción a
             medida.
@@ -1045,16 +1551,27 @@ export default function DynamoLanding() {
             </motion.button>
             <a
               href="#corporativo"
-              className="bg-white/[0.06] hover:bg-white/[0.11] text-white border border-white/[0.12] px-7 py-4 rounded-xl text-base font-medium transition-all"
+              style={{
+                backgroundColor: bgCard,
+                borderColor,
+                color: textPrimary,
+              }}
+              className="border px-7 py-4 rounded-xl text-base font-medium hover:opacity-85 transition-all"
             >
               Explorar Ecosistemas
             </a>
           </div>
         </motion.div>
 
-        {/* Tarjeta Footer estructurada como en 00:20 */}
-        <div className="max-w-7xl mx-auto rounded-3xl bg-[#0A0A0D] border border-white/[0.08] p-8 md:p-12 relative z-10">
-          <div className="grid md:grid-cols-12 gap-10 pb-10 border-b border-white/[0.06]">
+        {/* Tarjeta Footer */}
+        <div
+          style={{ backgroundColor: bgCard, borderColor }}
+          className="max-w-7xl mx-auto rounded-3xl border p-8 md:p-12 relative z-10 transition-colors duration-200"
+        >
+          <div
+            style={{ borderColor }}
+            className="grid md:grid-cols-12 gap-10 pb-10 border-b"
+          >
             <div className="md:col-span-5">
               <div className="flex items-center gap-2.5 mb-4">
                 <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#FF6B35] to-[#D93800] flex items-center justify-center">
@@ -1064,7 +1581,10 @@ export default function DynamoLanding() {
                   Dynamo Solutions<span className="text-[#FF5B22]">.</span>
                 </span>
               </div>
-              <p className="text-sm text-zinc-400 max-w-sm font-light leading-relaxed">
+              <p
+                style={{ color: textSecondary }}
+                className="text-sm max-w-sm font-light leading-relaxed"
+              >
                 Arquitectos de ecosistemas digitales. Automatización,
                 posicionamiento y escalabilidad para empresas y profesionales.
               </p>
@@ -1072,20 +1592,32 @@ export default function DynamoLanding() {
 
             <div className="md:col-span-7 grid sm:grid-cols-3 gap-8 text-sm">
               <div>
-                <div className="font-medium text-white mb-3">Ecosistema 01</div>
-                <ul className="space-y-2 text-zinc-400 text-xs">
+                <div className="font-medium mb-3">Ecosistema 01</div>
+                <ul
+                  style={{ color: textSecondary }}
+                  className="space-y-2 text-xs"
+                >
                   <li>
-                    <a href="#corporativo" className="hover:text-white transition-colors">
+                    <a
+                      href="#corporativo"
+                      className="hover:opacity-100 transition-opacity"
+                    >
                       Desarrollo E-commerce & Web
                     </a>
                   </li>
                   <li>
-                    <a href="#corporativo" className="hover:text-white transition-colors">
+                    <a
+                      href="#corporativo"
+                      className="hover:opacity-100 transition-opacity"
+                    >
                       SEO, GEO & Google Business
                     </a>
                   </li>
                   <li>
-                    <a href="#corporativo" className="hover:text-white transition-colors">
+                    <a
+                      href="#corporativo"
+                      className="hover:opacity-100 transition-opacity"
+                    >
                       SEM & Meta Ads
                     </a>
                   </li>
@@ -1093,20 +1625,32 @@ export default function DynamoLanding() {
               </div>
 
               <div>
-                <div className="font-medium text-white mb-3">Ecosistema 02</div>
-                <ul className="space-y-2 text-zinc-400 text-xs">
+                <div className="font-medium mb-3">Ecosistema 02</div>
+                <ul
+                  style={{ color: textSecondary }}
+                  className="space-y-2 text-xs"
+                >
                   <li>
-                    <a href="#profesionales" className="hover:text-white transition-colors">
+                    <a
+                      href="#profesionales"
+                      className="hover:opacity-100 transition-opacity"
+                    >
                       Modelo 80/20 Riesgo Cero
                     </a>
                   </li>
                   <li>
-                    <a href="#profesionales" className="hover:text-white transition-colors">
+                    <a
+                      href="#profesionales"
+                      className="hover:opacity-100 transition-opacity"
+                    >
                       Reservas IA en WhatsApp
                     </a>
                   </li>
                   <li>
-                    <a href="#profesionales" className="hover:text-white transition-colors">
+                    <a
+                      href="#profesionales"
+                      className="hover:opacity-100 transition-opacity"
+                    >
                       Autoridad Local Google Maps
                     </a>
                   </li>
@@ -1114,20 +1658,32 @@ export default function DynamoLanding() {
               </div>
 
               <div>
-                <div className="font-medium text-white mb-3">Compañía</div>
-                <ul className="space-y-2 text-zinc-400 text-xs">
+                <div className="font-medium mb-3">Compañía</div>
+                <ul
+                  style={{ color: textSecondary }}
+                  className="space-y-2 text-xs"
+                >
                   <li>
-                    <a href="#manifiesto" className="hover:text-white transition-colors">
+                    <a
+                      href="#manifiesto"
+                      className="hover:opacity-100 transition-opacity"
+                    >
                       Sobre Nosotros · El Manifiesto
                     </a>
                   </li>
                   <li>
-                    <a href="#caso-estudio" className="hover:text-white transition-colors">
+                    <a
+                      href="#caso-estudio"
+                      className="hover:opacity-100 transition-opacity"
+                    >
                       Caso The Bellacy Studio
                     </a>
                   </li>
                   <li>
-                    <a href="#agendar" className="hover:text-white transition-colors">
+                    <a
+                      href="#agendar"
+                      className="hover:opacity-100 transition-opacity"
+                    >
                       Agendar Auditoría Gratuita
                     </a>
                   </li>
@@ -1136,17 +1692,27 @@ export default function DynamoLanding() {
             </div>
           </div>
 
-          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500 gap-4">
+          <div
+            style={{ color: textMuted }}
+            className="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs gap-4"
+          >
             <div>© 2026 Dynamo Solutions. Todos los derechos reservados.</div>
-            <div className="font-mono text-[11px] text-zinc-400">
+            <div className="font-mono text-[11px]">
               Automatización & Escalabilidad Digital
             </div>
           </div>
         </div>
 
-        {/* Marca de agua gigante inferior idéntica al cierre 00:21 de la referencia */}
+        {/* Marca de agua gigante inferior */}
         <div className="max-w-7xl mx-auto text-center select-none pointer-events-none overflow-hidden -mt-4">
-          <div className="font-sans font-bold text-[15vw] leading-none tracking-tighter bg-gradient-to-b from-white/[0.07] to-transparent bg-clip-text text-transparent">
+          <div
+            style={{
+              backgroundImage: isLightModeSide
+                ? "linear-gradient(to bottom, rgba(0,0,0,0.08), transparent)"
+                : "linear-gradient(to bottom, rgba(255,255,255,0.08), transparent)",
+            }}
+            className="font-sans font-bold text-[15vw] leading-none tracking-tighter bg-clip-text text-transparent"
+          >
             Dynamo
           </div>
         </div>
