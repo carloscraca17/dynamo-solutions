@@ -247,7 +247,7 @@ export default function DynamoLanding() {
 
             <motion.h1
               variants={fadeUpBlur}
-              className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-[5.25rem] font-normal tracking-tight leading-[1.03] mb-6"
+              className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight leading-tight mb-6"
             >
               Automatización y escalabilidad{" "}
               <span className="text-zinc-400">para negocios modernos.</span>
@@ -325,7 +325,7 @@ export default function DynamoLanding() {
             whileInView="visible"
             viewport={{ once: true, margin: "-80px" }}
             variants={fadeUpBlur}
-            className="font-serif text-4xl sm:text-5xl md:text-6xl font-normal tracking-tight leading-[1.12] mb-10 max-w-4xl mx-auto"
+            className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight mb-10 max-w-4xl mx-auto"
           >
             No somos una agencia tradicional;{" "}
             <span className="inline-flex items-center justify-center align-middle mx-1 w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-b from-zinc-800 to-zinc-950 border border-white/15 shadow-inner">
@@ -431,7 +431,7 @@ export default function DynamoLanding() {
             <span className="inline-block font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-300 border border-white/15 bg-white/[0.03] px-3.5 py-1.5 rounded-md mb-5">
               DOS MODELOS DE ESCALABILIDAD
             </span>
-            <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl font-normal tracking-tight leading-[1.08]">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight">
               Un Ecosistema.{" "}
               <span className="text-zinc-400">Dos Caminos de Crecimiento.</span>
             </h2>
@@ -567,7 +567,7 @@ export default function DynamoLanding() {
               <span className="inline-block font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-300 border border-white/15 bg-white/[0.03] px-3.5 py-1.5 rounded-md mb-5">
                 ECOSISTEMA 01 · SOLUCIONES CORPORATIVAS
               </span>
-              <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl font-normal tracking-tight leading-[1.08]">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight">
                 Soluciones{" "}
                 <span className="text-zinc-400">Corporativas.</span>
               </h2>
@@ -665,7 +665,7 @@ export default function DynamoLanding() {
               <span className="inline-block font-mono text-[11px] uppercase tracking-[0.2em] text-[#FF8B60] border border-[#FF5B22]/30 bg-[#FF5B22]/10 px-3.5 py-1.5 rounded-md mb-5">
                 ECOSISTEMA 02 · MODELO 80/20
               </span>
-              <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl font-normal tracking-tight leading-[1.08]">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight">
                 Impulso para{" "}
                 <span className="text-zinc-400">Profesionales.</span>
               </h2>
@@ -847,7 +847,7 @@ export default function DynamoLanding() {
           <span className="inline-block font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-300 border border-white/15 bg-white/[0.03] px-3.5 py-1.5 rounded-md mb-5">
             CASO DE ESTUDIO EXCLUSIVO · THE BELLACY STUDIO
           </span>
-          <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl font-normal tracking-tight leading-[1.08]">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight">
             Transformación digital con{" "}
             <span className="text-zinc-400">resultados medibles.</span>
           </h2>
@@ -927,7 +927,7 @@ export default function DynamoLanding() {
               </div>
 
               <div className="my-8">
-                <div className="font-serif text-4xl md:text-5xl text-white leading-tight mb-2">
+                <div className="text-3xl md:text-4xl font-bold tracking-tight text-white leading-tight mb-2">
                   The Bellacy Studio
                 </div>
                 <p className="text-xs md:text-sm text-white/85 font-light">
@@ -1026,7 +1026,7 @@ export default function DynamoLanding() {
           <span className="inline-block font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-400 border border-white/15 bg-white/[0.03] px-3.5 py-1.5 rounded-md mb-6">
             EMPIEZA HOY
           </span>
-          <h2 className="font-serif text-5xl sm:text-6xl md:text-7xl font-normal tracking-tight mb-6">
+          <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight mb-6">
             ¿Listo para <span className="text-zinc-400">escalar?</span>
           </h2>
           <p className="text-zinc-400 text-base md:text-lg font-light mb-10 max-w-xl mx-auto leading-relaxed">
