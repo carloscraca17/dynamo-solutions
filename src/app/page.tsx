@@ -66,6 +66,12 @@ export default function DynamoLanding() {
   const [activeStep, setActiveStep] = useState<number>(0);
   // 0 = Negro (Dark) -> 20..80 = Escala de Grises -> 100 = Blanco (Light)
   const [luminosity, setLuminosity] = useState<number>(0);
+  // Coordenadas del cursor para iluminar y mover la grilla de El Manifiesto
+  const [manifestoMouse, setManifestoMouse] = useState<{
+    x: number;
+    y: number;
+    active: boolean;
+  }>({ x: 0, y: 0, active: false });
 
   // Cálculo continuo de la paleta según el nivel de luminosidad (0 - 100)
   const bgPrimaryRGB = sampleStops(
@@ -337,33 +343,8 @@ export default function DynamoLanding() {
       }}
       className="min-h-screen font-sans selection:bg-[#FF5B22]/30 selection:text-white transition-colors duration-200"
     >
-      {/* BARRA SUPERIOR + NAVEGACIÓN CON NIVELADOR DE LUMINOSIDAD */}
+      {/* NAVEGACIÓN PRINCIPAL CON NIVELADOR DE LUMINOSIDAD */}
       <header className="fixed w-full top-0 z-50">
-        {/* Top subtle announcement bar */}
-        <div
-          style={{
-            backgroundColor: navBg,
-            borderColor,
-          }}
-          className="backdrop-blur-md border-b py-2 px-4 text-center transition-colors duration-200"
-        >
-          <a
-            href="#caso-estudio"
-            style={{ color: textSecondary }}
-            className="inline-flex items-center gap-2 text-xs hover:opacity-100 transition-opacity"
-          >
-            <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#FF5B22] animate-pulse" />
-            <span>
-              Caso de Estudio:{" "}
-              <strong style={{ color: textPrimary }} className="font-medium">
-                The Bellacy Studio
-              </strong>{" "}
-              escaló de $300 USD a $1.300 USD en 3 meses
-            </span>
-            <ChevronRight className="w-3.5 h-3.5 opacity-60" />
-          </a>
-        </div>
-
         <nav
           style={{
             backgroundColor: navBg,
@@ -403,13 +384,13 @@ export default function DynamoLanding() {
             </div>
 
             <div className="flex items-center gap-3">
-              {/* Barra compacta de Luminosidad en el Header */}
+              {/* Barra de Luminosidad integrada en el Header */}
               <div
                 style={{
                   backgroundColor: bgCard,
                   borderColor,
                 }}
-                className="hidden sm:flex items-center gap-2.5 px-3 py-1.5 rounded-xl border shadow-sm"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl border shadow-sm"
                 title="Nivelar tonos entre Negro (Dark), Grises intermedios y Blanco (Light)"
               >
                 <button
@@ -427,7 +408,7 @@ export default function DynamoLanding() {
                   value={luminosity}
                   onChange={(e) => setLuminosity(Number(e.target.value))}
                   aria-label="Nivel de luminosidad"
-                  className="w-24 md:w-28 h-1.5 rounded-lg appearance-none cursor-pointer accent-[#FF5B22]"
+                  className="w-20 sm:w-28 h-1.5 rounded-lg appearance-none cursor-pointer accent-[#FF5B22]"
                   style={{
                     background:
                       "linear-gradient(to right, #050505 0%, #3f3f46 35%, #71717a 60%, #d4d4d8 82%, #ffffff 100%)",
@@ -441,12 +422,6 @@ export default function DynamoLanding() {
                 >
                   <Sun className="w-3.5 h-3.5 text-amber-400" />
                 </button>
-                <span
-                  style={{ color: textMuted }}
-                  className="text-[10px] font-mono w-8 text-right"
-                >
-                  {luminosity}%
-                </span>
               </div>
 
               <a
@@ -460,76 +435,6 @@ export default function DynamoLanding() {
           </div>
         </nav>
       </header>
-
-      {/* CONTROL FLOTANTE DE LUMINOSIDAD Y ESCALA DE GRISES (Abajo a la derecha) */}
-      <div
-        style={{
-          backgroundColor: bgCard,
-          borderColor,
-          color: textPrimary,
-        }}
-        className="fixed bottom-5 right-5 z-50 rounded-2xl border p-3.5 shadow-[0_15px_50px_rgba(0,0,0,0.45)] backdrop-blur-xl w-72 transition-colors duration-200"
-      >
-        <div className="flex items-center justify-between text-xs mb-2">
-          <span className="flex items-center gap-1.5 font-medium">
-            <SlidersHorizontal className="w-3.5 h-3.5 text-[#FF6B35]" />
-            Nivel de Luminosidad
-          </span>
-          <span
-            style={{ color: textMuted }}
-            className="font-mono text-[10px] uppercase"
-          >
-            {getToneLabel(luminosity)}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2.5 mb-2.5">
-          <Moon className="w-3.5 h-3.5 shrink-0 opacity-70" />
-          <input
-            type="range"
-            min={0}
-            max={100}
-            value={luminosity}
-            onChange={(e) => setLuminosity(Number(e.target.value))}
-            aria-label="Barra de luminosidad entre oscuro, grises y claro"
-            className="w-full h-2 rounded-lg appearance-none cursor-pointer accent-[#FF5B22]"
-            style={{
-              background:
-                "linear-gradient(to right, #050505 0%, #27272a 25%, #52525b 50%, #a1a1aa 75%, #fafafa 100%)",
-              border: `1px solid ${borderColor}`,
-            }}
-          />
-          <Sun className="w-3.5 h-3.5 shrink-0 text-amber-400" />
-        </div>
-
-        {/* Presets rápidos de Negro -> Grises -> Blanco */}
-        <div className="grid grid-cols-5 gap-1 text-[10px] font-mono">
-          {[
-            { label: "Dark", val: 0 },
-            { label: "Gris 25", val: 25 },
-            { label: "Gris 50", val: 50 },
-            { label: "Gris 75", val: 75 },
-            { label: "Light", val: 100 },
-          ].map((preset) => (
-            <button
-              key={preset.val}
-              type="button"
-              onClick={() => setLuminosity(preset.val)}
-              style={{
-                borderColor:
-                  Math.abs(luminosity - preset.val) <= 6
-                    ? "#FF5B22"
-                    : borderColor,
-                backgroundColor: bgCardInner,
-                color: textSecondary,
-              }}
-              className="py-1 rounded-md border text-center hover:opacity-100 transition-all cursor-pointer"
-            >
-              {preset.label}
-            </button>
-          ))}
-        </div>
-      </div>
 
       {/* HERO SECTION CON VIDEO FIJO EN EL BANNER SUPERIOR (50% TRANSPARENCIA) */}
       <section className="relative overflow-hidden min-h-[85vh] flex items-center pt-36 pb-24 md:pt-44 md:pb-32 px-6 text-white">
@@ -610,24 +515,79 @@ export default function DynamoLanding() {
         </div>
       </section>
 
-      {/* EL MANIFIESTO (SOBRE NOSOTROS) */}
+      {/* EL MANIFIESTO (SOBRE NOSOTROS) — Con grilla interactiva naranja al pasar el cursor */}
       <section
         id="manifiesto"
+        onMouseMove={(e) => {
+          const rect = e.currentTarget.getBoundingClientRect();
+          setManifestoMouse({
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top,
+            active: true,
+          });
+        }}
+        onMouseLeave={() =>
+          setManifestoMouse((prev) => ({ ...prev, active: false }))
+        }
         style={{ borderColor, backgroundColor: bgPrimary }}
         className="relative py-28 md:py-36 px-6 border-t overflow-hidden scroll-mt-20 transition-colors duration-200"
       >
-        {/* Fondo de cuadrícula arquitectónica sutil */}
+        {/* Capa 1: Fondo de cuadrícula base con ligero desplazamiento parallax */}
         <div
-          className="absolute inset-0 pointer-events-none opacity-45"
+          className="absolute inset-0 pointer-events-none opacity-45 transition-transform duration-300 ease-out"
           style={{
             backgroundImage: `linear-gradient(to right, ${gridLineColor} 1px, transparent 1px), linear-gradient(to bottom, ${gridLineColor} 1px, transparent 1px)`,
-            backgroundSize: "4.5rem 4.5rem",
+            backgroundSize: "72px 72px",
+            transform: manifestoMouse.active
+              ? `translate3d(${((manifestoMouse.x % 72) - 36) * 0.12}px, ${((manifestoMouse.y % 72) - 36) * 0.12}px, 0)`
+              : "translate3d(0, 0, 0)",
             maskImage:
-              "radial-gradient(ellipse 70% 65% at 50% 50%, #000 30%, transparent 100%)",
+              "radial-gradient(ellipse 75% 70% at 50% 50%, #000 35%, transparent 100%)",
             WebkitMaskImage:
-              "radial-gradient(ellipse 70% 65% at 50% 50%, #000 30%, transparent 100%)",
+              "radial-gradient(ellipse 75% 70% at 50% 50%, #000 35%, transparent 100%)",
           }}
         />
+
+        {/* Capa 2: Líneas de cuadrícula que se iluminan en Naranja (#FF5B22) y se mueven siguiendo el cursor */}
+        <div
+          className="absolute inset-0 pointer-events-none transition-opacity duration-300"
+          style={{
+            opacity: manifestoMouse.active ? 1 : 0,
+            backgroundImage:
+              "linear-gradient(to right, rgba(255, 91, 34, 0.85) 1.5px, transparent 1.5px), linear-gradient(to bottom, rgba(255, 91, 34, 0.85) 1.5px, transparent 1.5px)",
+            backgroundSize: "72px 72px",
+            transform: manifestoMouse.active
+              ? `translate3d(${((manifestoMouse.x % 72) - 36) * 0.22}px, ${((manifestoMouse.y % 72) - 36) * 0.22}px, 0)`
+              : "translate3d(0, 0, 0)",
+            maskImage: `radial-gradient(280px circle at ${manifestoMouse.x}px ${manifestoMouse.y}px, #000 0%, rgba(0,0,0,0.4) 55%, transparent 100%)`,
+            WebkitMaskImage: `radial-gradient(280px circle at ${manifestoMouse.x}px ${manifestoMouse.y}px, #000 0%, rgba(0,0,0,0.4) 55%, transparent 100%)`,
+            filter: "drop-shadow(0 0 8px rgba(255, 91, 34, 0.65))",
+          }}
+        />
+
+        {/* Capa 3: Celda activa y halo cálido naranja bajo el cursor */}
+        {manifestoMouse.active && (
+          <>
+            <div
+              className="absolute pointer-events-none transition-all duration-150 ease-out rounded-sm"
+              style={{
+                width: 72,
+                height: 72,
+                left: Math.floor(manifestoMouse.x / 72) * 72,
+                top: Math.floor(manifestoMouse.y / 72) * 72,
+                backgroundColor: "rgba(255, 91, 34, 0.14)",
+                border: "1px solid rgba(255, 107, 53, 0.6)",
+                boxShadow: "0 0 25px rgba(255, 91, 34, 0.35)",
+              }}
+            />
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background: `radial-gradient(340px circle at ${manifestoMouse.x}px ${manifestoMouse.y}px, rgba(255, 91, 34, 0.13), transparent 75%)`,
+              }}
+            />
+          </>
+        )}
 
         <div className="relative z-10 max-w-5xl mx-auto text-center">
           <motion.div
