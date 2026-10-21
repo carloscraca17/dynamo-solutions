@@ -668,20 +668,37 @@ export default function DynamoLanding() {
           1. HERO SECTION (Sin signos de puntuación ";" y sin promesa genérica de +330%)
          ===================================================================== */}
       <section className="relative min-h-screen pt-28 sm:pt-36 pb-12 sm:pb-16 px-4 sm:px-6 flex flex-col justify-between overflow-hidden">
-        {/* Video de Fondo con 50% de transparencia + Onda Topográfica */}
+        {/* Video de Fondo con 50% de transparencia + Onda Topográfica (Móvil vs Escritorio) */}
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+          {/* Video exclusivo para versión Móvil */}
           <video
             autoPlay
             loop
             muted
             playsInline
-            className="w-full h-full object-cover"
+            className="block md:hidden w-full h-full object-cover"
+          >
+            <source
+              src="https://res.cloudinary.com/ahsxrxpv/video/upload/v1792624467/uhd_25fps.mp4"
+              type="video/mp4"
+            />
+          </video>
+
+          {/* Video exclusivo para versión de Escritorio */}
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="hidden md:block w-full h-full object-cover"
           >
             <source
               src="https://res.cloudinary.com/ahsxrxpv/video/upload/v1792510146/6930814-uhd_3840_2160_25fps.mp4"
               type="video/mp4"
             />
           </video>
+
+          {/* Filtro de 50% de transparencia aplicado tanto en móvil como en escritorio */}
           <div className="absolute inset-0 bg-black/50" />
           <div className="absolute inset-0 flex items-center justify-center opacity-75 mix-blend-screen">
             <TopographicWaveSVG className="w-full h-full max-w-6xl animate-float-slow" />
