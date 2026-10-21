@@ -39,13 +39,14 @@ body {
   background-image: linear-gradient(
     90deg,
     #5246ff 0%,
-    #8b3dff 30%,
-    #cc39d6 65%,
+    #8b3dff 32%,
+    #d638c4 66%,
     #ff5864 100%
   );
   -webkit-background-clip: text;
   background-clip: text;
-  color: transparent;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
 }
 
 .bg-digital-gradient {
