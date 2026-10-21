@@ -1,7 +1,13 @@
 "use client";
 
 import { useState, type CSSProperties } from "react";
-import { motion, type Variants } from "framer-motion";
+import {
+  motion,
+  useMotionValue,
+  useSpring,
+  useTransform,
+  type Variants,
+} from "framer-motion";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -72,8 +78,22 @@ export default function DynamoLanding() {
     y: number;
     active: boolean;
   }>({ x: 0, y: 0, active: false });
-  // Porcentaje de develado de izquierda a derecha (0 = Antes US$ 300, 100 = Después US$ 1.300)
-  const [bellacyReveal, setBellacyReveal] = useState<number>(35);
+
+  // Física Spring moderna para develar la tarjeta de The Bellacy Studio de un lado al otro
+  const revealRaw = useMotionValue(24);
+  const revealSpring = useSpring(revealRaw, {
+    stiffness: 130,
+    damping: 22,
+    mass: 0.55,
+  });
+  // Corte diagonal moderno con inercia (onda oblicua de izquierda a derecha)
+  const afterClipPath = useTransform(revealSpring, (v) => {
+    const topEdge = Math.min(105, Math.max(-5, v + 3.5));
+    const bottomEdge = Math.min(105, Math.max(-5, v - 3.5));
+    return `polygon(0% 0%, ${topEdge}% 0%, ${bottomEdge}% 100%, 0% 100%)`;
+  });
+  const beamLeft = useTransform(revealSpring, (v) => `${Math.min(96, Math.max(4, v))}%`);
+  const afterScale = useTransform(revealSpring, [0, 100], [0.985, 1]);
 
   // Cálculo continuo de la paleta según el nivel de luminosidad (0 - 100)
   const bgPrimaryRGB = sampleStops(
@@ -1258,7 +1278,7 @@ export default function DynamoLanding() {
         </div>
       </section>
 
-      {/* SECCIÓN EXCLUSIVA: EL CASO THE BELLACY STUDIO — Tarjeta Interactiva Antes / Después (Develado Izquierda a Derecha) */}
+      {/* SECCIÓN EXCLUSIVA: EL CASO THE BELLACY STUDIO — Tarjeta Interactiva Antes / Después con física Spring */}
       <section
         id="caso-estudio"
         className="py-28 md:py-36 px-6 max-w-7xl mx-auto scroll-mt-20"
@@ -1268,7 +1288,7 @@ export default function DynamoLanding() {
           whileInView="visible"
           viewport={{ once: true, margin: "-80px" }}
           variants={fadeUpBlur}
-          className="text-center max-w-3xl mx-auto mb-12"
+          className="text-center max-w-3xl mx-auto mb-14"
         >
           <span
             style={{
@@ -1285,48 +1305,9 @@ export default function DynamoLanding() {
             <span style={{ color: textSecondary }}>resultados medibles.</span>
           </h2>
           <p style={{ color: textSecondary }} className="text-sm md:text-base font-light">
-            Desliza la tarjeta de <strong style={{ color: textPrimary }} className="font-medium">izquierda a derecha</strong> para develar el antes y el después de The Bellacy Studio.
+            Mueve el cursor o desliza de <strong style={{ color: textPrimary }} className="font-medium">izquierda a derecha</strong> sobre la tarjeta para develar el antes y el después.
           </p>
         </motion.div>
-
-        {/* Controles rápidos de comparación Antes vs Después */}
-        <div className="flex flex-wrap items-center justify-center gap-3 mb-6">
-          <button
-            type="button"
-            onClick={() => setBellacyReveal(8)}
-            style={{
-              backgroundColor: bellacyReveal <= 15 ? "#27272a" : bgCard,
-              borderColor: bellacyReveal <= 15 ? "#71717a" : borderColor,
-              color: bellacyReveal <= 15 ? "#ffffff" : textSecondary,
-            }}
-            className="px-4 py-2 rounded-xl border text-xs font-mono uppercase tracking-wider transition-all cursor-pointer"
-          >
-            ← Ver Antes (US$ 300/mes)
-          </button>
-          <button
-            type="button"
-            onClick={() => setBellacyReveal(50)}
-            style={{
-              backgroundColor:
-                bellacyReveal > 15 && bellacyReveal < 85 ? bgCardInner : bgCard,
-              borderColor:
-                bellacyReveal > 15 && bellacyReveal < 85
-                  ? "#FF6B35"
-                  : borderColor,
-              color: textPrimary,
-            }}
-            className="px-4 py-2 rounded-xl border text-xs font-mono uppercase tracking-wider transition-all cursor-pointer"
-          >
-            Comparar 50 / 50
-          </button>
-          <button
-            type="button"
-            onClick={() => setBellacyReveal(94)}
-            className="px-4 py-2 rounded-xl border border-[#FF8559]/50 bg-gradient-to-r from-[#FF6B35] to-[#E54310] text-white text-xs font-mono uppercase tracking-wider shadow-[0_0_20px_rgba(255,91,34,0.35)] transition-all cursor-pointer"
-          >
-            Develar Después (US$ 1.300/mes) →
-          </button>
-        </div>
 
         <motion.div
           initial="hidden"
@@ -1336,38 +1317,39 @@ export default function DynamoLanding() {
           style={{ backgroundColor: bgCard, borderColor }}
           className="rounded-[2rem] border p-5 md:p-8 shadow-2xl transition-colors duration-200"
         >
-          {/* TARJETA INTERACTIVA DE DEVELADO IZQUIERDA A DERECHA */}
-          <div className="relative rounded-3xl overflow-hidden border border-white/10 select-none min-h-[520px] md:min-h-[460px]">
-            {/* Input range invisible que cubre toda la tarjeta para arrastrar de izquierda a derecha con mouse o touch */}
-            <input
-              type="range"
-              min={0}
-              max={100}
-              value={bellacyReveal}
-              onChange={(e) => setBellacyReveal(Number(e.target.value))}
-              aria-label="Develar de izquierda a derecha el antes y después de The Bellacy Studio"
-              className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-30 m-0"
-            />
-
+          {/* TARJETA INTERACTIVA EN CSS GRID (Ambas capas comparten la celda 1/1 para que NUNCA se corte el alto) */}
+          <div
+            onPointerMove={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              const pct = ((e.clientX - rect.left) / rect.width) * 100;
+              revealRaw.set(Math.max(0, Math.min(100, pct)));
+            }}
+            onClick={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              const pct = ((e.clientX - rect.left) / rect.width) * 100;
+              revealRaw.set(pct > 50 ? 100 : 0);
+            }}
+            className="relative grid grid-cols-1 rounded-3xl overflow-hidden border border-white/10 select-none cursor-ew-resize group"
+          >
             {/* =========================================================
-                CAPA BASE (ANTES DE CONTRATAR NUESTROS SERVICIOS: US$ 300)
+                CAPA 1 (BASE): ANTES DE DYNAMO SOLUTIONS (US$ 300 / MES)
                ========================================================= */}
-            <div className="w-full h-full min-h-[520px] md:min-h-[460px] bg-gradient-to-br from-[#141418] via-[#0D0D10] to-[#08080A] text-white p-7 md:p-12 flex flex-col justify-between relative">
+            <div className="col-start-1 row-start-1 w-full bg-gradient-to-br from-[#141418] via-[#0D0D10] to-[#08080A] text-white p-7 sm:p-10 md:p-12 flex flex-col justify-between relative">
               <div className="absolute right-8 bottom-8 opacity-5 pointer-events-none">
                 <BarChart3 className="w-56 h-56 text-zinc-400" />
               </div>
 
               <div className="flex flex-wrap items-center justify-between gap-4">
-                <span className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-widest text-zinc-400 bg-zinc-900/90 border border-zinc-700/80 px-3.5 py-1.5 rounded-lg">
+                <span className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-widest text-zinc-300 bg-zinc-900/90 border border-zinc-700/80 px-3.5 py-1.5 rounded-lg">
                   <span className="w-2 h-2 rounded-full bg-zinc-500" />
                   ANTES DE DYNAMO SOLUTIONS · ESTADO INICIAL
                 </span>
-                <span className="text-xs font-mono text-zinc-500">
-                  Desliza de izquierda a derecha para transformar →
+                <span className="text-xs font-mono text-zinc-400 bg-white/[0.04] border border-white/10 px-3 py-1 rounded-md">
+                  ← Desliza hacia la derecha para revelar el Después →
                 </span>
               </div>
 
-              <div className="grid lg:grid-cols-12 gap-8 items-center my-8">
+              <div className="grid lg:grid-cols-12 gap-8 items-center my-10">
                 <div className="lg:col-span-6">
                   <div className="text-xs font-mono uppercase tracking-widest text-zinc-500 mb-2">
                     Caso de Estudio · Diagnóstico Inicial
@@ -1382,20 +1364,38 @@ export default function DynamoLanding() {
                     digital.
                   </p>
 
-                  <div className="inline-block rounded-2xl bg-black/60 border border-zinc-800 p-5">
-                    <div className="text-[11px] font-mono uppercase tracking-wider text-zinc-500 mb-1">
-                      Facturación Mensual (Antes)
+                  <div className="inline-flex flex-wrap items-center gap-6 rounded-2xl bg-black/65 border border-zinc-800 p-5">
+                    <div>
+                      <div className="text-[11px] font-mono uppercase tracking-wider text-zinc-500 mb-1">
+                        Facturación Mensual (Antes)
+                      </div>
+                      <div className="flex items-baseline gap-3">
+                        <span className="text-4xl md:text-5xl font-bold text-zinc-300">
+                          US$ 300
+                        </span>
+                        <span className="text-xs font-mono text-zinc-500">
+                          / mes
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-baseline gap-3">
-                      <span className="text-4xl md:text-5xl font-bold text-zinc-300">
-                        US$ 300
-                      </span>
-                      <span className="text-xs font-mono text-zinc-500">
-                        / mes
-                      </span>
-                    </div>
-                    <div className="text-xs text-zinc-500 mt-1">
-                      Flujo limitado e impredecible de nuevos clientes
+
+                    <div className="flex gap-4 pl-4 border-l border-zinc-800">
+                      <div>
+                        <div className="text-2xl font-bold text-zinc-400">
+                          Baja
+                        </div>
+                        <div className="text-[11px] text-zinc-500">
+                          Visibilidad
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-2xl font-bold text-zinc-400">
+                          0 Ads
+                        </div>
+                        <div className="text-[11px] text-zinc-500">
+                          Pauta activa
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1440,21 +1440,21 @@ export default function DynamoLanding() {
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-zinc-800/80 flex flex-wrap items-center justify-between gap-4 text-xs font-mono text-zinc-500">
+              <div className="pt-5 border-t border-zinc-800/80 flex flex-wrap items-center justify-between gap-4 text-xs font-mono text-zinc-400">
                 <span>ESTADO: PRE-OPTIMIZACIÓN</span>
-                <span>INGRESOS MENSUALES: US$ 300</span>
+                <span>INGRESOS MENSUALES: US$ 300 / MES</span>
               </div>
             </div>
 
             {/* =========================================================
-                CAPA SUPERIOR DEVELADA (DESPUÉS DE DYNAMO SOLUTIONS: US$ 1.300)
-                Se devela de izquierda a derecha según bellacyReveal (%)
+                CAPA 2 (DEVELADA CON CORTE DIAGONAL Y SPRING): DESPUÉS (US$ 1.300 / MES)
                ========================================================= */}
-            <div
+            <motion.div
               style={{
-                clipPath: `inset(0 ${100 - bellacyReveal}% 0 0)`,
+                clipPath: afterClipPath,
+                scale: afterScale,
               }}
-              className="absolute inset-0 w-full h-full bg-gradient-to-br from-[#FF7A45] via-[#D94B1A] to-[#1E0D07] text-white p-7 md:p-12 flex flex-col justify-between z-10"
+              className="col-start-1 row-start-1 w-full bg-gradient-to-br from-[#FF7A45] via-[#D94B1A] to-[#1E0D07] text-white p-7 sm:p-10 md:p-12 flex flex-col justify-between relative z-10 origin-left"
             >
               <div className="absolute right-8 bottom-8 opacity-15 pointer-events-none">
                 <BarChart3 className="w-56 h-56 text-white" />
@@ -1465,12 +1465,12 @@ export default function DynamoLanding() {
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                   DESPUÉS DE DYNAMO SOLUTIONS · EN TAN SOLO 3 MESES
                 </span>
-                <span className="text-xs font-mono text-white/90 bg-black/25 px-3 py-1 rounded-md border border-white/15">
+                <span className="text-xs font-mono text-white bg-black/30 px-3 py-1 rounded-md border border-white/20">
                   ROI VERIFICADO: +330%
                 </span>
               </div>
 
-              <div className="grid lg:grid-cols-12 gap-8 items-center my-8">
+              <div className="grid lg:grid-cols-12 gap-8 items-center my-10">
                 <div className="lg:col-span-6">
                   <div className="text-xs font-mono uppercase tracking-widest text-white/80 mb-2">
                     Caso de Estudio · Ecosistema Activo
@@ -1563,32 +1563,30 @@ export default function DynamoLanding() {
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-white/20 flex flex-wrap items-center justify-between gap-4 text-xs font-mono text-white/90">
+              <div className="pt-5 border-t border-white/25 flex flex-wrap items-center justify-between gap-4 text-xs font-mono text-white">
                 <span>RESULTADO: ECOSISTEMA EN ESCALA AUTOMÁTICA</span>
                 <span>FACTURACIÓN ALCANZADA: US$ 1.300 / MES (+330%)</span>
               </div>
-            </div>
+            </motion.div>
 
             {/* =========================================================
-                DIVISOR VERTICAL INTERACTIVO (CORTINA IZQUIERDA -> DERECHA)
+                HAZ LÁSER ESCÁNER CON INERCIA SPRING (Onda Moderna)
                ========================================================= */}
-            <div
-              style={{ left: `${bellacyReveal}%` }}
-              className="absolute inset-y-0 z-20 pointer-events-none -translate-x-1/2 flex flex-col items-center justify-center"
+            <motion.div
+              style={{ left: beamLeft }}
+              className="absolute inset-y-0 z-20 pointer-events-none -translate-x-1/2 flex items-center justify-center"
             >
-              {/* Línea vertical luminosa */}
-              <div className="w-0.5 h-full bg-white shadow-[0_0_20px_#ffffff,0_0_35px_#FF5B22]" />
+              {/* Estela de energía cálida detrás del haz */}
+              <div className="absolute right-0 w-28 h-full bg-gradient-to-l from-white/30 via-[#FF6B35]/25 to-transparent blur-xl -skew-x-3" />
 
-              {/* Botón central de arrastre */}
-              <div className="absolute top-1/2 -translate-y-1/2 flex flex-col items-center gap-1.5">
-                <div className="w-12 h-12 rounded-full bg-white text-black shadow-[0_0_35px_rgba(0,0,0,0.8),0_0_25px_rgba(255,91,34,0.9)] border-2 border-[#FF6B35] flex items-center justify-center font-mono text-xs font-bold">
-                  ↔
-                </div>
-                <span className="px-2.5 py-0.5 rounded-full bg-black/85 text-white border border-white/20 text-[10px] font-mono whitespace-nowrap shadow-lg">
-                  {bellacyReveal}% develado
-                </span>
+              {/* Haz láser oblicuo que coincide con el ángulo del polygon */}
+              <div className="w-[2.5px] h-[110%] bg-gradient-to-b from-white/40 via-white to-white/40 shadow-[0_0_20px_#ffffff,0_0_40px_#FF5B22] -rotate-[2.5deg]" />
+
+              {/* Orbe magnético central */}
+              <div className="relative w-12 h-12 rounded-2xl bg-black/80 backdrop-blur-xl text-white shadow-[0_0_30px_rgba(255,91,34,0.9)] border border-white/40 flex items-center justify-center font-mono text-sm group-hover:scale-110 transition-transform">
+                <span className="text-[#FF6B35] font-bold">↔</span>
               </div>
-            </div>
+            </motion.div>
           </div>
 
           {/* BLOQUE INFERIOR CON LA NARRATIVA COMPLETA Y CTA DE LA SECCIÓN */}
