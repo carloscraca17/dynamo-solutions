@@ -30,7 +30,8 @@ import {
   Clock,
   Sun,
   Moon,
-  SlidersHorizontal,
+  Menu,
+  X,
 } from "lucide-react";
 
 // Interpolación lineal entre dos canales o valores
@@ -70,6 +71,7 @@ function getToneLabel(lum: number) {
 
 export default function DynamoLanding() {
   const [activeStep, setActiveStep] = useState<number>(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   // 0 = Negro (Dark) -> 20..80 = Escala de Grises -> 100 = Blanco (Light)
   const [luminosity, setLuminosity] = useState<number>(0);
   // Coordenadas del cursor para iluminar y mover la grilla de El Manifiesto
@@ -365,7 +367,7 @@ export default function DynamoLanding() {
       }}
       className="min-h-screen font-sans selection:bg-[#FF5B22]/30 selection:text-white transition-colors duration-200"
     >
-      {/* NAVEGACIÓN PRINCIPAL CON NIVELADOR DE LUMINOSIDAD */}
+      {/* NAVEGACIÓN PRINCIPAL 100% RESPONSIVE CON NIVELADOR DE LUMINOSIDAD */}
       <header className="fixed w-full top-0 z-50">
         <nav
           style={{
@@ -374,14 +376,14 @@ export default function DynamoLanding() {
           }}
           className="backdrop-blur-xl border-b transition-colors duration-200"
         >
-          <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
-            <a href="#" className="flex items-center gap-2.5 group shrink-0">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4">
+            <a href="#" className="flex items-center gap-2 group shrink-0">
               <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#FF6B35] to-[#D93800] flex items-center justify-center shadow-[0_0_15px_rgba(255,91,34,0.4)]">
                 <Zap className="w-4 h-4 text-white fill-white" />
               </div>
               <span
                 style={{ color: textPrimary }}
-                className="text-xl font-semibold tracking-tight"
+                className="text-lg sm:text-xl font-semibold tracking-tight"
               >
                 Dynamo<span className="text-[#FF5B22]">.</span>
               </span>
@@ -405,14 +407,14 @@ export default function DynamoLanding() {
               </a>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               {/* Barra de Luminosidad integrada en el Header */}
               <div
                 style={{
                   backgroundColor: bgCard,
                   borderColor,
                 }}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl border shadow-sm"
+                className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl border shadow-sm"
                 title="Nivelar tonos entre Negro (Dark), Grises intermedios y Blanco (Light)"
               >
                 <button
@@ -430,7 +432,7 @@ export default function DynamoLanding() {
                   value={luminosity}
                   onChange={(e) => setLuminosity(Number(e.target.value))}
                   aria-label="Nivel de luminosidad"
-                  className="w-20 sm:w-28 h-1.5 rounded-lg appearance-none cursor-pointer accent-[#FF5B22]"
+                  className="w-14 sm:w-24 md:w-28 h-1.5 rounded-lg appearance-none cursor-pointer accent-[#FF5B22]"
                   style={{
                     background:
                       "linear-gradient(to right, #050505 0%, #3f3f46 35%, #71717a 60%, #d4d4d8 82%, #ffffff 100%)",
@@ -448,18 +450,79 @@ export default function DynamoLanding() {
 
               <a
                 href="#agendar"
-                className="bg-gradient-to-b from-[#FF6B35] to-[#E84311] text-white px-5 py-2 rounded-lg text-xs md:text-sm font-medium hover:brightness-110 transition-all shadow-[0_0_20px_rgba(255,91,34,0.35)] border border-[#FF8559]/40 flex items-center gap-1.5 shrink-0"
+                className="hidden sm:inline-flex bg-gradient-to-b from-[#FF6B35] to-[#E84311] text-white px-4 md:px-5 py-2 rounded-lg text-xs md:text-sm font-medium hover:brightness-110 transition-all shadow-[0_0_20px_rgba(255,91,34,0.35)] border border-[#FF8559]/40 items-center gap-1.5 shrink-0"
               >
                 Agendar Reunión
                 <ChevronRight className="w-4 h-4" />
               </a>
+
+              {/* Botón de Menú Móvil */}
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen((prev) => !prev)}
+                style={{
+                  backgroundColor: bgCard,
+                  borderColor,
+                  color: textPrimary,
+                }}
+                aria-label="Abrir menú de navegación"
+                className="lg:hidden p-2 rounded-xl border flex items-center justify-center"
+              >
+                {mobileMenuOpen ? (
+                  <X className="w-5 h-5" />
+                ) : (
+                  <Menu className="w-5 h-5" />
+                )}
+              </button>
             </div>
           </div>
+
+          {/* Drawer de Navegación Móvil */}
+          {mobileMenuOpen && (
+            <div
+              style={{
+                backgroundColor: bgCard,
+                borderColor,
+              }}
+              className="lg:hidden border-t px-4 pt-4 pb-6 space-y-3 shadow-2xl"
+            >
+              <div className="flex flex-col space-y-2 text-sm">
+                {[
+                  { label: "Sobre Nosotros · El Manifiesto", href: "#manifiesto" },
+                  { label: "Soluciones Corporativas", href: "#corporativo" },
+                  { label: "Impulso para Profesionales (80/20)", href: "#profesionales" },
+                  { label: "Caso de Estudio: The Bellacy Studio", href: "#caso-estudio" },
+                ].map((item, idx) => (
+                  <a
+                    key={idx}
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    style={{
+                      color: textPrimary,
+                      backgroundColor: bgCardInner,
+                      borderColor,
+                    }}
+                    className="px-4 py-3 rounded-xl border font-medium flex items-center justify-between"
+                  >
+                    <span>{item.label}</span>
+                    <ChevronRight className="w-4 h-4 text-[#FF6B35]" />
+                  </a>
+                ))}
+              </div>
+              <a
+                href="#agendar"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full bg-gradient-to-b from-[#FF6B35] to-[#E84311] text-white py-3.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,91,34,0.35)] border border-[#FF8559]/40"
+              >
+                Agendar Reunión <ArrowRight className="w-4 h-4" />
+              </a>
+            </div>
+          )}
         </nav>
       </header>
 
       {/* HERO SECTION CON VIDEO FIJO EN EL BANNER SUPERIOR (50% TRANSPARENCIA) */}
-      <section className="relative overflow-hidden min-h-[85vh] flex items-center pt-36 pb-24 md:pt-44 md:pb-32 px-6 text-white">
+      <section className="relative overflow-hidden min-h-[82vh] sm:min-h-[85vh] flex items-center pt-28 pb-20 sm:pt-36 sm:pb-24 md:pt-44 md:pb-32 px-4 sm:px-6 text-white">
         {/* Video de fondo exclusivo del Hero */}
         <video
           src="https://res.cloudinary.com/ahsxrxpv/video/upload/v1792510146/6930814-uhd_3840_2160_25fps.mp4"
@@ -478,7 +541,7 @@ export default function DynamoLanding() {
           style={{
             background: `linear-gradient(to top, ${bgPrimary} 0%, transparent 100%)`,
           }}
-          className="absolute inset-x-0 bottom-0 h-40 pointer-events-none transition-colors duration-200"
+          className="absolute inset-x-0 bottom-0 h-32 sm:h-40 pointer-events-none transition-colors duration-200"
         />
 
         <div className="relative z-10 max-w-7xl mx-auto w-full">
@@ -488,16 +551,16 @@ export default function DynamoLanding() {
             variants={staggerContainer}
             className="max-w-3xl"
           >
-            <motion.div variants={fadeUpBlur} className="mb-6">
-              <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-medium bg-[#1A110D]/90 border border-[#FF5B22]/40 text-[#FF8B60] shadow-[0_0_25px_rgba(255,91,34,0.25)] backdrop-blur-md">
-                <Sparkles className="w-3.5 h-3.5 text-[#FF6B35]" />
+            <motion.div variants={fadeUpBlur} className="mb-5 sm:mb-6">
+              <span className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-full text-[11px] sm:text-xs font-medium bg-[#1A110D]/90 border border-[#FF5B22]/40 text-[#FF8B60] shadow-[0_0_25px_rgba(255,91,34,0.25)] backdrop-blur-md">
+                <Sparkles className="w-3.5 h-3.5 text-[#FF6B35] shrink-0" />
                 Arquitectos de Ecosistemas Digitales
               </span>
             </motion.div>
 
             <motion.h1
               variants={fadeUpBlur}
-              className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight leading-tight mb-6 text-white"
+              className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.12] sm:leading-tight mb-5 sm:mb-6 text-white"
             >
               Automatización y escalabilidad{" "}
               <span className="text-zinc-300">para negocios modernos.</span>
@@ -505,7 +568,7 @@ export default function DynamoLanding() {
 
             <motion.p
               variants={fadeUpBlur}
-              className="text-base md:text-lg text-zinc-200 mb-9 max-w-xl font-light leading-relaxed"
+              className="text-sm sm:text-base md:text-lg text-zinc-200 mb-8 sm:mb-9 max-w-xl font-light leading-relaxed"
             >
               Diseñamos ecosistemas digitales, optimizamos tu posicionamiento y
               construimos soluciones tecnológicas que convierten visitantes en
@@ -514,13 +577,13 @@ export default function DynamoLanding() {
 
             <motion.div
               variants={fadeUpBlur}
-              className="flex flex-wrap items-center gap-4"
+              className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4"
             >
               <motion.a
                 href="#manifiesto"
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.98 }}
-                className="bg-gradient-to-b from-[#FF6B35] to-[#E54310] text-white px-7 py-3.5 rounded-xl text-sm md:text-base font-medium inline-flex items-center gap-2 shadow-[0_0_30px_rgba(255,91,34,0.45)] border border-[#FF8A61]/40 hover:brightness-110 transition-all"
+                className="bg-gradient-to-b from-[#FF6B35] to-[#E54310] text-white px-6 sm:px-7 py-3.5 rounded-xl text-sm md:text-base font-medium inline-flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(255,91,34,0.45)] border border-[#FF8A61]/40 hover:brightness-110 transition-all text-center"
               >
                 Inicia tu transformación <ArrowRight className="w-4 h-4" />
               </motion.a>
@@ -528,7 +591,7 @@ export default function DynamoLanding() {
                 href="#agendar"
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.98 }}
-                className="bg-white/[0.1] hover:bg-white/[0.16] text-white border border-white/[0.2] backdrop-blur-md px-7 py-3.5 rounded-xl text-sm md:text-base font-medium transition-all"
+                className="bg-white/[0.1] hover:bg-white/[0.16] text-white border border-white/[0.2] backdrop-blur-md px-6 sm:px-7 py-3.5 rounded-xl text-sm md:text-base font-medium transition-all text-center"
               >
                 Agendar Reunión
               </motion.a>
@@ -537,7 +600,7 @@ export default function DynamoLanding() {
         </div>
       </section>
 
-      {/* EL MANIFIESTO (SOBRE NOSOTROS) — Con grilla interactiva naranja al pasar el cursor */}
+      {/* EL MANIFIESTO (SOBRE NOSOTROS) — Con grilla interactiva naranja en mouse y táctil */}
       <section
         id="manifiesto"
         onMouseMove={(e) => {
@@ -548,11 +611,21 @@ export default function DynamoLanding() {
             active: true,
           });
         }}
+        onTouchMove={(e) => {
+          const touch = e.touches[0];
+          if (!touch) return;
+          const rect = e.currentTarget.getBoundingClientRect();
+          setManifestoMouse({
+            x: touch.clientX - rect.left,
+            y: touch.clientY - rect.top,
+            active: true,
+          });
+        }}
         onMouseLeave={() =>
           setManifestoMouse((prev) => ({ ...prev, active: false }))
         }
         style={{ borderColor, backgroundColor: bgPrimary }}
-        className="relative py-28 md:py-36 px-6 border-t overflow-hidden scroll-mt-20 transition-colors duration-200"
+        className="relative py-20 sm:py-28 md:py-36 px-4 sm:px-6 border-t overflow-hidden scroll-mt-16 transition-colors duration-200"
       >
         {/* Capa 1: Fondo de cuadrícula base con ligero desplazamiento parallax */}
         <div
@@ -636,24 +709,24 @@ export default function DynamoLanding() {
             whileInView="visible"
             viewport={{ once: true, margin: "-80px" }}
             variants={fadeUpBlur}
-            className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight mb-10 max-w-4xl mx-auto"
+            className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight mb-8 sm:mb-10 max-w-4xl mx-auto"
           >
             No somos una agencia tradicional;{" "}
             <span
               style={{ backgroundColor: bgCard, borderColor }}
-              className="inline-flex items-center justify-center align-middle mx-1 w-10 h-10 md:w-12 md:h-12 rounded-xl border shadow-inner"
+              className="inline-flex items-center justify-center align-middle mx-1 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl border shadow-inner"
             >
-              <Layers className="w-5 h-5 md:w-6 md:h-6 text-[#FF6B35]" />
+              <Layers className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-[#FF6B35]" />
             </span>{" "}
             somos arquitectos de{" "}
             <span style={{ color: textSecondary }}>ecosistemas digitales</span>{" "}
             <span
               style={{ backgroundColor: bgCard, borderColor }}
-              className="inline-flex items-center justify-center align-middle mx-1 w-10 h-10 md:w-12 md:h-12 rounded-xl border shadow-inner"
+              className="inline-flex items-center justify-center align-middle mx-1 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl border shadow-inner"
             >
               <Zap
                 style={{ color: textPrimary }}
-                className="w-5 h-5 md:w-6 md:h-6"
+                className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6"
               />
             </span>
             .
@@ -667,7 +740,7 @@ export default function DynamoLanding() {
             variants={wordRevealContainer}
             className="max-w-4xl mx-auto mb-8"
           >
-            <p className="text-xl md:text-2xl font-light leading-relaxed flex flex-wrap justify-center gap-x-2 gap-y-1">
+            <p className="text-base sm:text-xl md:text-2xl font-light leading-relaxed flex flex-wrap justify-center gap-x-1.5 sm:gap-x-2 gap-y-1">
               {manifestoWords.map((word, idx) => {
                 const isHighlight =
                   word === "Dynamo" ||
@@ -696,7 +769,7 @@ export default function DynamoLanding() {
             viewport={{ once: true, margin: "-60px" }}
             variants={fadeUpBlur}
             style={{ color: textSecondary }}
-            className="text-base md:text-lg font-light leading-relaxed max-w-3xl mx-auto mb-12"
+            className="text-sm sm:text-base md:text-lg font-light leading-relaxed max-w-3xl mx-auto mb-10 sm:mb-12"
           >
             Ya seas una empresa consolidada buscando dominar su sector, o un
             profesional independiente dando el salto digital, construimos la
@@ -717,7 +790,7 @@ export default function DynamoLanding() {
             <div style={{ color: textMuted }} className="text-xs mb-4">
               Ecosistemas especializados para cada etapa de crecimiento
             </div>
-            <div className="flex flex-wrap justify-center gap-2.5">
+            <div className="flex flex-wrap justify-center gap-2 sm:gap-2.5">
               {[
                 { label: "Desarrollo E-commerce & Web", href: "#corporativo" },
                 { label: "SEO, GEO & Google Business", href: "#corporativo" },
@@ -737,10 +810,10 @@ export default function DynamoLanding() {
                     borderColor,
                     color: textSecondary,
                   }}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border hover:border-[#FF5B22]/60 text-xs transition-all"
+                  className="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-lg border hover:border-[#FF5B22]/60 text-[11px] sm:text-xs transition-all"
                 >
                   <span>{chip.label}</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 opacity-60" />
+                  <ArrowUpRight className="w-3.5 h-3.5 opacity-60 shrink-0" />
                 </motion.a>
               ))}
             </div>
@@ -751,7 +824,7 @@ export default function DynamoLanding() {
       {/* RESUMEN EJECUTIVO DE LOS DOS ECOSISTEMAS */}
       <section
         style={{ backgroundColor: bgSecondary, borderColor }}
-        className="py-24 px-6 border-t transition-colors duration-200"
+        className="py-16 sm:py-24 px-4 sm:px-6 border-t transition-colors duration-200"
       >
         <div className="max-w-7xl mx-auto">
           <motion.div
@@ -759,7 +832,7 @@ export default function DynamoLanding() {
             whileInView="visible"
             viewport={{ once: true, margin: "-80px" }}
             variants={fadeUpBlur}
-            className="text-center max-w-3xl mx-auto mb-16"
+            className="text-center max-w-3xl mx-auto mb-12 sm:mb-16"
           >
             <span
               style={{
@@ -767,11 +840,11 @@ export default function DynamoLanding() {
                 backgroundColor: bgCard,
                 color: textSecondary,
               }}
-              className="inline-block font-mono text-[11px] uppercase tracking-[0.2em] border px-3.5 py-1.5 rounded-md mb-5"
+              className="inline-block font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.2em] border px-3 sm:px-3.5 py-1.5 rounded-md mb-5"
             >
               DOS MODELOS DE ESCALABILIDAD
             </span>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight">
+            <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight">
               Un Ecosistema.{" "}
               <span style={{ color: textSecondary }}>
                 Dos Caminos de Crecimiento.
@@ -792,29 +865,29 @@ export default function DynamoLanding() {
               variants={fadeUpBlur}
               whileHover={{ y: -4 }}
               style={{ backgroundColor: bgCard, borderColor }}
-              className="group relative rounded-3xl border p-8 md:p-10 overflow-hidden transition-all flex flex-col justify-between"
+              className="group relative rounded-3xl border p-5 sm:p-8 md:p-10 overflow-hidden transition-all flex flex-col justify-between"
             >
               <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-[#FF5B22]/10 blur-3xl pointer-events-none group-hover:bg-[#FF5B22]/20 transition-all" />
 
               <div
                 style={{ backgroundColor: bgCardInner, borderColor }}
-                className="relative h-36 mb-8 rounded-2xl border p-5 flex items-center justify-center gap-4 overflow-hidden"
+                className="relative h-40 sm:h-36 pt-6 sm:pt-0 mb-6 sm:mb-8 rounded-2xl border p-4 sm:p-5 flex items-center justify-center gap-3 sm:gap-4 overflow-hidden"
               >
                 <div
                   style={{ backgroundColor: bgCard, borderColor }}
-                  className="w-12 h-12 rounded-xl border flex items-center justify-center"
+                  className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl border flex items-center justify-center shrink-0"
                 >
                   <Code2
                     style={{ color: textSecondary }}
                     className="w-5 h-5"
                   />
                 </div>
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#FF6B35] to-[#D43800] border border-[#FF946B]/50 flex items-center justify-center shadow-[0_0_30px_rgba(255,91,34,0.45)] group-hover:scale-110 transition-transform duration-500">
-                  <Globe className="w-7 h-7 text-white" />
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-[#FF6B35] to-[#D43800] border border-[#FF946B]/50 flex items-center justify-center shadow-[0_0_30px_rgba(255,91,34,0.45)] group-hover:scale-110 transition-transform duration-500 shrink-0">
+                  <Globe className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                 </div>
                 <div
                   style={{ backgroundColor: bgCard, borderColor }}
-                  className="w-12 h-12 rounded-xl border flex items-center justify-center"
+                  className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl border flex items-center justify-center shrink-0"
                 >
                   <Target
                     style={{ color: textSecondary }}
@@ -827,14 +900,14 @@ export default function DynamoLanding() {
                     borderColor,
                     color: textMuted,
                   }}
-                  className="absolute top-3 right-3 text-[10px] font-mono uppercase tracking-widest border px-2.5 py-1 rounded-md"
+                  className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 text-[9px] sm:text-[10px] font-mono uppercase tracking-widest border px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md"
                 >
                   ECOSISTEMA 01
                 </span>
               </div>
 
               <div>
-                <h3 className="text-2xl md:text-3xl font-semibold mb-3 tracking-tight">
+                <h3 className="text-xl sm:text-2xl md:text-3xl font-semibold mb-3 tracking-tight">
                   Soluciones Corporativas
                 </h3>
                 <p
@@ -871,42 +944,42 @@ export default function DynamoLanding() {
               variants={fadeUpBlur}
               whileHover={{ y: -4 }}
               style={{ backgroundColor: bgCard, borderColor }}
-              className="group relative rounded-3xl border p-8 md:p-10 overflow-hidden transition-all flex flex-col justify-between"
+              className="group relative rounded-3xl border p-5 sm:p-8 md:p-10 overflow-hidden transition-all flex flex-col justify-between"
             >
               <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-amber-500/10 blur-3xl pointer-events-none group-hover:bg-[#FF5B22]/20 transition-all" />
 
               <div
                 style={{ backgroundColor: bgCardInner, borderColor }}
-                className="relative h-36 mb-8 rounded-2xl border p-5 flex items-center justify-center gap-4 overflow-hidden"
+                className="relative h-40 sm:h-36 pt-6 sm:pt-0 mb-6 sm:mb-8 rounded-2xl border p-4 sm:p-5 flex items-center justify-center gap-3 sm:gap-4 overflow-hidden"
               >
                 <div
                   style={{ backgroundColor: bgCard, borderColor }}
-                  className="w-12 h-12 rounded-xl border flex items-center justify-center"
+                  className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl border flex items-center justify-center shrink-0"
                 >
                   <Handshake
                     style={{ color: textSecondary }}
                     className="w-5 h-5"
                   />
                 </div>
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#FF6B35] to-[#D43800] border border-[#FF946B]/50 flex items-center justify-center shadow-[0_0_30px_rgba(255,91,34,0.45)] group-hover:scale-110 transition-transform duration-500">
-                  <Zap className="w-7 h-7 text-white" />
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-[#FF6B35] to-[#D43800] border border-[#FF946B]/50 flex items-center justify-center shadow-[0_0_30px_rgba(255,91,34,0.45)] group-hover:scale-110 transition-transform duration-500 shrink-0">
+                  <Zap className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                 </div>
                 <div
                   style={{ backgroundColor: bgCard, borderColor }}
-                  className="w-12 h-12 rounded-xl border flex items-center justify-center"
+                  className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl border flex items-center justify-center shrink-0"
                 >
                   <BotMessageSquare
                     style={{ color: textSecondary }}
                     className="w-5 h-5"
                   />
                 </div>
-                <span className="absolute top-3 right-3 text-[10px] font-mono uppercase tracking-widest text-[#FF6B35] bg-[#FF5B22]/15 border border-[#FF5B22]/30 px-2.5 py-1 rounded-md">
+                <span className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 text-[9px] sm:text-[10px] font-mono uppercase tracking-widest text-[#FF6B35] bg-[#FF5B22]/15 border border-[#FF5B22]/30 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md">
                   MODELO 80/20
                 </span>
               </div>
 
               <div>
-                <h3 className="text-2xl md:text-3xl font-semibold mb-3 tracking-tight">
+                <h3 className="text-xl sm:text-2xl md:text-3xl font-semibold mb-3 tracking-tight">
                   Impulso para Profesionales
                 </h3>
                 <p
@@ -944,7 +1017,7 @@ export default function DynamoLanding() {
       <section
         id="corporativo"
         style={{ backgroundColor: bgPrimary, borderColor }}
-        className="py-28 md:py-36 px-6 border-t scroll-mt-20 transition-colors duration-200"
+        className="py-20 sm:py-28 md:py-36 px-4 sm:px-6 border-t scroll-mt-20 transition-colors duration-200"
       >
         <div className="max-w-7xl mx-auto">
           <motion.div
@@ -952,7 +1025,7 @@ export default function DynamoLanding() {
             whileInView="visible"
             viewport={{ once: true, margin: "-80px" }}
             variants={fadeUpBlur}
-            className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6"
+            className="flex flex-col md:flex-row md:items-end justify-between mb-12 sm:mb-16 gap-5 sm:gap-6"
           >
             <div className="max-w-2xl">
               <span
@@ -961,11 +1034,11 @@ export default function DynamoLanding() {
                   backgroundColor: bgCard,
                   color: textSecondary,
                 }}
-                className="inline-block font-mono text-[11px] uppercase tracking-[0.2em] border px-3.5 py-1.5 rounded-md mb-5"
+                className="inline-block font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.2em] border px-3 sm:px-3.5 py-1.5 rounded-md mb-4 sm:mb-5"
               >
                 ECOSISTEMA 01 · SOLUCIONES CORPORATIVAS
               </span>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight">
+              <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight">
                 Soluciones{" "}
                 <span style={{ color: textSecondary }}>Corporativas.</span>
               </h2>
@@ -994,23 +1067,23 @@ export default function DynamoLanding() {
                   variants={fadeUpBlur}
                   whileHover={{ y: -5 }}
                   style={{ backgroundColor: bgCard, borderColor }}
-                  className="group relative rounded-3xl border p-7 md:p-8 flex flex-col justify-between overflow-hidden transition-all"
+                  className="group relative rounded-3xl border p-5 sm:p-7 md:p-8 flex flex-col justify-between overflow-hidden transition-all"
                 >
                   <div>
                     <div
                       style={{ backgroundColor: bgCardInner, borderColor }}
-                      className="relative h-40 mb-7 rounded-2xl border p-4 flex flex-col justify-between overflow-hidden"
+                      className="relative min-h-[10rem] mb-6 sm:mb-7 rounded-2xl border p-4 flex flex-col justify-between gap-4 overflow-hidden"
                     >
                       <div className="absolute -bottom-10 -right-10 w-36 h-36 rounded-full bg-[#FF5B22]/15 blur-2xl pointer-events-none group-hover:bg-[#FF5B22]/25 transition-all" />
 
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between gap-2">
                         <span
                           style={{ color: textMuted }}
-                          className="text-[11px] font-mono"
+                          className="text-[10px] sm:text-[11px] font-mono truncate"
                         >
                           [{pillar.code}] // {pillar.tag}
                         </span>
-                        <span className="inline-flex items-center gap-1 text-[10px] font-mono text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-mono text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full shrink-0">
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                           Running
                         </span>
@@ -1038,7 +1111,7 @@ export default function DynamoLanding() {
                       </div>
                     </div>
 
-                    <h3 className="text-xl font-semibold mb-3.5 leading-snug">
+                    <h3 className="text-lg sm:text-xl font-semibold mb-3 leading-snug">
                       {pillar.title}
                     </h3>
                     <p
@@ -1051,7 +1124,7 @@ export default function DynamoLanding() {
 
                   <div
                     style={{ borderColor, color: textMuted }}
-                    className="mt-8 pt-5 border-t flex items-center justify-between text-xs font-mono"
+                    className="mt-7 sm:mt-8 pt-4 sm:pt-5 border-t flex items-center justify-between text-[11px] sm:text-xs font-mono"
                   >
                     <span>CORPORATE // {pillar.code}</span>
                     <span
@@ -1072,7 +1145,7 @@ export default function DynamoLanding() {
       <section
         id="profesionales"
         style={{ backgroundColor: bgSecondary, borderColor }}
-        className="py-28 md:py-36 px-6 border-t border-b scroll-mt-20 overflow-hidden transition-colors duration-200"
+        className="py-20 sm:py-28 md:py-36 px-4 sm:px-6 border-t border-b scroll-mt-20 overflow-hidden transition-colors duration-200"
       >
         <div className="max-w-7xl mx-auto">
           <motion.div
@@ -1080,13 +1153,13 @@ export default function DynamoLanding() {
             whileInView="visible"
             viewport={{ once: true, margin: "-80px" }}
             variants={fadeUpBlur}
-            className="grid lg:grid-cols-12 gap-8 items-end mb-16"
+            className="grid lg:grid-cols-12 gap-6 sm:gap-8 items-end mb-12 sm:mb-16"
           >
             <div className="lg:col-span-7">
-              <span className="inline-block font-mono text-[11px] uppercase tracking-[0.2em] text-[#FF6B35] border border-[#FF5B22]/30 bg-[#FF5B22]/10 px-3.5 py-1.5 rounded-md mb-5">
+              <span className="inline-block font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.2em] text-[#FF6B35] border border-[#FF5B22]/30 bg-[#FF5B22]/10 px-3 sm:px-3.5 py-1.5 rounded-md mb-4 sm:mb-5">
                 ECOSISTEMA 02 · MODELO 80/20
               </span>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight">
+              <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight">
                 Impulso para{" "}
                 <span style={{ color: textSecondary }}>Profesionales.</span>
               </h2>
@@ -1106,14 +1179,14 @@ export default function DynamoLanding() {
                   borderColor,
                   color: textPrimary,
                 }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border text-xs font-medium hover:border-[#FF5B22]/50 transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border text-xs font-medium hover:border-[#FF5B22]/50 transition-colors"
               >
                 Aplicar al Modelo 80/20 <ChevronRight className="w-3.5 h-3.5" />
               </a>
             </div>
           </motion.div>
 
-          <div className="grid lg:grid-cols-12 gap-10 items-center">
+          <div className="grid lg:grid-cols-12 gap-8 sm:gap-10 items-center">
             <motion.div
               initial="hidden"
               whileInView="visible"
@@ -1135,7 +1208,7 @@ export default function DynamoLanding() {
                         ? "rgba(255, 91, 34, 0.5)"
                         : borderColor,
                     }}
-                    className="cursor-pointer rounded-2xl p-6 md:p-7 border transition-all duration-300 shadow-sm"
+                    className="cursor-pointer rounded-2xl p-5 sm:p-6 md:p-7 border transition-all duration-300 shadow-sm"
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-3">
@@ -1148,7 +1221,7 @@ export default function DynamoLanding() {
                                 }
                               : undefined
                           }
-                          className={`font-mono text-xs px-2 py-0.5 rounded ${
+                          className={`font-mono text-xs px-2 py-0.5 rounded shrink-0 ${
                             isSelected
                               ? "bg-[#FF5B22]/20 text-[#FF6B35] border border-[#FF5B22]/40"
                               : ""
@@ -1156,7 +1229,7 @@ export default function DynamoLanding() {
                         >
                           [{pillar.code}]
                         </span>
-                        <h3 className="text-lg md:text-xl font-semibold">
+                        <h3 className="text-base sm:text-lg md:text-xl font-semibold leading-snug">
                           {pillar.title}
                         </h3>
                       </div>
@@ -1179,7 +1252,7 @@ export default function DynamoLanding() {
               viewport={{ once: true }}
               transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
               style={{ backgroundColor: bgCardInner, borderColor }}
-              className="lg:col-span-6 relative min-h-[460px] rounded-3xl border p-6 md:p-10 flex flex-col justify-between overflow-hidden"
+              className="lg:col-span-6 relative min-h-[380px] sm:min-h-[460px] rounded-3xl border p-5 sm:p-6 md:p-10 flex flex-col justify-between overflow-hidden"
             >
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 rounded-full bg-[#FF5B22]/15 blur-3xl pointer-events-none" />
 
@@ -1190,7 +1263,7 @@ export default function DynamoLanding() {
                     activeStep === 0 ? "rgba(255,91,34,0.6)" : borderColor,
                 }}
                 style={{ backgroundColor: bgCard }}
-                className="relative z-10 self-end w-full sm:w-80 rounded-2xl border p-5 shadow-xl -rotate-2"
+                className="relative z-10 self-end w-full sm:w-80 rounded-2xl border p-4 sm:p-5 shadow-xl sm:-rotate-2"
               >
                 <div
                   style={{ color: textMuted }}
@@ -1199,10 +1272,10 @@ export default function DynamoLanding() {
                   <span className="font-mono uppercase text-[10px]">
                     [01] Modelo de Éxito Compartido
                   </span>
-                  <ShieldCheck className="w-4 h-4 text-[#FF6B35]" />
+                  <ShieldCheck className="w-4 h-4 text-[#FF6B35] shrink-0" />
                 </div>
-                <div className="flex items-baseline gap-3">
-                  <span className="text-3xl font-bold">80 / 20</span>
+                <div className="flex flex-wrap items-baseline gap-2.5 sm:gap-3">
+                  <span className="text-2xl sm:text-3xl font-bold">80 / 20</span>
                   <span className="text-xs text-emerald-500 font-mono">
                     +$0 Inversión Inicial
                   </span>
@@ -1215,16 +1288,16 @@ export default function DynamoLanding() {
                 </div>
               </motion.div>
 
-              <div className="relative z-10 my-6 flex items-center justify-center">
+              <div className="relative z-10 my-5 sm:my-6 flex items-center justify-center">
                 <div className="relative">
                   <div className="absolute -inset-4 rounded-3xl bg-[#FF5B22]/25 blur-xl animate-pulse" />
-                  <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-[#FF6B35] to-[#D43800] border border-[#FF9B73]/50 flex items-center justify-center shadow-[0_0_40px_rgba(255,91,34,0.6)] rotate-6">
-                    <Zap className="w-8 h-8 text-white fill-white" />
+                  <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-[#FF6B35] to-[#D43800] border border-[#FF9B73]/50 flex items-center justify-center shadow-[0_0_40px_rgba(255,91,34,0.6)] rotate-6">
+                    <Zap className="w-7 h-7 sm:w-8 sm:h-8 text-white fill-white" />
                   </div>
                 </div>
               </div>
 
-              <div className="relative z-10 grid sm:grid-cols-2 gap-4">
+              <div className="relative z-10 grid sm:grid-cols-2 gap-3.5 sm:gap-4">
                 <motion.div
                   animate={{
                     y: activeStep === 1 ? -4 : 0,
@@ -1232,10 +1305,10 @@ export default function DynamoLanding() {
                       activeStep === 1 ? "rgba(255,91,34,0.6)" : borderColor,
                   }}
                   style={{ backgroundColor: bgCard }}
-                  className="rounded-2xl border p-4 shadow-lg rotate-1"
+                  className="rounded-2xl border p-4 shadow-lg sm:rotate-1"
                 >
                   <div className="flex items-center gap-2 text-xs font-medium mb-1.5">
-                    <BotMessageSquare className="w-4 h-4 text-[#FF6B35]" />
+                    <BotMessageSquare className="w-4 h-4 text-[#FF6B35] shrink-0" />
                     <span>Asistente IA WhatsApp</span>
                   </div>
                   <div
@@ -1256,10 +1329,10 @@ export default function DynamoLanding() {
                       activeStep === 2 ? "rgba(255,91,34,0.6)" : borderColor,
                   }}
                   style={{ backgroundColor: bgCard }}
-                  className="rounded-2xl border p-4 shadow-lg -rotate-1"
+                  className="rounded-2xl border p-4 shadow-lg sm:-rotate-1"
                 >
                   <div className="flex items-center gap-2 text-xs font-medium mb-1.5">
-                    <MapPin className="w-4 h-4 text-[#FF6B35]" />
+                    <MapPin className="w-4 h-4 text-[#FF6B35] shrink-0" />
                     <span>Autoridad Google Maps</span>
                   </div>
                   <div
@@ -1281,14 +1354,14 @@ export default function DynamoLanding() {
       {/* SECCIÓN EXCLUSIVA: EL CASO THE BELLACY STUDIO — Tarjeta Interactiva Antes / Después con física Spring */}
       <section
         id="caso-estudio"
-        className="py-28 md:py-36 px-6 max-w-7xl mx-auto scroll-mt-20"
+        className="py-20 sm:py-28 md:py-36 px-4 sm:px-6 max-w-7xl mx-auto scroll-mt-20"
       >
         <motion.div
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-80px" }}
           variants={fadeUpBlur}
-          className="text-center max-w-3xl mx-auto mb-14"
+          className="text-center max-w-3xl mx-auto mb-10 sm:mb-14"
         >
           <span
             style={{
@@ -1296,15 +1369,15 @@ export default function DynamoLanding() {
               backgroundColor: bgCard,
               color: textSecondary,
             }}
-            className="inline-block font-mono text-[11px] uppercase tracking-[0.2em] border px-3.5 py-1.5 rounded-md mb-5"
+            className="inline-block font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.2em] border px-3 sm:px-3.5 py-1.5 rounded-md mb-4 sm:mb-5"
           >
             CASO DE ESTUDIO EXCLUSIVO · THE BELLACY STUDIO
           </span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight mb-4">
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight mb-4">
             Transformación digital con{" "}
             <span style={{ color: textSecondary }}>resultados medibles.</span>
           </h2>
-          <p style={{ color: textSecondary }} className="text-sm md:text-base font-light">
+          <p style={{ color: textSecondary }} className="text-xs sm:text-sm md:text-base font-light px-2">
             Mueve el cursor o desliza de <strong style={{ color: textPrimary }} className="font-medium">izquierda a derecha</strong> sobre la tarjeta para develar el antes y el después.
           </p>
         </motion.div>
@@ -1315,7 +1388,7 @@ export default function DynamoLanding() {
           viewport={{ once: true, margin: "-60px" }}
           variants={staggerContainer}
           style={{ backgroundColor: bgCard, borderColor }}
-          className="rounded-[2rem] border p-5 md:p-8 shadow-2xl transition-colors duration-200"
+          className="rounded-3xl sm:rounded-[2rem] border p-3 sm:p-5 md:p-8 shadow-2xl transition-colors duration-200"
         >
           {/* TARJETA INTERACTIVA EN CSS GRID (Ambas capas comparten la celda 1/1 para que NUNCA se corte el alto) */}
           <div
@@ -1324,53 +1397,60 @@ export default function DynamoLanding() {
               const pct = ((e.clientX - rect.left) / rect.width) * 100;
               revealRaw.set(Math.max(0, Math.min(100, pct)));
             }}
+            onTouchMove={(e) => {
+              const touch = e.touches[0];
+              if (!touch) return;
+              const rect = e.currentTarget.getBoundingClientRect();
+              const pct = ((touch.clientX - rect.left) / rect.width) * 100;
+              revealRaw.set(Math.max(0, Math.min(100, pct)));
+            }}
             onClick={(e) => {
               const rect = e.currentTarget.getBoundingClientRect();
               const pct = ((e.clientX - rect.left) / rect.width) * 100;
               revealRaw.set(pct > 50 ? 100 : 0);
             }}
-            className="relative grid grid-cols-1 rounded-3xl overflow-hidden border border-white/10 select-none cursor-ew-resize group"
+            className="relative grid grid-cols-1 rounded-2xl sm:rounded-3xl overflow-hidden border border-white/10 select-none cursor-ew-resize touch-pan-y group"
           >
             {/* =========================================================
                 CAPA 1 (BASE): ANTES DE DYNAMO SOLUTIONS (US$ 300 / MES)
                ========================================================= */}
-            <div className="col-start-1 row-start-1 w-full bg-gradient-to-br from-[#141418] via-[#0D0D10] to-[#08080A] text-white p-7 sm:p-10 md:p-12 flex flex-col justify-between relative">
-              <div className="absolute right-8 bottom-8 opacity-5 pointer-events-none">
-                <BarChart3 className="w-56 h-56 text-zinc-400" />
+            <div className="col-start-1 row-start-1 w-full bg-gradient-to-br from-[#141418] via-[#0D0D10] to-[#08080A] text-white p-5 sm:p-10 md:p-12 flex flex-col justify-between relative">
+              <div className="absolute right-4 sm:right-8 bottom-4 sm:bottom-8 opacity-5 pointer-events-none">
+                <BarChart3 className="w-36 h-36 sm:w-56 sm:h-56 text-zinc-400" />
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <span className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-widest text-zinc-300 bg-zinc-900/90 border border-zinc-700/80 px-3.5 py-1.5 rounded-lg">
-                  <span className="w-2 h-2 rounded-full bg-zinc-500" />
-                  ANTES DE DYNAMO SOLUTIONS · ESTADO INICIAL
+              <div className="flex flex-wrap items-center justify-between gap-2.5 sm:gap-4">
+                <span className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] font-mono uppercase tracking-wider sm:tracking-widest text-zinc-300 bg-zinc-900/90 border border-zinc-700/80 px-2.5 sm:px-3.5 py-1.5 rounded-lg">
+                  <span className="w-2 h-2 rounded-full bg-zinc-500 shrink-0" />
+                  <span>ANTES DE DYNAMO SOLUTIONS · ESTADO INICIAL</span>
                 </span>
-                <span className="text-xs font-mono text-zinc-400 bg-white/[0.04] border border-white/10 px-3 py-1 rounded-md">
-                  ← Desliza hacia la derecha para revelar el Después →
+                <span className="text-[10px] sm:text-xs font-mono text-zinc-400 bg-white/[0.04] border border-white/10 px-2.5 sm:px-3 py-1 rounded-md">
+                  ← Desliza para revelar el Después →
                 </span>
               </div>
 
-              <div className="grid lg:grid-cols-12 gap-8 items-center my-10">
+              <div className="grid lg:grid-cols-12 gap-6 sm:gap-8 items-center my-6 sm:my-10">
                 <div className="lg:col-span-6">
-                  <div className="text-xs font-mono uppercase tracking-widest text-zinc-500 mb-2">
+                  <div className="text-[10px] sm:text-xs font-mono uppercase tracking-widest text-zinc-500 mb-2">
                     Caso de Estudio · Diagnóstico Inicial
                   </div>
-                  <h3 className="text-3xl md:text-5xl font-bold tracking-tight text-zinc-200 mb-3">
+                  <h3 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight text-zinc-200 mb-3">
                     The Bellacy Studio
                   </h3>
-                  <p className="text-sm md:text-base text-zinc-400 font-light leading-relaxed mb-6">
+                  <p className="text-xs sm:text-sm md:text-base text-zinc-400 font-light leading-relaxed mb-5 sm:mb-6">
                     Antes de contratar nuestros servicios, el estudio contaba con
                     una excelente calidad de servicio pero carecía de visibilidad
                     local estructurada en Google Maps y de campañas de adquisición
                     digital.
                   </p>
 
-                  <div className="inline-flex flex-wrap items-center gap-6 rounded-2xl bg-black/65 border border-zinc-800 p-5">
+                  <div className="flex flex-col sm:inline-flex sm:flex-row sm:flex-wrap sm:items-center gap-4 sm:gap-6 rounded-2xl bg-black/65 border border-zinc-800 p-4 sm:p-5">
                     <div>
-                      <div className="text-[11px] font-mono uppercase tracking-wider text-zinc-500 mb-1">
+                      <div className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-zinc-500 mb-1">
                         Facturación Mensual (Antes)
                       </div>
-                      <div className="flex items-baseline gap-3">
-                        <span className="text-4xl md:text-5xl font-bold text-zinc-300">
+                      <div className="flex items-baseline gap-2.5 sm:gap-3">
+                        <span className="text-3xl sm:text-4xl md:text-5xl font-bold text-zinc-300">
                           US$ 300
                         </span>
                         <span className="text-xs font-mono text-zinc-500">
@@ -1379,9 +1459,9 @@ export default function DynamoLanding() {
                       </div>
                     </div>
 
-                    <div className="flex gap-4 pl-4 border-l border-zinc-800">
+                    <div className="flex gap-4 pt-3 sm:pt-0 sm:pl-4 border-t sm:border-t-0 sm:border-l border-zinc-800">
                       <div>
-                        <div className="text-2xl font-bold text-zinc-400">
+                        <div className="text-xl sm:text-2xl font-bold text-zinc-400">
                           Baja
                         </div>
                         <div className="text-[11px] text-zinc-500">
@@ -1389,7 +1469,7 @@ export default function DynamoLanding() {
                         </div>
                       </div>
                       <div>
-                        <div className="text-2xl font-bold text-zinc-400">
+                        <div className="text-xl sm:text-2xl font-bold text-zinc-400">
                           0 Ads
                         </div>
                         <div className="text-[11px] text-zinc-500">
@@ -1401,10 +1481,10 @@ export default function DynamoLanding() {
                 </div>
 
                 <div className="lg:col-span-6">
-                  <div className="text-xs font-mono uppercase tracking-wider text-zinc-500 mb-3">
+                  <div className="text-[10px] sm:text-xs font-mono uppercase tracking-wider text-zinc-500 mb-3">
                     Situación Previa a la Intervención
                   </div>
-                  <div className="grid sm:grid-cols-2 gap-3 text-xs">
+                  <div className="grid sm:grid-cols-2 gap-2.5 sm:gap-3 text-xs">
                     {[
                       {
                         title: "Posicionamiento Google Maps",
@@ -1425,13 +1505,13 @@ export default function DynamoLanding() {
                     ].map((item, i) => (
                       <div
                         key={i}
-                        className="rounded-xl bg-zinc-900/70 border border-zinc-800/90 p-4 flex flex-col justify-between"
+                        className="rounded-xl bg-zinc-900/70 border border-zinc-800/90 p-3.5 sm:p-4 flex flex-col justify-between"
                       >
                         <span className="text-zinc-300 font-medium mb-1">
                           {item.title}
                         </span>
                         <span className="inline-flex items-center gap-1.5 text-[11px] font-mono text-zinc-500">
-                          <span className="w-1.5 h-1.5 rounded-full bg-zinc-600" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-zinc-600 shrink-0" />
                           {item.state}
                         </span>
                       </div>
@@ -1440,7 +1520,7 @@ export default function DynamoLanding() {
                 </div>
               </div>
 
-              <div className="pt-5 border-t border-zinc-800/80 flex flex-wrap items-center justify-between gap-4 text-xs font-mono text-zinc-400">
+              <div className="pt-4 sm:pt-5 border-t border-zinc-800/80 flex flex-wrap items-center justify-between gap-2 sm:gap-4 text-[10px] sm:text-xs font-mono text-zinc-400">
                 <span>ESTADO: PRE-OPTIMIZACIÓN</span>
                 <span>INGRESOS MENSUALES: US$ 300 / MES</span>
               </div>
@@ -1454,46 +1534,46 @@ export default function DynamoLanding() {
                 clipPath: afterClipPath,
                 scale: afterScale,
               }}
-              className="col-start-1 row-start-1 w-full bg-gradient-to-br from-[#FF7A45] via-[#D94B1A] to-[#1E0D07] text-white p-7 sm:p-10 md:p-12 flex flex-col justify-between relative z-10 origin-left"
+              className="col-start-1 row-start-1 w-full bg-gradient-to-br from-[#FF7A45] via-[#D94B1A] to-[#1E0D07] text-white p-5 sm:p-10 md:p-12 flex flex-col justify-between relative z-10 origin-left"
             >
-              <div className="absolute right-8 bottom-8 opacity-15 pointer-events-none">
-                <BarChart3 className="w-56 h-56 text-white" />
+              <div className="absolute right-4 sm:right-8 bottom-4 sm:bottom-8 opacity-15 pointer-events-none">
+                <BarChart3 className="w-36 h-36 sm:w-56 sm:h-56 text-white" />
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <span className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-widest text-white bg-black/35 backdrop-blur-md border border-white/25 px-3.5 py-1.5 rounded-lg">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  DESPUÉS DE DYNAMO SOLUTIONS · EN TAN SOLO 3 MESES
+              <div className="flex flex-wrap items-center justify-between gap-2.5 sm:gap-4">
+                <span className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] font-mono uppercase tracking-wider sm:tracking-widest text-white bg-black/35 backdrop-blur-md border border-white/25 px-2.5 sm:px-3.5 py-1.5 rounded-lg">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                  <span>DESPUÉS DE DYNAMO SOLUTIONS · EN 3 MESES</span>
                 </span>
-                <span className="text-xs font-mono text-white bg-black/30 px-3 py-1 rounded-md border border-white/20">
+                <span className="text-[10px] sm:text-xs font-mono text-white bg-black/30 px-2.5 sm:px-3 py-1 rounded-md border border-white/20">
                   ROI VERIFICADO: +330%
                 </span>
               </div>
 
-              <div className="grid lg:grid-cols-12 gap-8 items-center my-10">
+              <div className="grid lg:grid-cols-12 gap-6 sm:gap-8 items-center my-6 sm:my-10">
                 <div className="lg:col-span-6">
-                  <div className="text-xs font-mono uppercase tracking-widest text-white/80 mb-2">
+                  <div className="text-[10px] sm:text-xs font-mono uppercase tracking-widest text-white/80 mb-2">
                     Caso de Estudio · Ecosistema Activo
                   </div>
-                  <h3 className="text-3xl md:text-5xl font-bold tracking-tight text-white mb-3">
+                  <h3 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white mb-3">
                     The Bellacy Studio
                   </h3>
-                  <p className="text-sm md:text-base text-white/90 font-light leading-relaxed mb-6">
+                  <p className="text-xs sm:text-sm md:text-base text-white/90 font-light leading-relaxed mb-5 sm:mb-6">
                     Posicionamiento local en Google Maps combinado con pauta
                     inteligente de alta conversión. Sistema predecible y
                     constante de adquisición de nuevos clientes.
                   </p>
 
-                  <div className="inline-flex flex-wrap items-center gap-6 rounded-2xl bg-black/45 backdrop-blur-md border border-white/25 p-5 shadow-2xl">
+                  <div className="flex flex-col sm:inline-flex sm:flex-row sm:flex-wrap sm:items-center gap-4 sm:gap-6 rounded-2xl bg-black/45 backdrop-blur-md border border-white/25 p-4 sm:p-5 shadow-2xl">
                     <div>
-                      <div className="text-[11px] font-mono uppercase tracking-wider text-white/75 mb-1">
+                      <div className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-white/75 mb-1">
                         Facturación Mensual (Después)
                       </div>
-                      <div className="flex items-baseline gap-3">
-                        <span className="text-white/50 line-through text-base font-mono">
+                      <div className="flex flex-wrap items-baseline gap-2 sm:gap-3">
+                        <span className="text-white/50 line-through text-sm sm:text-base font-mono">
                           US$ 300
                         </span>
-                        <span className="text-4xl md:text-5xl font-bold text-white">
+                        <span className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">
                           US$ 1.300
                         </span>
                         <span className="text-xs font-mono text-white/80">
@@ -1502,9 +1582,9 @@ export default function DynamoLanding() {
                       </div>
                     </div>
 
-                    <div className="flex gap-4 pl-4 border-l border-white/20">
+                    <div className="flex gap-4 pt-3 sm:pt-0 sm:pl-4 border-t sm:border-t-0 sm:border-l border-white/20">
                       <div>
-                        <div className="text-2xl font-bold text-emerald-300">
+                        <div className="text-xl sm:text-2xl font-bold text-emerald-300">
                           +330%
                         </div>
                         <div className="text-[11px] text-white/80">
@@ -1512,7 +1592,7 @@ export default function DynamoLanding() {
                         </div>
                       </div>
                       <div>
-                        <div className="text-2xl font-bold text-white">
+                        <div className="text-xl sm:text-2xl font-bold text-white">
                           3 Meses
                         </div>
                         <div className="text-[11px] text-white/80">
@@ -1524,10 +1604,10 @@ export default function DynamoLanding() {
                 </div>
 
                 <div className="lg:col-span-6">
-                  <div className="text-xs font-mono uppercase tracking-wider text-white/85 mb-3">
+                  <div className="text-[10px] sm:text-xs font-mono uppercase tracking-wider text-white/85 mb-3">
                     Estrategia Implementada con Éxito
                   </div>
-                  <div className="grid sm:grid-cols-2 gap-3 text-xs">
+                  <div className="grid sm:grid-cols-2 gap-2.5 sm:gap-3 text-xs">
                     {[
                       {
                         title: "Posicionamiento Google Maps",
@@ -1548,13 +1628,13 @@ export default function DynamoLanding() {
                     ].map((item, i) => (
                       <div
                         key={i}
-                        className="rounded-xl bg-black/40 backdrop-blur-md border border-white/20 p-4 flex flex-col justify-between"
+                        className="rounded-xl bg-black/40 backdrop-blur-md border border-white/20 p-3.5 sm:p-4 flex flex-col justify-between"
                       >
                         <span className="text-white font-medium mb-1">
                           {item.title}
                         </span>
                         <span className="inline-flex items-center gap-1.5 text-[11px] font-mono text-emerald-300">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
                           {item.state}
                         </span>
                       </div>
@@ -1563,11 +1643,11 @@ export default function DynamoLanding() {
                 </div>
               </div>
 
-              <div className="pt-5 border-t border-white/25 flex flex-wrap items-center justify-between gap-4 text-xs font-mono text-white">
+              <div className="pt-4 sm:pt-5 border-t border-white/25 flex flex-wrap items-center justify-between gap-2 sm:gap-4 text-[10px] sm:text-xs font-mono text-white">
                 <span>RESULTADO: ECOSISTEMA EN ESCALA AUTOMÁTICA</span>
                 <span>FACTURACIÓN ALCANZADA: US$ 1.300 / MES (+330%)</span>
               </div>
-            </motion.div>
+            </div>
 
             {/* =========================================================
                 HAZ LÁSER ESCÁNER CON INERCIA SPRING (Onda Moderna)
@@ -1577,13 +1657,13 @@ export default function DynamoLanding() {
               className="absolute inset-y-0 z-20 pointer-events-none -translate-x-1/2 flex items-center justify-center"
             >
               {/* Estela de energía cálida detrás del haz */}
-              <div className="absolute right-0 w-28 h-full bg-gradient-to-l from-white/30 via-[#FF6B35]/25 to-transparent blur-xl -skew-x-3" />
+              <div className="absolute right-0 w-16 sm:w-28 h-full bg-gradient-to-l from-white/30 via-[#FF6B35]/25 to-transparent blur-xl -skew-x-3" />
 
               {/* Haz láser oblicuo que coincide con el ángulo del polygon */}
               <div className="w-[2.5px] h-[110%] bg-gradient-to-b from-white/40 via-white to-white/40 shadow-[0_0_20px_#ffffff,0_0_40px_#FF5B22] -rotate-[2.5deg]" />
 
               {/* Orbe magnético central */}
-              <div className="relative w-12 h-12 rounded-2xl bg-black/80 backdrop-blur-xl text-white shadow-[0_0_30px_rgba(255,91,34,0.9)] border border-white/40 flex items-center justify-center font-mono text-sm group-hover:scale-110 transition-transform">
+              <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-black/80 backdrop-blur-xl text-white shadow-[0_0_30px_rgba(255,91,34,0.9)] border border-white/40 flex items-center justify-center font-mono text-xs sm:text-sm group-hover:scale-110 transition-transform">
                 <span className="text-[#FF6B35] font-bold">↔</span>
               </div>
             </motion.div>
@@ -1592,12 +1672,12 @@ export default function DynamoLanding() {
           {/* BLOQUE INFERIOR CON LA NARRATIVA COMPLETA Y CTA DE LA SECCIÓN */}
           <div
             style={{ backgroundColor: bgCardInner, borderColor }}
-            className="mt-6 rounded-2xl border p-6 md:p-8 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6"
+            className="mt-5 sm:mt-6 rounded-2xl border p-5 sm:p-6 md:p-8 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5 sm:gap-6"
           >
             <div className="max-w-4xl">
               <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-[#FF6B35] mb-2">
-                <Activity className="w-4 h-4" />
-                Impacto Real & Medible · Resumen del Caso
+                <Activity className="w-4 h-4 shrink-0" />
+                <span>Impacto Real & Medible · Resumen del Caso</span>
               </div>
               <p
                 style={{ color: textSecondary }}
@@ -1623,7 +1703,7 @@ export default function DynamoLanding() {
             <div className="shrink-0 flex flex-col sm:flex-row lg:flex-col items-stretch sm:items-center lg:items-end gap-3 w-full lg:w-auto">
               <a
                 href="#agendar"
-                className="bg-gradient-to-b from-[#FF6B35] to-[#E54310] text-white px-6 py-3.5 rounded-xl text-xs md:text-sm font-medium inline-flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(255,91,34,0.35)] border border-[#FF8A61]/40 hover:brightness-110 transition-all"
+                className="w-full sm:w-auto bg-gradient-to-b from-[#FF6B35] to-[#E54310] text-white px-6 py-3.5 rounded-xl text-xs md:text-sm font-medium inline-flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(255,91,34,0.35)] border border-[#FF8A61]/40 hover:brightness-110 transition-all"
               >
                 Replicar este sistema <ArrowRight className="w-4 h-4" />
               </a>
@@ -1635,9 +1715,9 @@ export default function DynamoLanding() {
       {/* CTA FINAL + FOOTER CON WATERMARK GIGANTE */}
       <section
         id="agendar"
-        className="relative pt-28 pb-16 px-6 overflow-hidden scroll-mt-20"
+        className="relative pt-20 sm:pt-28 pb-12 sm:pb-16 px-4 sm:px-6 overflow-hidden scroll-mt-20"
       >
-        <div className="max-w-5xl mx-auto mb-20 relative">
+        <div className="max-w-5xl mx-auto mb-14 sm:mb-20 relative">
           <div
             style={{
               background: `linear-gradient(to right, transparent, ${borderColor}, transparent)`,
@@ -1652,7 +1732,7 @@ export default function DynamoLanding() {
           whileInView="visible"
           viewport={{ once: true }}
           variants={fadeUpBlur}
-          className="max-w-3xl mx-auto text-center mb-24"
+          className="max-w-3xl mx-auto text-center mb-16 sm:mb-24"
         >
           <span
             style={{
@@ -1660,27 +1740,27 @@ export default function DynamoLanding() {
               backgroundColor: bgCard,
               color: textSecondary,
             }}
-            className="inline-block font-mono text-[11px] uppercase tracking-[0.2em] border px-3.5 py-1.5 rounded-md mb-6"
+            className="inline-block font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.2em] border px-3 sm:px-3.5 py-1.5 rounded-md mb-5 sm:mb-6"
           >
             EMPIEZA HOY
           </span>
-          <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight mb-6">
+          <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight mb-5 sm:mb-6">
             ¿Listo para <span style={{ color: textSecondary }}>escalar?</span>
           </h2>
           <p
             style={{ color: textSecondary }}
-            className="text-base md:text-lg font-light mb-10 max-w-xl mx-auto leading-relaxed"
+            className="text-sm sm:text-base md:text-lg font-light mb-8 sm:mb-10 max-w-xl mx-auto leading-relaxed"
           >
             Agenda una reunión estratégica de 30 minutos con nuestro equipo.
             Evaluaremos tu situación actual y diseñaremos un plan de acción a
             medida.
           </p>
 
-          <div className="flex flex-wrap items-center justify-center gap-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3.5 sm:gap-4 max-w-md sm:max-w-none mx-auto">
             <motion.button
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.98 }}
-              className="bg-gradient-to-b from-[#FF6B35] to-[#E54310] text-white px-8 py-4 rounded-xl text-base md:text-lg font-medium inline-flex items-center gap-2 shadow-[0_0_35px_rgba(255,91,34,0.45)] border border-[#FF8A61]/40 hover:brightness-110 transition-all cursor-pointer"
+              className="w-full sm:w-auto bg-gradient-to-b from-[#FF6B35] to-[#E54310] text-white px-7 sm:px-8 py-4 rounded-xl text-sm sm:text-base md:text-lg font-medium inline-flex items-center justify-center gap-2 shadow-[0_0_35px_rgba(255,91,34,0.45)] border border-[#FF8A61]/40 hover:brightness-110 transition-all cursor-pointer"
             >
               Agendar Auditoría Gratuita <ChevronRight className="w-5 h-5" />
             </motion.button>
@@ -1691,7 +1771,7 @@ export default function DynamoLanding() {
                 borderColor,
                 color: textPrimary,
               }}
-              className="border px-7 py-4 rounded-xl text-base font-medium hover:opacity-85 transition-all"
+              className="w-full sm:w-auto border px-7 py-4 rounded-xl text-sm sm:text-base font-medium hover:opacity-85 transition-all inline-flex items-center justify-center"
             >
               Explorar Ecosistemas
             </a>
@@ -1701,18 +1781,18 @@ export default function DynamoLanding() {
         {/* Tarjeta Footer */}
         <div
           style={{ backgroundColor: bgCard, borderColor }}
-          className="max-w-7xl mx-auto rounded-3xl border p-8 md:p-12 relative z-10 transition-colors duration-200"
+          className="max-w-7xl mx-auto rounded-3xl border p-6 sm:p-8 md:p-12 relative z-10 transition-colors duration-200"
         >
           <div
             style={{ borderColor }}
-            className="grid md:grid-cols-12 gap-10 pb-10 border-b"
+            className="grid md:grid-cols-12 gap-8 sm:gap-10 pb-8 sm:pb-10 border-b"
           >
             <div className="md:col-span-5">
               <div className="flex items-center gap-2.5 mb-4">
                 <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#FF6B35] to-[#D93800] flex items-center justify-center">
                   <Zap className="w-4 h-4 text-white fill-white" />
                 </div>
-                <span className="text-xl font-semibold tracking-tight">
+                <span className="text-lg sm:text-xl font-semibold tracking-tight">
                   Dynamo Solutions<span className="text-[#FF5B22]">.</span>
                 </span>
               </div>
@@ -1725,7 +1805,7 @@ export default function DynamoLanding() {
               </p>
             </div>
 
-            <div className="md:col-span-7 grid sm:grid-cols-3 gap-8 text-sm">
+            <div className="md:col-span-7 grid sm:grid-cols-3 gap-6 sm:gap-8 text-sm">
               <div>
                 <div className="font-medium mb-3">Ecosistema 01</div>
                 <ul
@@ -1829,7 +1909,7 @@ export default function DynamoLanding() {
 
           <div
             style={{ color: textMuted }}
-            className="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs gap-4"
+            className="pt-6 flex flex-col sm:flex-row items-center justify-between text-center sm:text-left text-xs gap-3 sm:gap-4"
           >
             <div>© 2026 Dynamo Solutions. Todos los derechos reservados.</div>
             <div className="font-mono text-[11px]">
@@ -1839,14 +1919,14 @@ export default function DynamoLanding() {
         </div>
 
         {/* Marca de agua gigante inferior */}
-        <div className="max-w-7xl mx-auto text-center select-none pointer-events-none overflow-hidden -mt-4">
+        <div className="max-w-7xl mx-auto text-center select-none pointer-events-none overflow-hidden -mt-2 sm:-mt-4">
           <div
             style={{
               backgroundImage: isLightModeSide
                 ? "linear-gradient(to bottom, rgba(0,0,0,0.08), transparent)"
                 : "linear-gradient(to bottom, rgba(255,255,255,0.08), transparent)",
             }}
-            className="font-sans font-bold text-[15vw] leading-none tracking-tighter bg-clip-text text-transparent"
+            className="font-sans font-bold text-[18vw] sm:text-[15vw] leading-none tracking-tighter bg-clip-text text-transparent"
           >
             Dynamo
           </div>
