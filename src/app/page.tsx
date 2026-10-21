@@ -1208,81 +1208,30 @@ export default function DynamoLanding() {
           {/* Banda Marquee Infinita con los Logos sin fondo */}
           <div
             style={{ borderColor, backgroundColor: "rgba(10, 10, 18, 0.55)" }}
-            className="relative overflow-hidden border-y py-7 mb-12 backdrop-blur-md"
+            className="relative overflow-hidden border-y py-10 sm:py-12 backdrop-blur-md"
           >
-            <div className="pointer-events-none absolute inset-y-0 left-0 w-16 sm:w-28 bg-gradient-to-r from-[#030306] to-transparent z-10" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-16 sm:w-28 bg-gradient-to-l from-[#030306] to-transparent z-10" />
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-16 sm:w-32 bg-gradient-to-r from-[#030306] to-transparent z-10" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-16 sm:w-32 bg-gradient-to-l from-[#030306] to-transparent z-10" />
 
-            <div className="animate-marquee flex items-center gap-14 sm:gap-24 px-8">
-              {[...clientEcosystems, ...clientEcosystems].map((client, i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-4 opacity-80 hover:opacity-100 transition-opacity shrink-0 group"
-                >
-                  <div className="h-12 sm:h-14 w-32 sm:w-40 flex items-center justify-center">
-                    <img
-                      src={client.logo}
-                      alt={client.name}
-                      className="max-h-11 sm:max-h-13 max-w-full object-contain filter drop-shadow-[0_0_14px_rgba(158,56,245,0.35)] group-hover:scale-110 transition-transform duration-300"
-                    />
+            <div className="animate-marquee flex items-center gap-16 sm:gap-28 px-8">
+              {[...clientEcosystems, ...clientEcosystems, ...clientEcosystems].map(
+                (client, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center justify-center opacity-85 hover:opacity-100 transition-all duration-300 shrink-0 group"
+                  >
+                    <div className="h-16 sm:h-24 w-40 sm:w-52 flex items-center justify-center">
+                      <img
+                        src={client.logo}
+                        alt={client.name}
+                        className="max-h-14 sm:max-h-20 max-w-full object-contain filter drop-shadow-[0_0_18px_rgba(158,56,245,0.4)] group-hover:drop-shadow-[0_0_28px_rgba(255,88,100,0.65)] group-hover:scale-110 transition-all duration-300"
+                      />
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              )}
             </div>
           </div>
-
-          {/* Grilla de 5 Tarjetas Holográficas Interactivas para cada Marca */}
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-60px" }}
-            variants={staggerContainer}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5"
-          >
-            {clientEcosystems.map((client, idx) => (
-              <motion.div
-                key={client.name}
-                variants={fadeUpBlur}
-                whileHover={{ y: -8, scale: 1.02 }}
-                style={{ backgroundColor: bgCard, borderColor }}
-                className="group relative border p-6 flex flex-col items-center justify-between min-h-[230px] overflow-hidden transition-all"
-              >
-                {/* Borde luminoso superior */}
-                <div className="absolute top-0 inset-x-0 h-[2px] bg-digital-gradient opacity-30 group-hover:opacity-100 transition-opacity" />
-
-                {/* Halo cromático detrás del logo al hacer hover */}
-                <div className="absolute inset-0 bg-gradient-to-b from-[#5246FF]/0 via-[#9E38F5]/0 to-[#FF5864]/0 group-hover:from-[#5246FF]/10 group-hover:via-[#9E38F5]/10 group-hover:to-[#FF5864]/15 transition-all duration-500 pointer-events-none" />
-
-                <div className="w-full flex items-center justify-between text-[10px] font-mono text-zinc-500 relative z-10">
-                  <span>0{idx + 1}</span>
-                  <span className="text-[#B832F5] group-hover:text-[#FF5864] transition-colors">
-                    ● ACTIVO
-                  </span>
-                </div>
-
-                {/* Contenedor del Logo sin fondo */}
-                <div className="relative z-10 my-5 h-24 w-full flex items-center justify-center px-2">
-                  <img
-                    src={client.logo}
-                    alt={client.name}
-                    className="max-h-20 max-w-[160px] w-auto object-contain transition-all duration-500 filter drop-shadow-[0_6px_20px_rgba(139,61,255,0.3)] group-hover:drop-shadow-[0_0_28px_rgba(255,88,100,0.6)] group-hover:scale-110"
-                  />
-                </div>
-
-                <div className="w-full text-center relative z-10 pt-3 border-t border-white/10">
-                  <div className="font-display font-bold uppercase text-xs tracking-wider mb-0.5">
-                    {client.name}
-                  </div>
-                  <div
-                    style={{ color: textMuted }}
-                    className="text-[10px] font-mono uppercase tracking-widest"
-                  >
-                    {client.tag}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
         </div>
       </section>
 
