@@ -1647,7 +1647,7 @@ export default function DynamoLanding() {
                 <span>RESULTADO: ECOSISTEMA EN ESCALA AUTOMÁTICA</span>
                 <span>FACTURACIÓN ALCANZADA: US$ 1.300 / MES (+330%)</span>
               </div>
-            </div>
+            </motion.div>
 
             {/* =========================================================
                 HAZ LÁSER ESCÁNER CON INERCIA SPRING (Onda Moderna)
