@@ -1,606 +1,733 @@
 "use client";
 
-import { useState, type CSSProperties } from "react";
+import React, { useState } from "react";
 import {
   motion,
+  Variants,
+  AnimatePresence,
   useMotionValue,
   useSpring,
   useTransform,
-  type Variants,
 } from "framer-motion";
 import {
-  ArrowRight,
-  ArrowUpRight,
-  BarChart3,
-  Globe,
   Zap,
-  CheckCircle2,
+  ArrowUpRight,
+  ArrowRight,
   Code2,
-  Search,
-  Target,
-  Handshake,
+  Globe,
+  BarChart3,
   BotMessageSquare,
   MapPin,
+  Handshake,
+  CheckCircle2,
   TrendingUp,
-  Sparkles,
   Layers,
-  Activity,
-  ChevronRight,
   ShieldCheck,
   Clock,
+  Target,
+  Activity,
   Sun,
   Moon,
   Menu,
   X,
+  ChevronRight,
 } from "lucide-react";
 
-// Interpolación lineal entre dos canales o valores
-function lerp(a: number, b: number, t: number) {
-  return Math.round(a + (b - a) * t);
+const fadeUpBlur: Variants = {
+  hidden: { opacity: 0, y: 28, filter: "blur(10px)" },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: { duration: 0.75, ease: [0.22, 1, 0.36, 1] },
+  },
+};
+
+const staggerContainer: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.12,
+      delayChildren: 0.08,
+    },
+  },
+};
+
+// Componente reutilizable de onda topográfica 3D (inspirado en el video de referencia DigitalPro)
+function TopographicWaveSVG({ className = "" }: { className?: string }) {
+  const lines = Array.from({ length: 28 });
+  return (
+    <svg
+      viewBox="0 0 900 600"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      preserveAspectRatio="xMidYMid slice"
+    >
+      <defs>
+        <linearGradient id="topoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#5246FF" stopOpacity="0.38" />
+          <stop offset="45%" stopColor="#9E38F5" stopOpacity="0.32" />
+          <stop offset="80%" stopColor="#FF5864" stopOpacity="0.28" />
+          <stop offset="100%" stopColor="#ffffff" stopOpacity="0.08" />
+        </linearGradient>
+      </defs>
+      {lines.map((_, i) => {
+        const offset = i * 9;
+        const curveShift = Math.sin(i * 0.28) * 35;
+        return (
+          <path
+            key={i}
+            d={`M ${-80 + offset * 0.4} ${560 - offset * 1.4} C ${
+              220 + curveShift
+            } ${120 + offset * 1.2}, ${480 - curveShift} ${
+              520 - offset * 1.1
+            }, ${960 - offset * 0.3} ${80 + offset * 1.3}`}
+            stroke="url(#topoGrad)"
+            strokeWidth="1.25"
+            strokeLinecap="round"
+          />
+        );
+      })}
+    </svg>
+  );
 }
 
-function rgb(r: number, g: number, b: number) {
-  return `rgb(${r}, ${g}, ${b})`;
+// Escultura 3D de Anillos Concéntricos Iridiscentes (inspirada en los segundos 00:02-00:03 del video)
+function IridescentRingsSculpture() {
+  return (
+    <div className="relative w-full h-[360px] sm:h-[460px] flex items-center justify-center select-none pointer-events-none">
+      {/* Resplandor ambiental profundo */}
+      <div className="absolute w-72 h-72 sm:w-96 sm:h-96 rounded-full bg-gradient-to-tr from-[#5246FF]/30 via-[#9E38F5]/25 to-[#FF5864]/20 blur-3xl" />
+
+      <motion.div
+        animate={{
+          rotateZ: [0, 6, 0, -4, 0],
+          y: [0, -14, 0],
+        }}
+        transition={{
+          duration: 12,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        className="relative w-[290px] h-[290px] sm:w-[390px] sm:h-[390px] flex items-center justify-center"
+      >
+        <svg
+          viewBox="0 0 500 500"
+          className="w-full h-full drop-shadow-[0_25px_60px_rgba(139,61,255,0.35)]"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <linearGradient id="ringMetal1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#140F2D" />
+              <stop offset="28%" stopColor="#5246FF" />
+              <stop offset="58%" stopColor="#B832F5" />
+              <stop offset="85%" stopColor="#FF5864" />
+              <stop offset="100%" stopColor="#1A0B1E" />
+            </linearGradient>
+            <linearGradient id="ringMetal2" x1="100%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#FF7A6B" />
+              <stop offset="35%" stopColor="#9E38F5" />
+              <stop offset="70%" stopColor="#2B1E66" />
+              <stop offset="100%" stopColor="#090712" />
+            </linearGradient>
+            <linearGradient id="ringRim" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#7C6BFF" stopOpacity="0.9" />
+              <stop offset="50%" stopColor="#E965C9" stopOpacity="0.95" />
+              <stop offset="100%" stopColor="#FF6B6B" stopOpacity="0.8" />
+            </linearGradient>
+          </defs>
+
+          {/* Anillo exterior 1 */}
+          <ellipse
+            cx="250"
+            cy="290"
+            rx="215"
+            ry="120"
+            transform="rotate(-14 250 290)"
+            fill="url(#ringMetal1)"
+            stroke="url(#ringRim)"
+            strokeWidth="2"
+          />
+          <ellipse
+            cx="250"
+            cy="282"
+            rx="175"
+            ry="92"
+            transform="rotate(-14 250 282)"
+            fill="#06050B"
+            stroke="#5246FF"
+            strokeOpacity="0.4"
+            strokeWidth="1.2"
+          />
+
+          {/* Anillo medio 2 */}
+          <ellipse
+            cx="250"
+            cy="245"
+            rx="185"
+            ry="102"
+            transform="rotate(-10 250 245)"
+            fill="url(#ringMetal2)"
+            stroke="url(#ringRim)"
+            strokeWidth="2.2"
+          />
+          <ellipse
+            cx="250"
+            cy="238"
+            rx="140"
+            ry="74"
+            transform="rotate(-10 250 238)"
+            fill="#080610"
+            stroke="#B832F5"
+            strokeOpacity="0.45"
+            strokeWidth="1.2"
+          />
+
+          {/* Anillo superior 3 */}
+          <ellipse
+            cx="250"
+            cy="198"
+            rx="145"
+            ry="78"
+            transform="rotate(-6 250 198)"
+            fill="url(#ringMetal1)"
+            stroke="url(#ringRim)"
+            strokeWidth="2.5"
+          />
+          <ellipse
+            cx="250"
+            cy="192"
+            rx="100"
+            ry="50"
+            transform="rotate(-6 250 192)"
+            fill="#07050E"
+            stroke="#FF5864"
+            strokeOpacity="0.5"
+            strokeWidth="1.2"
+          />
+
+          {/* Núcleo flotante */}
+          <ellipse
+            cx="250"
+            cy="155"
+            rx="82"
+            ry="40"
+            transform="rotate(-3 250 155)"
+            fill="url(#ringMetal2)"
+            stroke="url(#ringRim)"
+            strokeWidth="2"
+          />
+        </svg>
+      </motion.div>
+    </div>
+  );
 }
 
-// Interpolación por tramos para pasar por una rica escala de grises intermedios
-function sampleStops(stops: [number, [number, number, number]][], lum: number) {
-  const clamped = Math.max(0, Math.min(100, lum));
-  for (let i = 0; i < stops.length - 1; i++) {
-    const [p0, c0] = stops[i];
-    const [p1, c1] = stops[i + 1];
-    if (clamped >= p0 && clamped <= p1) {
-      const t = (clamped - p0) / (p1 - p0 || 1);
-      return [
-        lerp(c0[0], c1[0], t),
-        lerp(c0[1], c1[1], t),
-        lerp(c0[2], c1[2], t),
-      ] as [number, number, number];
-    }
-  }
-  return stops[stops.length - 1][1];
-}
-
-function getToneLabel(lum: number) {
-  if (lum <= 8) return "Negro Puro (Dark)";
-  if (lum <= 30) return "Gris Carbón";
-  if (lum <= 55) return "Gris Pizarra Medio";
-  if (lum <= 80) return "Gris Plata Claro";
-  return "Blanco (Light)";
+// Esfera wireframe luminosa para los ítems numerados 01, 02, 03, 04 (como en 00:02 del video)
+function WireframeSphereIcon({ index }: { index: number }) {
+  return (
+    <div className="relative w-9 h-9 rounded-full flex items-center justify-center shrink-0">
+      <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#5246FF]/30 via-[#9E38F5]/30 to-[#FF5864]/30 blur-sm" />
+      <svg
+        viewBox="0 0 36 36"
+        className="w-8 h-8 relative z-10"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle
+          cx="18"
+          cy="18"
+          r="14"
+          stroke="url(#sphereGrad)"
+          strokeWidth="1.2"
+          strokeDasharray={index % 2 === 0 ? "3 2" : "none"}
+        />
+        <ellipse
+          cx="18"
+          cy="18"
+          rx="14"
+          ry="6"
+          transform={`rotate(${index * 35 + 20} 18 18)`}
+          stroke="url(#sphereGrad)"
+          strokeWidth="1.1"
+        />
+        <ellipse
+          cx="18"
+          cy="18"
+          rx="6"
+          ry="14"
+          transform={`rotate(${index * 25} 18 18)`}
+          stroke="url(#sphereGrad)"
+          strokeWidth="1.1"
+        />
+        <defs>
+          <linearGradient id="sphereGrad" x1="0" y1="0" x2="36" y2="36">
+            <stop offset="0%" stopColor="#635BFF" />
+            <stop offset="50%" stopColor="#C039E5" />
+            <stop offset="100%" stopColor="#FF5864" />
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+  );
 }
 
 export default function DynamoLanding() {
   const [activeStep, setActiveStep] = useState<number>(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
-  // 0 = Negro (Dark) -> 20..80 = Escala de Grises -> 100 = Blanco (Light)
-  const [luminosity, setLuminosity] = useState<number>(0);
-  // Coordenadas del cursor para iluminar y mover la grilla de El Manifiesto
+
+  // Estado para la cuadrícula interactiva en la sección "El Manifiesto"
   const [manifestoMouse, setManifestoMouse] = useState<{
     x: number;
     y: number;
     active: boolean;
-  }>({ x: 0, y: 0, active: false });
+  }>({ x: 500, y: 300, active: false });
 
-  // Física Spring moderna para develar la tarjeta de The Bellacy Studio de un lado al otro
-  const revealRaw = useMotionValue(24);
+  // Física Spring para la tarjeta interactiva "Antes / Después" de The Bellacy Studio
+  const revealRaw = useMotionValue(52);
   const revealSpring = useSpring(revealRaw, {
-    stiffness: 130,
-    damping: 22,
-    mass: 0.55,
+    stiffness: 160,
+    damping: 24,
+    mass: 0.6,
   });
-  // Corte diagonal moderno con inercia (onda oblicua de izquierda a derecha)
+
+  // Corte diagonal moderno con efecto de onda oblicua
   const afterClipPath = useTransform(revealSpring, (v) => {
-    const topEdge = Math.min(105, Math.max(-5, v + 3.5));
-    const bottomEdge = Math.min(105, Math.max(-5, v - 3.5));
+    const topEdge = Math.max(0, Math.min(100, v + 3.5));
+    const bottomEdge = Math.max(0, Math.min(100, v - 3.5));
     return `polygon(0% 0%, ${topEdge}% 0%, ${bottomEdge}% 100%, 0% 100%)`;
   });
-  const beamLeft = useTransform(revealSpring, (v) => `${Math.min(96, Math.max(4, v))}%`);
-  const afterScale = useTransform(revealSpring, [0, 100], [0.985, 1]);
 
-  // Cálculo continuo de la paleta según el nivel de luminosidad (0 - 100)
-  const bgPrimaryRGB = sampleStops(
-    [
-      [0, [5, 5, 5]], // #050505 Negro profundo
-      [25, [28, 28, 32]], // #1c1c20 Gris carbón oscuro
-      [50, [72, 72, 80]], // #484850 Gris neutro medio
-      [75, [175, 175, 184]], // #afafb8 Gris plata
-      [100, [248, 248, 250]], // #f8f8fa Blanco limpio
-    ],
-    luminosity
-  );
+  const beamLeft = useTransform(revealSpring, (v) => `${v}%`);
+  const afterScale = useTransform(revealSpring, [0, 50, 100], [1.02, 1.005, 1]);
 
-  const bgSecondaryRGB = sampleStops(
-    [
-      [0, [8, 8, 11]],
-      [25, [36, 36, 42]],
-      [50, [84, 84, 94]],
-      [75, [190, 190, 198]],
-      [100, [238, 238, 243]],
-    ],
-    luminosity
-  );
+  // Barra de luminosidad: 0 = Oscuro (Negro DigitalPro), 25..75 = Escala de Grises intermedios, 100 = Claro
+  const [luminosity, setLuminosity] = useState<number>(0);
 
-  const bgCardRGB = sampleStops(
-    [
-      [0, [12, 12, 15]],
-      [25, [44, 44, 52]],
-      [50, [56, 56, 64]],
-      [75, [215, 215, 222]],
-      [100, [255, 255, 255]],
-    ],
-    luminosity
-  );
+  const t = luminosity / 100;
+  const lerp = (a: number, b: number) => Math.round(a + (b - a) * t);
+  const rgb = (r1: number, g1: number, b1: number, r2: number, g2: number, b2: number) =>
+    `rgb(${lerp(r1, r2)}, ${lerp(g1, g2)}, ${lerp(b1, b2)})`;
 
-  const bgCardInnerRGB = sampleStops(
-    [
-      [0, [8, 8, 10]],
-      [25, [32, 32, 38]],
-      [50, [44, 44, 52]],
-      [75, [198, 198, 206]],
-      [100, [242, 242, 246]],
-    ],
-    luminosity
-  );
+  // Colores base inspirados en DigitalPro (#030305 -> #08080E) con interpolación continua
+  const bgPrimary = rgb(3, 3, 6, 246, 246, 250);
+  const bgSecondary = rgb(7, 7, 12, 236, 236, 242);
+  const bgCard = rgb(10, 10, 16, 255, 255, 255);
+  const bgCardInner = rgb(6, 6, 10, 240, 240, 246);
+  const textPrimary = rgb(250, 250, 252, 12, 12, 18);
+  const textSecondary = rgb(168, 168, 182, 75, 75, 90);
+  const textMuted = rgb(110, 110, 128, 115, 115, 132);
+  const borderColor =
+    t < 0.5
+      ? `rgba(255, 255, 255, ${(0.08 + t * 0.1).toFixed(2)})`
+      : `rgba(15, 15, 25, ${(0.1 + (t - 0.5) * 0.14).toFixed(2)})`;
+  const navBg =
+    t < 0.5
+      ? `rgba(${lerp(4, 245)}, ${lerp(4, 245)}, ${lerp(8, 250)}, 0.86)`
+      : `rgba(${lerp(4, 245)}, ${lerp(4, 245)}, ${lerp(8, 250)}, 0.92)`;
+  const isLightModeSide = luminosity > 58;
 
-  // El texto invierte suavemente al cruzar el umbral gris medio-claro (~58%) para mantener legibilidad total
-  const isLightModeSide = luminosity >= 58;
-
-  const textPrimary = isLightModeSide
-    ? rgb(
-        ...sampleStops(
-          [
-            [58, [24, 24, 28]],
-            [100, [9, 9, 11]],
-          ],
-          luminosity
-        )
-      )
-    : rgb(
-        ...sampleStops(
-          [
-            [0, [255, 255, 255]],
-            [57, [250, 250, 252]],
-          ],
-          luminosity
-        )
-      );
-
-  const textSecondary = isLightModeSide
-    ? rgb(
-        ...sampleStops(
-          [
-            [58, [52, 52, 60]],
-            [100, [63, 63, 70]],
-          ],
-          luminosity
-        )
-      )
-    : rgb(
-        ...sampleStops(
-          [
-            [0, [161, 161, 170]],
-            [57, [228, 228, 234]],
-          ],
-          luminosity
-        )
-      );
-
-  const textMuted = isLightModeSide
-    ? rgb(
-        ...sampleStops(
-          [
-            [58, [82, 82, 91]],
-            [100, [113, 113, 122]],
-          ],
-          luminosity
-        )
-      )
-    : rgb(
-        ...sampleStops(
-          [
-            [0, [113, 113, 122]],
-            [57, [200, 200, 210]],
-          ],
-          luminosity
-        )
-      );
-
-  const borderColor = isLightModeSide
-    ? `rgba(0, 0, 0, ${(0.1 + ((luminosity - 58) / 42) * 0.06).toFixed(2)})`
-    : `rgba(255, 255, 255, ${(0.08 + (luminosity / 58) * 0.1).toFixed(2)})`;
-
-  const gridLineColor = isLightModeSide
-    ? "rgba(0, 0, 0, 0.07)"
-    : "rgba(255, 255, 255, 0.06)";
-
-  const bgPrimary = rgb(...bgPrimaryRGB);
-  const bgSecondary = rgb(...bgSecondaryRGB);
-  const bgCard = rgb(...bgCardRGB);
-  const bgCardInner = rgb(...bgCardInnerRGB);
-  const navBg = `rgba(${bgPrimaryRGB[0]}, ${bgPrimaryRGB[1]}, ${bgPrimaryRGB[2]}, 0.82)`;
-
-  const themeVars = {
-    "--bg-primary": bgPrimary,
-    "--bg-secondary": bgSecondary,
-    "--bg-card": bgCard,
-    "--bg-card-inner": bgCardInner,
-    "--text-primary": textPrimary,
-    "--text-secondary": textSecondary,
-    "--text-muted": textMuted,
-    "--border-subtle": borderColor,
-  } as CSSProperties;
-
-  // Variantes de animación inspiradas en la referencia
-  const fadeUpBlur: Variants = {
-    hidden: { opacity: 0, y: 28, filter: "blur(8px)" },
-    visible: {
-      opacity: 1,
-      y: 0,
-      filter: "blur(0px)",
-      transition: { duration: 0.75, ease: [0.22, 1, 0.36, 1] },
-    },
-  };
-
-  const staggerContainer: Variants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.12, delayChildren: 0.05 },
-    },
-  };
-
-  const wordRevealContainer: Variants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.04 },
-    },
-  };
-
-  const wordRevealItem: Variants = {
-    hidden: { opacity: 0.2, y: 8, filter: "blur(4px)" },
-    visible: {
-      opacity: 1,
-      y: 0,
-      filter: "blur(0px)",
-      transition: { duration: 0.5, ease: "easeOut" },
-    },
-  };
-
+  // Pilares de Soluciones Corporativas (Ecosistema 1) — con letras gigantes estilo A / B / G del video
   const corporatePillars = [
     {
       code: "01",
-      icon: Code2,
-      tag: "Arquitectura & Conversión",
-      title: "Desarrollo E-commerce y Web de Alto Rendimiento",
+      letter: "A",
+      title: "Desarrollo E-commerce y Web de Alto Impacto",
       description:
-        "No hacemos simples páginas web; construimos activos digitales. Desarrollamos ecosistemas rápidos, estéticos y escalables, ya sea mediante plataformas líderes como Shopify o arquitecturas web a medida. Cada línea de código y cada decisión de diseño tiene un único objetivo: maximizar tu tasa de conversión y ofrecer una experiencia de usuario impecable.",
-      metrics: ["Shopify & Custom Stack", "99.9% Performance", "UX/UI Conversión"],
+        "Creamos tiendas online y sitios corporativos diseñados con un único objetivo: vender. Estructuras rápidas, seguras y optimizadas para la conversión (CRO), listas para escalar tu catálogo o tus servicios sin límites técnicos.",
+      icon: Code2,
+      tag: "CRO & E-COMMERCE",
+      metrics: ["Conversión CRO", "Arquitectura Rápida", "Escala sin Límites"],
     },
     {
       code: "02",
-      icon: Search,
-      tag: "Visibilidad Orgánica & IA",
-      title: "Inteligencia de Búsqueda (SEO, GEO y Google Business)",
+      letter: "B",
+      title: "Posicionamiento Orgánico (SEO, GEO y Google Business)",
       description:
-        "Aseguramos que tu marca sea la primera opción, tanto para el usuario como para la Inteligencia Artificial. Dominamos el posicionamiento local y orgánico. Gestionamos proactivamente tu reputación, respondiendo reseñas estratégicamente y manteniendo tu perfil de Google actualizado para cada temporada y evento comercial clave. Hacemos que quienes te buscan, te elijan.",
-      metrics: ["Posicionamiento GEO/IA", "Google Business Pro", "Gestión de Reseñas"],
+        "Hacemos que tus clientes te encuentren justo cuando están buscando comprar. Optimizamos tu presencia en motores de búsqueda tradicionales (SEO), motores de inteligencia artificial (GEO) y dominamos las búsquedas locales a través de una gestión estratégica de tu perfil de Google Business.",
+      icon: Globe,
+      tag: "SEO · GEO · LOCAL",
+      metrics: ["Motores IA (GEO)", "SEO Tradicional", "Google Business"],
     },
     {
       code: "03",
-      icon: Target,
-      tag: "Tráfico & Escala",
-      title: "Adquisición de Clientes (SEM y Meta Ads)",
+      letter: "G",
+      title: "Tráfico Pagado y Adquisición (SEM & Meta Ads)",
       description:
-        "Convertimos la inversión publicitaria en ingresos predecibles. Diseñamos, auditamos y ejecutamos campañas de alto rendimiento. Utilizamos Google Ads y YouTube para captar clientes con intención de compra directa, y el ecosistema de Meta (Instagram/Facebook) para generar deseo y reconocimiento de marca a gran escala.",
-      metrics: ["Google Ads & YouTube", "Meta Ads Full-Funnel", "ROAS Predecible"],
+        "No compramos clics, compramos rentabilidad. Diseñamos, ejecutamos y optimizamos campañas de publicidad en Google Ads (SEM) y Meta Ads (Instagram/Facebook) enfocadas en el retorno de inversión (ROI) y la captación de leads calificados.",
+      icon: Target,
+      tag: "SEM & META ADS",
+      metrics: ["Enfoque en ROI", "Google Ads (SEM)", "Meta Ads Leads"],
     },
   ];
 
+  // Pilares de Impulso para Profesionales (Ecosistema 2 - Modelo 80/20)
   const professionalPillars = [
     {
       code: "01",
-      icon: Handshake,
-      tag: "Éxito Compartido",
-      title: "Infraestructura Digital a Riesgo Cero (Modelo 80/20)",
+      letter: "E",
+      title: "El Modelo de Éxito Compartido (80/20)",
       description:
-        "Eliminamos la barrera de entrada a la digitalización. No cobramos altos costos de desarrollo web inicial. Nuestro ecosistema funciona bajo un modelo de éxito compartido: construimos toda tu infraestructura y solo retenemos un 20% de comisión por los servicios efectivamente reservados a través de la plataforma. Si tú no ganas, nosotros tampoco.",
+        "Eliminamos la barrera de entrada. No pagas miles de dólares por el desarrollo de tu página web ni por el sistema de gestión. Nosotros invertimos en construir tu plataforma digital a medida y solo retenemos un 20% por cada servicio o reserva concretada a través del sistema. El 80% va directo a tu bolsillo. Si tú no ganas, nosotros tampoco.",
+      icon: Handshake,
+      badge: "80% Para Ti / 20% Éxito",
     },
     {
       code: "02",
-      icon: BotMessageSquare,
-      tag: "Asistente WhatsApp 24/7",
-      title: "Automatización de Reservas con IA",
+      letter: "I",
+      title: "Tu Recepcionista con Inteligencia Artificial en WhatsApp",
       description:
-        "Olvídate de perder clientes por no poder responder el teléfono mientras trabajas. Implementamos tu propia plataforma web de agendamiento, respaldada por un asistente de Inteligencia Artificial integrado en WhatsApp que atiende consultas, perfila clientes y coordina tus citas las 24 horas del día, los 7 días de la semana.",
+        "Olvídate de perder clientes por no responder a tiempo mientras estás trabajando. Integramos un asistente de IA directamente en tu WhatsApp que atiende consultas, perfila al cliente, muestra tu disponibilidad y agenda citas automáticamente las 24 horas del día, los 7 días de la semana.",
+      icon: BotMessageSquare,
+      badge: "WhatsApp IA 24/7",
     },
     {
       code: "03",
-      icon: MapPin,
-      tag: "Google Maps Local",
-      title: "Posicionamiento y Autoridad Local",
+      letter: "M",
+      title: "Autoridad Local en Google Maps",
       description:
-        "Te otorgamos la imagen corporativa de una gran empresa, adaptada a tu oficio. Creamos y posicionamos tu perfil profesional en Google Maps (sin necesidad de exponer tu dirección personal), destacando tus servicios en tu zona de cobertura para generar confianza inmediata y un flujo constante de reservas orgánicas.",
+        "Aunque trabajes a domicilio o en un estudio privado sin atención al público general, necesitas existir en el mapa. Configuramos y posicionamos tu perfil de Google Business como un 'Negocio de Área de Servicio' para que domines las búsquedas en tu zona sin exponer tu dirección personal, conectando el perfil directamente con tu calendario de reservas.",
+      icon: MapPin,
+      badge: "Área de Servicio",
     },
   ];
 
-  const manifestoWords = [
-    "En",
-    "Dynamo",
-    "Solutions",
-    "entendimos",
-    "que",
-    "el",
-    "mercado",
-    "cambió:",
-    "ya",
-    "no",
-    "basta",
-    "con",
-    "tener",
-    "presencia",
-    "en",
-    "internet,",
-    "necesitas",
-    "un",
-    "sistema",
-    "que",
-    "trabaje",
-    "por",
-    "ti.",
-    "Nacimos",
-    "con",
-    "un",
-    "propósito",
-    "claro:",
-    "democratizar",
-    "la",
-    "escalabilidad.",
+  // Ítems numerados de El Manifiesto (con el texto 100% íntegro distribuido al estilo 01, 02, 03, 04 del video)
+  const manifestoItems = [
+    {
+      num: "01",
+      heading: "ARQUITECTOS DE ECOSISTEMAS DIGITALES",
+      body: "No somos una agencia tradicional; somos arquitectos de ecosistemas digitales.",
+    },
+    {
+      num: "02",
+      heading: "DEMOCRATIZAR EL CRECIMIENTO DIGITAL",
+      body: "En Dynamo Solutions nacimos con una premisa clara: la tecnología de alto nivel y las estrategias de captación masiva no deberían ser exclusivas de las grandes corporaciones. Nuestro propósito es democratizar el crecimiento digital, ofreciendo soluciones que eliminan la fricción operativa y multiplican la rentabilidad.",
+    },
+    {
+      num: "03",
+      heading: "INFRAESTRUCTURA EN AUTOMÁTICO",
+      body: "Ya seas una empresa consolidada buscando dominar su sector, o un profesional independiente dando el salto digital, construimos la infraestructura tecnológica y estratégica que necesitas para operar en automático.",
+    },
+    {
+      num: "04",
+      heading: "ENFOQUE EN LO QUE MEJOR SABES HACER",
+      body: "Nosotros diseñamos, posicionamos y aceleramos tu negocio; tú te enfocas en lo que mejor sabes hacer.",
+    },
   ];
 
   return (
     <div
       style={{
-        ...themeVars,
         backgroundColor: bgPrimary,
         color: textPrimary,
       }}
-      className="min-h-screen font-sans selection:bg-[#FF5B22]/30 selection:text-white transition-colors duration-200"
+      className="relative min-h-screen overflow-hidden transition-colors duration-200"
     >
-      {/* NAVEGACIÓN PRINCIPAL 100% RESPONSIVE CON NIVELADOR DE LUMINOSIDAD */}
-      <header className="fixed w-full top-0 z-50">
-        <nav
-          style={{
-            backgroundColor: navBg,
-            borderColor,
-          }}
-          className="backdrop-blur-xl border-b transition-colors duration-200"
-        >
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4">
-            <a href="#" className="flex items-center gap-2 group shrink-0">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#FF6B35] to-[#D93800] flex items-center justify-center shadow-[0_0_15px_rgba(255,91,34,0.4)]">
-                <Zap className="w-4 h-4 text-white fill-white" />
-              </div>
-              <span
-                style={{ color: textPrimary }}
-                className="text-lg sm:text-xl font-semibold tracking-tight"
-              >
-                Dynamo<span className="text-[#FF5B22]">.</span>
-              </span>
-            </a>
+      {/* BARRA SUPERIOR DE PROGRESO CON EL GRADIENTE DIGITALPRO (Exactamente como en el borde superior del video) */}
+      <div className="fixed top-0 inset-x-0 h-[3px] z-[60] bg-digital-gradient opacity-95 pointer-events-none" />
 
-            <div
-              style={{ color: textSecondary }}
-              className="hidden lg:flex items-center gap-7 text-sm"
+      {/* NAVBAR MINIMALISTA ESTILO DIGITALPRO */}
+      <header
+        style={{
+          backgroundColor: navBg,
+          borderColor,
+        }}
+        className="fixed top-[3px] inset-x-0 z-50 border-b backdrop-blur-xl transition-colors duration-200"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4">
+          {/* Izquierda: Botón Hamburguesa estilo DigitalPro + Navegación rápida en Desktop */}
+          <div className="flex items-center gap-5">
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen((prev) => !prev)}
+              style={{
+                borderColor,
+                color: textPrimary,
+              }}
+              aria-label="Abrir menú de navegación"
+              className="w-10 h-10 flex flex-col items-center justify-center gap-1.5 border hover:border-[#9E38F5] transition-colors cursor-pointer"
             >
-              <a href="#manifiesto" className="hover:opacity-75 transition-opacity">
+              {mobileMenuOpen ? (
+                <X className="w-4 h-4" />
+              ) : (
+                <>
+                  <span
+                    style={{ backgroundColor: textPrimary }}
+                    className="w-5 h-[1.5px] block"
+                  />
+                  <span
+                    style={{ backgroundColor: textPrimary }}
+                    className="w-5 h-[1.5px] block"
+                  />
+                </>
+              )}
+            </button>
+
+            <nav
+              style={{ color: textSecondary }}
+              className="hidden xl:flex items-center gap-6 text-xs uppercase tracking-[0.14em] font-medium"
+            >
+              <a
+                href="#manifiesto"
+                className="hover:text-white transition-colors"
+              >
                 Sobre Nosotros
               </a>
-              <a href="#corporativo" className="hover:opacity-75 transition-opacity">
+              <a
+                href="#corporativo"
+                className="hover:text-white transition-colors"
+              >
                 Soluciones Corporativas
               </a>
-              <a href="#profesionales" className="hover:opacity-75 transition-opacity">
-                Impulso Profesionales
+              <a
+                href="#profesionales"
+                className="hover:text-white transition-colors"
+              >
+                Impulso 80/20
               </a>
-              <a href="#caso-estudio" className="hover:opacity-75 transition-opacity">
+              <a
+                href="#caso-estudio"
+                className="hover:text-white transition-colors"
+              >
                 Caso de Estudio
               </a>
-            </div>
-
-            <div className="flex items-center gap-2 sm:gap-3">
-              {/* Barra de Luminosidad integrada en el Header */}
-              <div
-                style={{
-                  backgroundColor: bgCard,
-                  borderColor,
-                }}
-                className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl border shadow-sm"
-                title="Nivelar tonos entre Negro (Dark), Grises intermedios y Blanco (Light)"
-              >
-                <button
-                  type="button"
-                  onClick={() => setLuminosity(0)}
-                  className="opacity-70 hover:opacity-100 transition-opacity cursor-pointer"
-                  aria-label="Modo Oscuro"
-                >
-                  <Moon className="w-3.5 h-3.5 text-[#FF6B35]" />
-                </button>
-                <input
-                  type="range"
-                  min={0}
-                  max={100}
-                  value={luminosity}
-                  onChange={(e) => setLuminosity(Number(e.target.value))}
-                  aria-label="Nivel de luminosidad"
-                  className="w-14 sm:w-24 md:w-28 h-1.5 rounded-lg appearance-none cursor-pointer accent-[#FF5B22]"
-                  style={{
-                    background:
-                      "linear-gradient(to right, #050505 0%, #3f3f46 35%, #71717a 60%, #d4d4d8 82%, #ffffff 100%)",
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={() => setLuminosity(100)}
-                  className="opacity-70 hover:opacity-100 transition-opacity cursor-pointer"
-                  aria-label="Modo Claro"
-                >
-                  <Sun className="w-3.5 h-3.5 text-amber-400" />
-                </button>
-              </div>
-
-              <a
-                href="#agendar"
-                className="hidden sm:inline-flex bg-gradient-to-b from-[#FF6B35] to-[#E84311] text-white px-4 md:px-5 py-2 rounded-lg text-xs md:text-sm font-medium hover:brightness-110 transition-all shadow-[0_0_20px_rgba(255,91,34,0.35)] border border-[#FF8559]/40 items-center gap-1.5 shrink-0"
-              >
-                Agendar Reunión
-                <ChevronRight className="w-4 h-4" />
-              </a>
-
-              {/* Botón de Menú Móvil */}
-              <button
-                type="button"
-                onClick={() => setMobileMenuOpen((prev) => !prev)}
-                style={{
-                  backgroundColor: bgCard,
-                  borderColor,
-                  color: textPrimary,
-                }}
-                aria-label="Abrir menú de navegación"
-                className="lg:hidden p-2 rounded-xl border flex items-center justify-center"
-              >
-                {mobileMenuOpen ? (
-                  <X className="w-5 h-5" />
-                ) : (
-                  <Menu className="w-5 h-5" />
-                )}
-              </button>
-            </div>
+            </nav>
           </div>
 
-          {/* Drawer de Navegación Móvil */}
-          {mobileMenuOpen && (
+          {/* Centro: Logotipo DYNAMO® con tipografía extendida Monument/Archivo */}
+          <a
+            href="#"
+            className="flex items-center gap-1.5 group shrink-0"
+          >
+            <span className="font-display font-extrabold text-lg sm:text-2xl tracking-wider uppercase">
+              DYNAMO
+              <span className="text-digital-gradient">SOLUTIONS</span>
+            </span>
+            <sup className="text-[10px] font-mono text-[#9E38F5] font-bold">
+              ®
+            </sup>
+          </a>
+
+          {/* Derecha: Barra de Luminosidad + CTA con punto luminoso estilo GET STARTED */}
+          <div className="flex items-center gap-2.5 sm:gap-4">
             <div
+              style={{
+                backgroundColor: isLightModeSide
+                  ? "rgba(0,0,0,0.06)"
+                  : "rgba(255,255,255,0.04)",
+                borderColor,
+              }}
+              className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 border"
+              title="Nivelar luminosidad entre oscuro, grises y claro"
+            >
+              <Moon
+                style={{
+                  color: luminosity < 35 ? "#9E38F5" : textMuted,
+                }}
+                className="w-3.5 h-3.5 shrink-0 transition-colors"
+              />
+              <input
+                type="range"
+                min={0}
+                max={100}
+                value={luminosity}
+                onChange={(e) => setLuminosity(Number(e.target.value))}
+                aria-label="Nivel de luminosidad"
+                className="w-12 sm:w-20 h-1.5 rounded-lg appearance-none cursor-pointer accent-[#9E38F5]"
+                style={{
+                  background:
+                    "linear-gradient(to right, #050508 0%, #52525b 50%, #f4f4f5 100%)",
+                }}
+              />
+              <Sun
+                style={{
+                  color: luminosity > 65 ? "#FF5864" : textMuted,
+                }}
+                className="w-3.5 h-3.5 shrink-0 transition-colors"
+              />
+            </div>
+
+            <a
+              href="#agendar"
+              className="hidden sm:inline-flex items-center gap-2.5 px-4 py-2 text-xs font-display font-bold uppercase tracking-wider hover:opacity-90 transition-opacity"
+            >
+              <span className="w-2.5 h-2.5 rounded-full bg-digital-gradient shadow-[0_0_12px_#9E38F5]" />
+              <span>AGENDAR REUNIÓN</span>
+            </a>
+          </div>
+        </div>
+
+        {/* Drawer de Navegación Desplegable */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.25 }}
               style={{
                 backgroundColor: bgCard,
                 borderColor,
               }}
-              className="lg:hidden border-t px-4 pt-4 pb-6 space-y-3 shadow-2xl"
+              className="border-t overflow-hidden"
             >
-              <div className="flex flex-col space-y-2 text-sm">
-                {[
-                  { label: "Sobre Nosotros · El Manifiesto", href: "#manifiesto" },
-                  { label: "Soluciones Corporativas", href: "#corporativo" },
-                  { label: "Impulso para Profesionales (80/20)", href: "#profesionales" },
-                  { label: "Caso de Estudio: The Bellacy Studio", href: "#caso-estudio" },
-                ].map((item, idx) => (
-                  <a
-                    key={idx}
-                    href={item.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    style={{
-                      color: textPrimary,
-                      backgroundColor: bgCardInner,
-                      borderColor,
-                    }}
-                    className="px-4 py-3 rounded-xl border font-medium flex items-center justify-between"
-                  >
-                    <span>{item.label}</span>
-                    <ChevronRight className="w-4 h-4 text-[#FF6B35]" />
-                  </a>
-                ))}
+              <div className="max-w-7xl mx-auto px-4 py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-8">
+                  {[
+                    { label: "01. Sobre Nosotros · El Manifiesto", href: "#manifiesto" },
+                    { label: "02. Soluciones Corporativas", href: "#corporativo" },
+                    { label: "03. Impulso Profesionales (80/20)", href: "#profesionales" },
+                    { label: "04. Caso The Bellacy Studio", href: "#caso-estudio" },
+                  ].map((item) => (
+                    <a
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      style={{ color: textPrimary }}
+                      className="text-xs sm:text-sm font-display uppercase tracking-wider py-2 hover:text-[#B832F5] transition-colors"
+                    >
+                      {item.label}
+                    </a>
+                  ))}
+                </div>
+                <a
+                  href="#agendar"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="btn-digital-outline px-5 py-3 text-xs font-display font-bold uppercase tracking-wider inline-flex items-center justify-center gap-2.5 text-white"
+                >
+                  <span className="w-2.5 h-2.5 rounded-full bg-digital-gradient shadow-[0_0_10px_#9E38F5]" />
+                  <span>AGENDAR REUNIÓN</span>
+                </a>
               </div>
-              <a
-                href="#agendar"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full bg-gradient-to-b from-[#FF6B35] to-[#E84311] text-white py-3.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,91,34,0.35)] border border-[#FF8559]/40"
-              >
-                Agendar Reunión <ArrowRight className="w-4 h-4" />
-              </a>
-            </div>
+            </motion.div>
           )}
-        </nav>
+        </AnimatePresence>
       </header>
 
-      {/* HERO SECTION CON VIDEO FIJO EN EL BANNER SUPERIOR (50% TRANSPARENCIA) */}
-      <section className="relative overflow-hidden min-h-[82vh] sm:min-h-[85vh] flex items-center pt-28 pb-20 sm:pt-36 sm:pb-24 md:pt-44 md:pb-32 px-4 sm:px-6 text-white">
-        {/* Video de fondo exclusivo del Hero */}
-        <video
-          src="https://res.cloudinary.com/ahsxrxpv/video/upload/v1792510146/6930814-uhd_3840_2160_25fps.mp4"
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-        />
-
-        {/* Capa con 50% de transparencia solicitada */}
-        <div className="absolute inset-0 bg-black/50 pointer-events-none" />
-
-        {/* Fundido inferior dinámico hacia el tono actual de la página */}
-        <div
-          style={{
-            background: `linear-gradient(to top, ${bgPrimary} 0%, transparent 100%)`,
-          }}
-          className="absolute inset-x-0 bottom-0 h-32 sm:h-40 pointer-events-none transition-colors duration-200"
-        />
-
-        <div className="relative z-10 max-w-7xl mx-auto w-full">
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={staggerContainer}
-            className="max-w-3xl"
+      {/* =====================================================================
+          1. HERO SECTION (Video de Fondo Original + Onda Topográfica + Estética DigitalPro)
+         ===================================================================== */}
+      <section className="relative min-h-screen pt-28 sm:pt-36 pb-14 sm:pb-20 px-4 sm:px-6 flex flex-col justify-between overflow-hidden">
+        {/* Video de Fondo en el Banner Principal con 50% de transparencia */}
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover"
           >
-            <motion.div variants={fadeUpBlur} className="mb-5 sm:mb-6">
-              <span className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-full text-[11px] sm:text-xs font-medium bg-[#1A110D]/90 border border-[#FF5B22]/40 text-[#FF8B60] shadow-[0_0_25px_rgba(255,91,34,0.25)] backdrop-blur-md">
-                <Sparkles className="w-3.5 h-3.5 text-[#FF6B35] shrink-0" />
-                Arquitectos de Ecosistemas Digitales
-              </span>
-            </motion.div>
+            <source
+              src="https://res.cloudinary.com/ahsxrxpv/video/upload/v1792510146/6930814-uhd_3840_2160_25fps.mp4"
+              type="video/mp4"
+            />
+          </video>
+          {/* Capa de 50% de transparencia solicitada */}
+          <div className="absolute inset-0 bg-black/50" />
+          {/* Escultura de ondas topográficas estilo DigitalPro sobre el video */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-70 mix-blend-screen">
+            <TopographicWaveSVG className="w-full h-full max-w-6xl animate-float-slow" />
+          </div>
+          {/* Degradado inferior suave hacia el color principal */}
+          <div
+            style={{
+              background: `linear-gradient(to top, ${bgPrimary} 4%, transparent 55%, rgba(0,0,0,0.45) 100%)`,
+            }}
+            className="absolute inset-0"
+          />
+        </div>
 
-            <motion.h1
-              variants={fadeUpBlur}
-              className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.12] sm:leading-tight mb-5 sm:mb-6 text-white"
-            >
-              Automatización y escalabilidad{" "}
-              <span className="text-zinc-300">para negocios modernos.</span>
-            </motion.h1>
-
-            <motion.p
-              variants={fadeUpBlur}
-              className="text-sm sm:text-base md:text-lg text-zinc-200 mb-8 sm:mb-9 max-w-xl font-light leading-relaxed"
-            >
-              Diseñamos ecosistemas digitales, optimizamos tu posicionamiento y
-              construimos soluciones tecnológicas que convierten visitantes en
-              clientes recurrentes.
-            </motion.p>
-
-            <motion.div
-              variants={fadeUpBlur}
-              className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4"
-            >
-              <motion.a
-                href="#manifiesto"
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.98 }}
-                className="bg-gradient-to-b from-[#FF6B35] to-[#E54310] text-white px-6 sm:px-7 py-3.5 rounded-xl text-sm md:text-base font-medium inline-flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(255,91,34,0.45)] border border-[#FF8A61]/40 hover:brightness-110 transition-all text-center"
-              >
-                Inicia tu transformación <ArrowRight className="w-4 h-4" />
-              </motion.a>
-              <motion.a
-                href="#agendar"
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.98 }}
-                className="bg-white/[0.1] hover:bg-white/[0.16] text-white border border-white/[0.2] backdrop-blur-md px-6 sm:px-7 py-3.5 rounded-xl text-sm md:text-base font-medium transition-all text-center"
-              >
-                Agendar Reunión
-              </motion.a>
-            </motion.div>
+        {/* Espaciador superior para centrar el titular monumental como en 00:00 */}
+        <div className="relative z-10 max-w-7xl mx-auto w-full pt-4 sm:pt-8 flex justify-center">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="inline-flex items-center gap-2.5 px-4 py-1.5 border border-white/15 bg-black/50 backdrop-blur-md text-[10px] sm:text-xs font-mono uppercase tracking-[0.22em] text-zinc-300"
+          >
+            <span className="w-2 h-2 rounded-full bg-digital-gradient animate-pulse" />
+            <span>DYNAMO SOLUTIONS · ARQUITECTURA & ESCALA DIGITAL</span>
           </motion.div>
         </div>
+
+        {/* TITULAR CENTRAL MONUMENTAL (Tipografía Extendida + Gradiente Indigo-Violeta-Coral + Cursor "|") */}
+        <div className="relative z-10 max-w-7xl mx-auto w-full my-auto py-12 sm:py-16 text-center">
+          <motion.h1
+            initial="hidden"
+            animate="visible"
+            variants={fadeUpBlur}
+            className="font-display font-extrabold uppercase text-3xl sm:text-5xl md:text-6xl lg:text-[4.5rem] leading-[1.04] tracking-tight text-white drop-shadow-[0_10px_40px_rgba(0,0,0,0.85)]"
+          >
+            <span className="block mb-2 sm:mb-3">
+              TU NEGOCIO EN PILOTO AUTOMÁTICO.
+            </span>
+            <span className="text-digital-gradient inline-flex items-center justify-center flex-wrap">
+              TU CRECIMIENTO, SIN LÍMITES.
+              <span className="inline-block w-[4px] sm:w-[6px] h-[0.85em] bg-white ml-2 sm:ml-3 animate-cursor-blink align-middle shadow-[0_0_15px_#ffffff]" />
+            </span>
+          </motion.h1>
+        </div>
+
+        {/* BARRA INFERIOR DEL HERO EN 3 COLUMNAS (Exactamente como en el segundo 00:00 del video DigitalPro) */}
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={staggerContainer}
+          className="relative z-10 max-w-7xl mx-auto w-full pt-8 border-t border-white/15 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center"
+        >
+          {/* Columna 1: Métrica en Gradiente (como el "45 active clients" en la esquina inferior izquierda del video) */}
+          <motion.div
+            variants={fadeUpBlur}
+            className="lg:col-span-3 flex items-center gap-4"
+          >
+            <span className="font-display font-extrabold text-4xl sm:text-5xl text-digital-gradient leading-none">
+              +330%
+            </span>
+            <span className="text-xs text-zinc-300 font-light leading-snug max-w-[160px]">
+              escalabilidad y retorno medible en ecosistemas activos
+            </span>
+          </motion.div>
+
+          {/* Columna 2: Subtítulo íntegro en el centro */}
+          <motion.p
+            variants={fadeUpBlur}
+            className="lg:col-span-5 text-sm sm:text-base text-zinc-200 font-light leading-relaxed text-left lg:text-center"
+          >
+            Diseñamos ecosistemas digitales, optimizamos tu posicionamiento y
+            construimos soluciones tecnológicas que convierten visitantes en
+            clientes recurrentes.
+          </motion.p>
+
+          {/* Columna 3: Botones de Acción (Botón Rectangular con Borde Gradiente + Punto Violeta) */}
+          <motion.div
+            variants={fadeUpBlur}
+            className="lg:col-span-4 flex flex-col sm:flex-row items-stretch sm:items-center lg:justify-end gap-3"
+          >
+            <a
+              href="#agendar"
+              className="btn-digital-outline px-6 py-4 text-xs sm:text-sm font-display font-bold uppercase tracking-wider text-white inline-flex items-center justify-center gap-2.5 cursor-pointer"
+            >
+              <span className="w-2.5 h-2.5 rounded-full bg-digital-gradient shadow-[0_0_12px_#9E38F5]" />
+              <span>AGENDAR AUDITORÍA GRATUITA</span>
+            </a>
+            <a
+              href="#corporativo"
+              className="px-5 py-4 text-xs font-display uppercase tracking-wider text-zinc-300 hover:text-white border border-white/15 hover:border-white/35 bg-black/40 backdrop-blur-md inline-flex items-center justify-center gap-1.5 transition-all"
+            >
+              <span>ECOSISTEMAS</span>
+              <ArrowUpRight className="w-4 h-4" />
+            </a>
+          </motion.div>
+        </motion.div>
       </section>
 
-      {/* EL MANIFIESTO (SOBRE NOSOTROS) — Con grilla interactiva naranja en mouse y táctil */}
+      {/* =====================================================================
+          2. SECCIÓN SOBRE NOSOTROS: EL MANIFIESTO (Layout 00:02-00:03 del video + Cuadrícula Interactiva)
+         ===================================================================== */}
       <section
         id="manifiesto"
         onMouseMove={(e) => {
@@ -624,1107 +751,845 @@ export default function DynamoLanding() {
         onMouseLeave={() =>
           setManifestoMouse((prev) => ({ ...prev, active: false }))
         }
-        style={{ borderColor, backgroundColor: bgPrimary }}
-        className="relative py-20 sm:py-28 md:py-36 px-4 sm:px-6 border-t overflow-hidden scroll-mt-16 transition-colors duration-200"
+        style={{ borderColor }}
+        className="relative py-24 sm:py-32 px-4 sm:px-6 border-t overflow-hidden scroll-mt-20"
       >
-        {/* Capa 1: Fondo de cuadrícula base con ligero desplazamiento parallax */}
-        <div
-          className="absolute inset-0 pointer-events-none opacity-45 transition-transform duration-300 ease-out"
-          style={{
-            backgroundImage: `linear-gradient(to right, ${gridLineColor} 1px, transparent 1px), linear-gradient(to bottom, ${gridLineColor} 1px, transparent 1px)`,
-            backgroundSize: "72px 72px",
-            transform: manifestoMouse.active
-              ? `translate3d(${((manifestoMouse.x % 72) - 36) * 0.12}px, ${((manifestoMouse.y % 72) - 36) * 0.12}px, 0)`
-              : "translate3d(0, 0, 0)",
-            maskImage:
-              "radial-gradient(ellipse 75% 70% at 50% 50%, #000 35%, transparent 100%)",
-            WebkitMaskImage:
-              "radial-gradient(ellipse 75% 70% at 50% 50%, #000 35%, transparent 100%)",
-          }}
-        />
+        {/* CUADRÍCULA DE LÍNEAS INTERACTIVAS (Iluminada con el gradiente Indigo/Violeta/Coral al pasar el cursor) */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div
+            style={{
+              backgroundImage: `linear-gradient(to right, ${borderColor} 1px, transparent 1px), linear-gradient(to bottom, ${borderColor} 1px, transparent 1px)`,
+              backgroundSize: "56px 56px",
+              transform: manifestoMouse.active
+                ? `translate3d(${(manifestoMouse.x - 600) * -0.012}px, ${(manifestoMouse.y - 300) * -0.012}px, 0)`
+                : "translate3d(0px, 0px, 0)",
+            }}
+            className="absolute inset-0 opacity-45 transition-transform duration-300 ease-out"
+          />
 
-        {/* Capa 2: Líneas de cuadrícula que se iluminan en Naranja (#FF5B22) y se mueven siguiendo el cursor */}
-        <div
-          className="absolute inset-0 pointer-events-none transition-opacity duration-300"
-          style={{
-            opacity: manifestoMouse.active ? 1 : 0,
-            backgroundImage:
-              "linear-gradient(to right, rgba(255, 91, 34, 0.85) 1.5px, transparent 1.5px), linear-gradient(to bottom, rgba(255, 91, 34, 0.85) 1.5px, transparent 1.5px)",
-            backgroundSize: "72px 72px",
-            transform: manifestoMouse.active
-              ? `translate3d(${((manifestoMouse.x % 72) - 36) * 0.22}px, ${((manifestoMouse.y % 72) - 36) * 0.22}px, 0)`
-              : "translate3d(0, 0, 0)",
-            maskImage: `radial-gradient(280px circle at ${manifestoMouse.x}px ${manifestoMouse.y}px, #000 0%, rgba(0,0,0,0.4) 55%, transparent 100%)`,
-            WebkitMaskImage: `radial-gradient(280px circle at ${manifestoMouse.x}px ${manifestoMouse.y}px, #000 0%, rgba(0,0,0,0.4) 55%, transparent 100%)`,
-            filter: "drop-shadow(0 0 8px rgba(255, 91, 34, 0.65))",
-          }}
-        />
+          <div
+            style={{
+              backgroundImage:
+                "linear-gradient(to right, #9E38F5 1.5px, transparent 1.5px), linear-gradient(to bottom, #FF5864 1.5px, transparent 1.5px)",
+              backgroundSize: "56px 56px",
+              transform: manifestoMouse.active
+                ? `translate3d(${(manifestoMouse.x - 600) * 0.024}px, ${(manifestoMouse.y - 300) * 0.024}px, 0)`
+                : "translate3d(0px, 0px, 0)",
+              WebkitMaskImage: `radial-gradient(360px circle at ${manifestoMouse.x}px ${manifestoMouse.y}px, rgba(0,0,0,1) 0%, rgba(0,0,0,0.45) 55%, transparent 100%)`,
+              maskImage: `radial-gradient(360px circle at ${manifestoMouse.x}px ${manifestoMouse.y}px, rgba(0,0,0,1) 0%, rgba(0,0,0,0.45) 55%, transparent 100%)`,
+              opacity: manifestoMouse.active ? 1 : 0,
+            }}
+            className="absolute inset-0 transition-opacity duration-300 ease-out drop-shadow-[0_0_12px_rgba(158,56,245,0.85)]"
+          />
+        </div>
 
-        {/* Capa 3: Celda activa y halo cálido naranja bajo el cursor */}
-        {manifestoMouse.active && (
-          <>
-            <div
-              className="absolute pointer-events-none transition-all duration-150 ease-out rounded-sm"
-              style={{
-                width: 72,
-                height: 72,
-                left: Math.floor(manifestoMouse.x / 72) * 72,
-                top: Math.floor(manifestoMouse.y / 72) * 72,
-                backgroundColor: "rgba(255, 91, 34, 0.14)",
-                border: "1px solid rgba(255, 107, 53, 0.6)",
-                boxShadow: "0 0 25px rgba(255, 91, 34, 0.35)",
-              }}
-            />
-            <div
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                background: `radial-gradient(340px circle at ${manifestoMouse.x}px ${manifestoMouse.y}px, rgba(255, 91, 34, 0.13), transparent 75%)`,
-              }}
-            />
-          </>
-        )}
+        <div className="relative z-10 max-w-7xl mx-auto">
+          {/* Encabezado de Sección al estilo "WHY CHOOSE DIGITAL PRO" (00:02) */}
+          <div className="grid lg:grid-cols-12 gap-12 items-start">
+            {/* Columna Izquierda: Título Monumental + Lista Numerada 01, 02, 03, 04 con íconos de esfera wireframe */}
+            <div className="lg:col-span-7">
+              <motion.div
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-80px" }}
+                variants={fadeUpBlur}
+                className="mb-12 sm:mb-16"
+              >
+                <div
+                  style={{ color: textMuted }}
+                  className="text-xs font-mono uppercase tracking-[0.25em] mb-3"
+                >
+                  SOBRE NOSOTROS · EL MANIFIESTO
+                </div>
+                <h2 className="font-display font-extrabold uppercase text-3xl sm:text-5xl md:text-6xl leading-[1.02] tracking-tight">
+                  <span className="block">DYNAMO</span>
+                  <span className="text-digital-gradient inline-flex items-center">
+                    SOLUTIONS
+                    <span className="inline-block w-[4px] sm:w-[5px] h-[0.82em] bg-white ml-2 animate-cursor-blink" />
+                  </span>
+                </h2>
+              </motion.div>
 
-        <div className="relative z-10 max-w-5xl mx-auto text-center">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-80px" }}
-            variants={fadeUpBlur}
-            className="mb-8"
-          >
-            <span
-              style={{
-                borderColor,
-                backgroundColor: bgCard,
-                color: textSecondary,
-              }}
-              className="inline-block font-mono text-[11px] uppercase tracking-[0.2em] border px-3.5 py-1.5 rounded-md"
-            >
-              SOBRE NOSOTROS · EL MANIFIESTO
-            </span>
-          </motion.div>
-
-          <motion.h2
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-80px" }}
-            variants={fadeUpBlur}
-            className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight mb-8 sm:mb-10 max-w-4xl mx-auto"
-          >
-            No somos una agencia tradicional;{" "}
-            <span
-              style={{ backgroundColor: bgCard, borderColor }}
-              className="inline-flex items-center justify-center align-middle mx-1 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl border shadow-inner"
-            >
-              <Layers className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-[#FF6B35]" />
-            </span>{" "}
-            somos arquitectos de{" "}
-            <span style={{ color: textSecondary }}>ecosistemas digitales</span>{" "}
-            <span
-              style={{ backgroundColor: bgCard, borderColor }}
-              className="inline-flex items-center justify-center align-middle mx-1 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl border shadow-inner"
-            >
-              <Zap
-                style={{ color: textPrimary }}
-                className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6"
-              />
-            </span>
-            .
-          </motion.h2>
-
-          {/* Texto del Manifiesto con efecto de iluminación progresiva de palabras */}
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-60px" }}
-            variants={wordRevealContainer}
-            className="max-w-4xl mx-auto mb-8"
-          >
-            <p className="text-base sm:text-xl md:text-2xl font-light leading-relaxed flex flex-wrap justify-center gap-x-1.5 sm:gap-x-2 gap-y-1">
-              {manifestoWords.map((word, idx) => {
-                const isHighlight =
-                  word === "Dynamo" ||
-                  word === "Solutions" ||
-                  word === "democratizar" ||
-                  word === "escalabilidad.";
-                return (
-                  <motion.span
-                    key={idx}
-                    variants={wordRevealItem}
-                    style={{
-                      color: isHighlight ? textPrimary : textSecondary,
-                    }}
-                    className={isHighlight ? "font-medium" : ""}
+              {/* Bloques 01, 02, 03, 04 con el texto completo del Manifiesto */}
+              <motion.div
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-60px" }}
+                variants={staggerContainer}
+                className="space-y-8 sm:space-y-10"
+              >
+                {manifestoItems.map((item, idx) => (
+                  <motion.div
+                    key={item.num}
+                    variants={fadeUpBlur}
+                    style={{ borderColor }}
+                    className="pb-8 sm:pb-10 border-b last:border-b-0 grid grid-cols-12 gap-4 sm:gap-6 items-start group"
                   >
-                    {word}
-                  </motion.span>
-                );
-              })}
-            </p>
-          </motion.div>
+                    {/* Columna de icono wireframe + número 01/02/03/04 igual al video */}
+                    <div className="col-span-2 sm:col-span-2 flex flex-col items-start gap-3 pt-1">
+                      <WireframeSphereIcon index={idx} />
+                      <span
+                        style={{ color: textMuted }}
+                        className="font-mono text-xs tracking-widest group-hover:text-[#B832F5] transition-colors"
+                      >
+                        {item.num}
+                      </span>
+                    </div>
 
-          <motion.p
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-60px" }}
-            variants={fadeUpBlur}
-            style={{ color: textSecondary }}
-            className="text-sm sm:text-base md:text-lg font-light leading-relaxed max-w-3xl mx-auto mb-10 sm:mb-12"
-          >
-            Ya seas una empresa consolidada buscando dominar su sector, o un
-            profesional independiente dando el salto digital, construimos la
-            infraestructura tecnológica y estratégica que necesitas para operar
-            en automático. Nosotros diseñamos, posicionamos y aceleramos tu
-            negocio; tú te enfocas en lo que mejor sabes hacer.
-          </motion.p>
-
-          {/* Píldoras de especialidades interactivas */}
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={staggerContainer}
-            style={{ borderColor }}
-            className="pt-6 border-t max-w-3xl mx-auto"
-          >
-            <div style={{ color: textMuted }} className="text-xs mb-4">
-              Ecosistemas especializados para cada etapa de crecimiento
+                    {/* Columna de contenido */}
+                    <div className="col-span-10 sm:col-span-10">
+                      <h3 className="font-display font-bold uppercase text-base sm:text-lg md:text-xl tracking-wide mb-3 group-hover:text-[#E24497] transition-colors">
+                        {item.heading}
+                      </h3>
+                      <p
+                        style={{ color: textSecondary }}
+                        className="text-sm sm:text-base font-light leading-relaxed"
+                      >
+                        {item.body}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
+              </motion.div>
             </div>
-            <div className="flex flex-wrap justify-center gap-2 sm:gap-2.5">
-              {[
-                { label: "Desarrollo E-commerce & Web", href: "#corporativo" },
-                { label: "SEO, GEO & Google Business", href: "#corporativo" },
-                { label: "SEM & Meta Ads", href: "#corporativo" },
-                { label: "Modelo 80/20 Riesgo Cero", href: "#profesionales" },
-                { label: "Reservas IA en WhatsApp", href: "#profesionales" },
-                { label: "Autoridad Local Google Maps", href: "#profesionales" },
-                { label: "Caso The Bellacy Studio", href: "#caso-estudio" },
-              ].map((chip, i) => (
-                <motion.a
-                  key={i}
-                  href={chip.href}
-                  variants={fadeUpBlur}
-                  whileHover={{ y: -2 }}
-                  style={{
-                    backgroundColor: bgCard,
-                    borderColor,
-                    color: textSecondary,
-                  }}
-                  className="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-lg border hover:border-[#FF5B22]/60 text-[11px] sm:text-xs transition-all"
-                >
-                  <span>{chip.label}</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 opacity-60 shrink-0" />
-                </motion.a>
-              ))}
-            </div>
-          </motion.div>
-        </div>
-      </section>
 
-      {/* RESUMEN EJECUTIVO DE LOS DOS ECOSISTEMAS */}
-      <section
-        style={{ backgroundColor: bgSecondary, borderColor }}
-        className="py-16 sm:py-24 px-4 sm:px-6 border-t transition-colors duration-200"
-      >
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-80px" }}
-            variants={fadeUpBlur}
-            className="text-center max-w-3xl mx-auto mb-12 sm:mb-16"
-          >
-            <span
-              style={{
-                borderColor,
-                backgroundColor: bgCard,
-                color: textSecondary,
-              }}
-              className="inline-block font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.2em] border px-3 sm:px-3.5 py-1.5 rounded-md mb-5"
-            >
-              DOS MODELOS DE ESCALABILIDAD
-            </span>
-            <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight">
-              Un Ecosistema.{" "}
-              <span style={{ color: textSecondary }}>
-                Dos Caminos de Crecimiento.
-              </span>
-            </h2>
-          </motion.div>
+            {/* Columna Derecha: Escultura 3D de Anillos Iridiscentes (00:02-00:03) + Resumen de los 2 Caminos */}
+            <div className="lg:col-span-5 lg:sticky lg:top-28 flex flex-col items-center">
+              <IridescentRingsSculpture />
 
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-80px" }}
-            variants={staggerContainer}
-            className="grid md:grid-cols-2 gap-6"
-          >
-            {/* Tarjeta Resumen Ecosistema 1 */}
-            <motion.a
-              href="#corporativo"
-              variants={fadeUpBlur}
-              whileHover={{ y: -4 }}
-              style={{ backgroundColor: bgCard, borderColor }}
-              className="group relative rounded-3xl border p-5 sm:p-8 md:p-10 overflow-hidden transition-all flex flex-col justify-between"
-            >
-              <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-[#FF5B22]/10 blur-3xl pointer-events-none group-hover:bg-[#FF5B22]/20 transition-all" />
-
+              {/* Tarjeta arquitectónica de conexión rápida a los 2 ecosistemas */}
               <div
-                style={{ backgroundColor: bgCardInner, borderColor }}
-                className="relative h-40 sm:h-36 pt-6 sm:pt-0 mb-6 sm:mb-8 rounded-2xl border p-4 sm:p-5 flex items-center justify-center gap-3 sm:gap-4 overflow-hidden"
+                style={{ backgroundColor: bgCard, borderColor }}
+                className="w-full border p-6 sm:p-7 mt-4 relative overflow-hidden"
               >
-                <div
-                  style={{ backgroundColor: bgCard, borderColor }}
-                  className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl border flex items-center justify-center shrink-0"
-                >
-                  <Code2
-                    style={{ color: textSecondary }}
-                    className="w-5 h-5"
-                  />
+                <div className="absolute top-0 inset-x-0 h-[2px] bg-digital-gradient" />
+                <div className="text-[11px] font-mono uppercase tracking-[0.2em] text-[#B832F5] mb-2">
+                  ARQUITECTURA DUAL
                 </div>
-                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-[#FF6B35] to-[#D43800] border border-[#FF946B]/50 flex items-center justify-center shadow-[0_0_30px_rgba(255,91,34,0.45)] group-hover:scale-110 transition-transform duration-500 shrink-0">
-                  <Globe className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
-                </div>
-                <div
-                  style={{ backgroundColor: bgCard, borderColor }}
-                  className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl border flex items-center justify-center shrink-0"
-                >
-                  <Target
-                    style={{ color: textSecondary }}
-                    className="w-5 h-5"
-                  />
-                </div>
-                <span
-                  style={{
-                    backgroundColor: bgCard,
-                    borderColor,
-                    color: textMuted,
-                  }}
-                  className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 text-[9px] sm:text-[10px] font-mono uppercase tracking-widest border px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md"
-                >
-                  ECOSISTEMA 01
-                </span>
-              </div>
-
-              <div>
-                <h3 className="text-xl sm:text-2xl md:text-3xl font-semibold mb-3 tracking-tight">
-                  Soluciones Corporativas
+                <h3 className="font-display font-bold uppercase text-lg sm:text-xl mb-3">
+                  UN ECOSISTEMA. DOS CAMINOS DE CRECIMIENTO.
                 </h3>
                 <p
                   style={{ color: textSecondary }}
-                  className="mb-6 leading-relaxed text-sm md:text-base font-light"
+                  className="text-xs sm:text-sm font-light leading-relaxed mb-5"
                 >
-                  Desarrollo web a medida, campañas de publicidad (SEM/Meta) y
-                  optimización SEO avanzada. Construimos la infraestructura
-                  digital que tu empresa necesita para dominar el mercado.
+                  Selecciona la vertical diseñada para la etapa actual de tu
+                  negocio o actividad profesional:
                 </p>
-                <ul
-                  style={{ color: textSecondary }}
-                  className="space-y-3 text-sm"
-                >
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-[#FF6B35] shrink-0" />
-                    <span>Desarrollo E-commerce & Web</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-[#FF6B35] shrink-0" />
-                    <span>Pauta Digital y Analítica</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-[#FF6B35] shrink-0" />
-                    <span>Optimización GEO & SEO</span>
-                  </li>
-                </ul>
-              </div>
-            </motion.a>
-
-            {/* Tarjeta Resumen Ecosistema 2 */}
-            <motion.a
-              href="#profesionales"
-              variants={fadeUpBlur}
-              whileHover={{ y: -4 }}
-              style={{ backgroundColor: bgCard, borderColor }}
-              className="group relative rounded-3xl border p-5 sm:p-8 md:p-10 overflow-hidden transition-all flex flex-col justify-between"
-            >
-              <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-amber-500/10 blur-3xl pointer-events-none group-hover:bg-[#FF5B22]/20 transition-all" />
-
-              <div
-                style={{ backgroundColor: bgCardInner, borderColor }}
-                className="relative h-40 sm:h-36 pt-6 sm:pt-0 mb-6 sm:mb-8 rounded-2xl border p-4 sm:p-5 flex items-center justify-center gap-3 sm:gap-4 overflow-hidden"
-              >
-                <div
-                  style={{ backgroundColor: bgCard, borderColor }}
-                  className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl border flex items-center justify-center shrink-0"
-                >
-                  <Handshake
-                    style={{ color: textSecondary }}
-                    className="w-5 h-5"
-                  />
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <a
+                    href="#corporativo"
+                    style={{ borderColor, backgroundColor: bgCardInner }}
+                    className="p-3.5 border hover:border-[#8B3DFF] transition-all group flex flex-col justify-between"
+                  >
+                    <span className="font-mono text-[10px] text-[#8B3DFF] mb-1">
+                      01 // EMPRESAS & PYMES
+                    </span>
+                    <span className="font-display font-bold uppercase text-xs flex items-center justify-between">
+                      <span>CORPORATIVO</span>
+                      <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    </span>
+                  </a>
+                  <a
+                    href="#profesionales"
+                    style={{ borderColor, backgroundColor: bgCardInner }}
+                    className="p-3.5 border hover:border-[#FF5864] transition-all group flex flex-col justify-between"
+                  >
+                    <span className="font-mono text-[10px] text-[#FF5864] mb-1">
+                      02 // MODELO 80/20
+                    </span>
+                    <span className="font-display font-bold uppercase text-xs flex items-center justify-between">
+                      <span>PROFESIONALES</span>
+                      <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    </span>
+                  </a>
                 </div>
-                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-[#FF6B35] to-[#D43800] border border-[#FF946B]/50 flex items-center justify-center shadow-[0_0_30px_rgba(255,91,34,0.45)] group-hover:scale-110 transition-transform duration-500 shrink-0">
-                  <Zap className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
-                </div>
-                <div
-                  style={{ backgroundColor: bgCard, borderColor }}
-                  className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl border flex items-center justify-center shrink-0"
-                >
-                  <BotMessageSquare
-                    style={{ color: textSecondary }}
-                    className="w-5 h-5"
-                  />
-                </div>
-                <span className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 text-[9px] sm:text-[10px] font-mono uppercase tracking-widest text-[#FF6B35] bg-[#FF5B22]/15 border border-[#FF5B22]/30 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md">
-                  MODELO 80/20
-                </span>
               </div>
-
-              <div>
-                <h3 className="text-xl sm:text-2xl md:text-3xl font-semibold mb-3 tracking-tight">
-                  Impulso para Profesionales
-                </h3>
-                <p
-                  style={{ color: textSecondary }}
-                  className="mb-6 leading-relaxed text-sm md:text-base font-light"
-                >
-                  Digitalizamos tu oficio sin costos iniciales de desarrollo.
-                  Creamos tu plataforma de reservas, gestionamos tu presencia y
-                  crecemos contigo bajo un modelo a comisión (80/20).
-                </p>
-                <ul
-                  style={{ color: textSecondary }}
-                  className="space-y-3 text-sm"
-                >
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-[#FF6B35] shrink-0" />
-                    <span>Sin inversión inicial en web</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-[#FF6B35] shrink-0" />
-                    <span>Sistema de reservas automatizado</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-[#FF6B35] shrink-0" />
-                    <span>Gestión de Google Business</span>
-                  </li>
-                </ul>
-              </div>
-            </motion.a>
-          </motion.div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* ECOSISTEMA 1 DETALLE: SOLUCIONES CORPORATIVAS */}
+      {/* =====================================================================
+          3. ECOSISTEMA 1: SOLUCIONES CORPORATIVAS (Tarjetas Verticales A / B / G del segundo 00:04 del video)
+         ===================================================================== */}
       <section
         id="corporativo"
-        style={{ backgroundColor: bgPrimary, borderColor }}
-        className="py-20 sm:py-28 md:py-36 px-4 sm:px-6 border-t scroll-mt-20 transition-colors duration-200"
+        style={{ backgroundColor: bgSecondary, borderColor }}
+        className="py-24 sm:py-32 px-4 sm:px-6 border-t scroll-mt-20 transition-colors duration-200"
       >
         <div className="max-w-7xl mx-auto">
+          {/* Cabecera monumental estilo "SERVICES" (00:04) */}
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-80px" }}
             variants={fadeUpBlur}
-            className="flex flex-col md:flex-row md:items-end justify-between mb-12 sm:mb-16 gap-5 sm:gap-6"
+            className="flex flex-col lg:flex-row lg:items-end justify-between mb-16 sm:mb-20 gap-6"
           >
-            <div className="max-w-2xl">
-              <span
-                style={{
-                  borderColor,
-                  backgroundColor: bgCard,
-                  color: textSecondary,
-                }}
-                className="inline-block font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.2em] border px-3 sm:px-3.5 py-1.5 rounded-md mb-4 sm:mb-5"
+            <div>
+              <div
+                style={{ color: textMuted }}
+                className="text-xs font-mono uppercase tracking-[0.22em] mb-3"
               >
-                ECOSISTEMA 01 · SOLUCIONES CORPORATIVAS
-              </span>
-              <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight">
-                Soluciones{" "}
-                <span style={{ color: textSecondary }}>Corporativas.</span>
+                ECOSISTEMA 01 · INFRAESTRUCTURA & PAUTA
+              </div>
+              <h2 className="font-display font-extrabold uppercase text-3xl sm:text-5xl md:text-6xl leading-[1.02] tracking-tight">
+                SOLUCIONES{" "}
+                <span className="text-digital-gradient">CORPORATIVAS</span>
               </h2>
             </div>
             <p
               style={{ color: textSecondary }}
-              className="max-w-md text-sm md:text-base font-light leading-relaxed"
+              className="max-w-md text-sm sm:text-base font-light leading-relaxed"
             >
               Orientado a empresas y PYMES que buscan escalar mediante inversión
-              en infraestructura y pauta.
+              en infraestructura y pauta. Desarrollo web a medida, campañas de
+              publicidad (SEM/Meta) y optimización SEO avanzada.
             </p>
           </motion.div>
 
+          {/* 3 Tarjetas Verticales Arquitectónicas con Letras Gigantes "A / B / G" y Ondas Topográficas (00:04-00:05) */}
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-60px" }}
+            variants={staggerContainer}
+            className="grid lg:grid-cols-3 gap-6"
+          >
+            {corporatePillars.map((pillar, index) => (
+              <motion.div
+                key={index}
+                variants={fadeUpBlur}
+                whileHover={{ y: -6 }}
+                style={{ backgroundColor: bgCard, borderColor }}
+                className="group relative border p-7 sm:p-9 md:p-10 flex flex-col justify-between min-h-[480px] sm:min-h-[540px] overflow-hidden transition-all"
+              >
+                {/* Onda topográfica decorativa en la esquina superior derecha (idéntica a las tarjetas A, B, G del video) */}
+                <div className="absolute -top-6 -right-12 w-72 h-56 opacity-45 group-hover:opacity-80 group-hover:scale-105 transition-all duration-500 pointer-events-none">
+                  <TopographicWaveSVG className="w-full h-full" />
+                </div>
+
+                {/* Parte superior: Número 01/02/03 + Letra Gigante en Gradiente (A, B, G) */}
+                <div className="relative z-10">
+                  <div
+                    style={{ color: textMuted }}
+                    className="font-mono text-xs tracking-widest mb-2"
+                  >
+                    {pillar.code}
+                  </div>
+                  <div className="font-display-light text-7xl sm:text-8xl leading-none text-digital-gradient select-none mb-8">
+                    {pillar.letter}
+                  </div>
+                </div>
+
+                {/* Parte central: Título en mayúsculas + Descripción íntegra */}
+                <div className="relative z-10 my-auto">
+                  <h3 className="font-display font-bold uppercase text-lg sm:text-xl leading-snug mb-4 tracking-wide">
+                    {pillar.title}
+                  </h3>
+                  <p
+                    style={{ color: textSecondary }}
+                    className="text-sm font-light leading-relaxed mb-6"
+                  >
+                    {pillar.description}
+                  </p>
+
+                  <div className="flex flex-wrap gap-1.5 mb-6">
+                    {pillar.metrics.map((m, idx) => (
+                      <span
+                        key={idx}
+                        style={{
+                          backgroundColor: bgCardInner,
+                          borderColor,
+                          color: textMuted,
+                        }}
+                        className="text-[10px] font-mono uppercase tracking-wider border px-2.5 py-1"
+                      >
+                        {m}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Parte inferior: Botón con punto luminoso violeta estilo "● GET STARTED" del video */}
+                <div className="relative z-10 pt-5 border-t border-white/10">
+                  <a
+                    href="#agendar"
+                    className="inline-flex items-center gap-2.5 text-xs font-display font-bold uppercase tracking-wider group-hover:text-[#E24497] transition-colors"
+                  >
+                    <span className="w-2.5 h-2.5 rounded-full bg-digital-gradient shadow-[0_0_12px_#9E38F5]" />
+                    <span>ESCALAR MI EMPRESA</span>
+                    <ArrowUpRight className="w-4 h-4 opacity-70 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                  </a>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* =====================================================================
+          4. ECOSISTEMA 2: IMPULSO PARA PROFESIONALES (MODELO 80/20)
+         ===================================================================== */}
+      <section
+        id="profesionales"
+        style={{ backgroundColor: bgPrimary, borderColor }}
+        className="py-24 sm:py-32 px-4 sm:px-6 border-t scroll-mt-20 overflow-hidden transition-colors duration-200"
+      >
+        <div className="max-w-7xl mx-auto">
+          {/* Cabecera monumental */}
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-80px" }}
-            variants={staggerContainer}
-            className="grid lg:grid-cols-3 gap-6"
+            variants={fadeUpBlur}
+            className="flex flex-col lg:flex-row lg:items-end justify-between mb-16 sm:mb-20 gap-6"
           >
-            {corporatePillars.map((pillar, index) => {
-              const Icon = pillar.icon;
+            <div>
+              <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-[0.22em] text-[#E24497] mb-3">
+                <span className="w-2 h-2 rounded-full bg-digital-gradient" />
+                <span>ECOSISTEMA 02 · MODELO A COMISIÓN 80/20 (SIN COSTO INICIAL)</span>
+              </div>
+              <h2 className="font-display font-extrabold uppercase text-3xl sm:text-5xl md:text-6xl leading-[1.02] tracking-tight">
+                IMPULSO PARA{" "}
+                <span className="text-digital-gradient">PROFESIONALES</span>
+              </h2>
+            </div>
+            <p
+              style={{ color: textSecondary }}
+              className="max-w-md text-sm sm:text-base font-light leading-relaxed"
+            >
+              Orientado a oficios, técnicos y profesionales independientes:
+              barberos, estética, técnicos y servicios de limpieza. Digitalizamos
+              tu oficio sin costos iniciales de desarrollo.
+            </p>
+          </motion.div>
+
+          {/* 3 Tarjetas Verticales del Ecosistema 80/20 con estética DigitalPro */}
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-60px" }}
+            variants={staggerContainer}
+            className="grid lg:grid-cols-3 gap-6 mb-12"
+          >
+            {professionalPillars.map((pillar, index) => {
+              const isSelected = activeStep === index;
               return (
                 <motion.div
                   key={index}
                   variants={fadeUpBlur}
-                  whileHover={{ y: -5 }}
-                  style={{ backgroundColor: bgCard, borderColor }}
-                  className="group relative rounded-3xl border p-5 sm:p-7 md:p-8 flex flex-col justify-between overflow-hidden transition-all"
+                  onMouseEnter={() => setActiveStep(index)}
+                  onClick={() => setActiveStep(index)}
+                  whileHover={{ y: -6 }}
+                  style={{
+                    backgroundColor: bgCard,
+                    borderColor: isSelected ? "#9E38F5" : borderColor,
+                  }}
+                  className="cursor-pointer group relative border p-7 sm:p-9 md:p-10 flex flex-col justify-between min-h-[480px] sm:min-h-[520px] overflow-hidden transition-all"
                 >
-                  <div>
-                    <div
-                      style={{ backgroundColor: bgCardInner, borderColor }}
-                      className="relative min-h-[10rem] mb-6 sm:mb-7 rounded-2xl border p-4 flex flex-col justify-between gap-4 overflow-hidden"
-                    >
-                      <div className="absolute -bottom-10 -right-10 w-36 h-36 rounded-full bg-[#FF5B22]/15 blur-2xl pointer-events-none group-hover:bg-[#FF5B22]/25 transition-all" />
+                  {/* Barra superior activa */}
+                  <div
+                    className={`absolute top-0 inset-x-0 h-[2px] bg-digital-gradient transition-opacity duration-300 ${
+                      isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                    }`}
+                  />
 
-                      <div className="flex items-center justify-between gap-2">
-                        <span
-                          style={{ color: textMuted }}
-                          className="text-[10px] sm:text-[11px] font-mono truncate"
-                        >
-                          [{pillar.code}] // {pillar.tag}
-                        </span>
-                        <span className="inline-flex items-center gap-1 text-[10px] font-mono text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full shrink-0">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                          Running
-                        </span>
-                      </div>
+                  {/* Onda topográfica en la esquina superior derecha */}
+                  <div className="absolute -top-6 -right-12 w-72 h-56 opacity-40 group-hover:opacity-75 transition-opacity duration-500 pointer-events-none">
+                    <TopographicWaveSVG className="w-full h-full" />
+                  </div>
 
-                      <div className="flex items-center gap-3 my-auto">
-                        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#FF6B35] to-[#D43800] flex items-center justify-center shadow-[0_0_20px_rgba(255,91,34,0.35)] group-hover:scale-105 transition-transform shrink-0">
-                          <Icon className="w-5 h-5 text-white" />
-                        </div>
-                        <div className="flex flex-wrap gap-1.5">
-                          {pillar.metrics.map((m, idx) => (
-                            <span
-                              key={idx}
-                              style={{
-                                backgroundColor: bgCard,
-                                borderColor,
-                                color: textSecondary,
-                              }}
-                              className="text-[10px] font-mono border px-2 py-1 rounded-md"
-                            >
-                              {m}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
+                  <div className="relative z-10">
+                    <div className="flex items-center justify-between mb-2">
+                      <span
+                        style={{ color: textMuted }}
+                        className="font-mono text-xs tracking-widest"
+                      >
+                        {pillar.code}
+                      </span>
+                      <span className="text-[10px] font-mono uppercase tracking-widest px-2.5 py-1 border border-[#9E38F5]/40 bg-[#9E38F5]/10 text-[#E24497]">
+                        {pillar.badge}
+                      </span>
                     </div>
+                    <div className="font-display-light text-7xl sm:text-8xl leading-none text-digital-gradient select-none mb-8">
+                      {pillar.letter}
+                    </div>
+                  </div>
 
-                    <h3 className="text-lg sm:text-xl font-semibold mb-3 leading-snug">
+                  <div className="relative z-10 my-auto">
+                    <h3 className="font-display font-bold uppercase text-lg sm:text-xl leading-snug mb-4 tracking-wide">
                       {pillar.title}
                     </h3>
                     <p
                       style={{ color: textSecondary }}
-                      className="leading-relaxed text-sm md:text-[15px] font-light"
+                      className="text-sm font-light leading-relaxed mb-6"
                     >
                       {pillar.description}
                     </p>
                   </div>
 
-                  <div
-                    style={{ borderColor, color: textMuted }}
-                    className="mt-7 sm:mt-8 pt-4 sm:pt-5 border-t flex items-center justify-between text-[11px] sm:text-xs font-mono"
-                  >
-                    <span>CORPORATE // {pillar.code}</span>
-                    <span
-                      style={{ color: textSecondary }}
-                      className="group-hover:text-[#FF6B35] transition-colors inline-flex items-center gap-1"
+                  <div className="relative z-10 pt-5 border-t border-white/10">
+                    <a
+                      href="#agendar"
+                      className="inline-flex items-center gap-2.5 text-xs font-display font-bold uppercase tracking-wider group-hover:text-[#E24497] transition-colors"
                     >
-                      Escala & Conversión <ArrowUpRight className="w-3.5 h-3.5" />
-                    </span>
+                      <span className="w-2.5 h-2.5 rounded-full bg-digital-gradient shadow-[0_0_12px_#9E38F5]" />
+                      <span>APLICAR AL MODELO 80/20</span>
+                      <ArrowUpRight className="w-4 h-4 opacity-70" />
+                    </a>
                   </div>
                 </motion.div>
               );
             })}
           </motion.div>
+
+          {/* Barra resumen interactiva del Modelo 80/20 */}
+          <div
+            style={{ backgroundColor: bgCard, borderColor }}
+            className="border p-6 sm:p-8 grid sm:grid-cols-3 gap-6 items-center"
+          >
+            <div className="flex items-center gap-4">
+              <span className="font-display font-extrabold text-3xl sm:text-4xl text-digital-gradient">
+                80/20
+              </span>
+              <div className="text-xs" style={{ color: textSecondary }}>
+                <strong style={{ color: textPrimary }} className="block font-display uppercase">
+                  Sin inversión inicial en web
+                </strong>
+                80% para ti · 20% por reserva concretada
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="font-display font-extrabold text-3xl sm:text-4xl text-digital-gradient">
+                24/7
+              </span>
+              <div className="text-xs" style={{ color: textSecondary }}>
+                <strong style={{ color: textPrimary }} className="block font-display uppercase">
+                  Recepcionista IA WhatsApp
+                </strong>
+                Perfila clientes y agenda citas en automático
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="font-display font-extrabold text-3xl sm:text-4xl text-digital-gradient">
+                MAPS
+              </span>
+              <div className="text-xs" style={{ color: textSecondary }}>
+                <strong style={{ color: textPrimary }} className="block font-display uppercase">
+                  Autoridad Google Business
+                </strong>
+                Posicionado en tu zona sin exponer tu dirección
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* ECOSISTEMA 2 DETALLE: IMPULSO PARA PROFESIONALES */}
+      {/* =====================================================================
+          5. SECCIÓN EXCLUSIVA: EL CASO THE BELLACY STUDIO (Layout "CASES" 00:06 + Tarjeta Interactiva Izquierda a Derecha)
+         ===================================================================== */}
       <section
-        id="profesionales"
+        id="caso-estudio"
         style={{ backgroundColor: bgSecondary, borderColor }}
-        className="py-20 sm:py-28 md:py-36 px-4 sm:px-6 border-t border-b scroll-mt-20 overflow-hidden transition-colors duration-200"
+        className="py-24 sm:py-32 px-4 sm:px-6 border-t scroll-mt-20 transition-colors duration-200"
       >
         <div className="max-w-7xl mx-auto">
+          {/* Cabecera inspirada en el segundo 00:06 ("90% of clients..." + "CASES") */}
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-80px" }}
             variants={fadeUpBlur}
-            className="grid lg:grid-cols-12 gap-6 sm:gap-8 items-end mb-12 sm:mb-16"
+            className="grid lg:grid-cols-12 gap-6 items-end mb-12 sm:mb-16"
           >
-            <div className="lg:col-span-7">
-              <span className="inline-block font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.2em] text-[#FF6B35] border border-[#FF5B22]/30 bg-[#FF5B22]/10 px-3 sm:px-3.5 py-1.5 rounded-md mb-4 sm:mb-5">
-                ECOSISTEMA 02 · MODELO 80/20
-              </span>
-              <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight">
-                Impulso para{" "}
-                <span style={{ color: textSecondary }}>Profesionales.</span>
-              </h2>
+            <div className="lg:col-span-3">
+              <div className="text-xs font-mono uppercase tracking-wider mb-1">
+                <span className="text-digital-gradient font-bold text-base">
+                  +330%
+                </span>{" "}
+                <span style={{ color: textSecondary }}>
+                  crecimiento mensual
+                </span>
+              </div>
+              <p
+                style={{ color: textMuted }}
+                className="text-xs font-light leading-relaxed"
+              >
+                Resultados verificados en tan solo 3 meses de ejecución.
+              </p>
             </div>
-            <div className="lg:col-span-5">
+
+            <div className="lg:col-span-9 flex flex-col md:flex-row md:items-end justify-between gap-4">
+              <div>
+                <div
+                  style={{ color: textMuted }}
+                  className="text-xs font-mono uppercase tracking-[0.22em] mb-2"
+                >
+                  CASO DE ESTUDIO EXCLUSIVO · ANTES Y DESPUÉS
+                </div>
+                <h2 className="font-display font-extrabold uppercase text-3xl sm:text-5xl md:text-6xl leading-[1.02] tracking-tight">
+                  CASO{" "}
+                  <span className="text-digital-gradient">BELLACY STUDIO</span>
+                </h2>
+              </div>
               <p
                 style={{ color: textSecondary }}
-                className="text-sm md:text-base font-light leading-relaxed mb-5"
+                className="text-xs sm:text-sm font-light max-w-xs"
               >
-                Orientado a oficios, técnicos y profesionales independientes:
-                barberos, estética, técnicos y servicios de limpieza.
+                Mueve el cursor o desliza de{" "}
+                <strong style={{ color: textPrimary }} className="font-medium">
+                  izquierda a derecha
+                </strong>{" "}
+                sobre la tarjeta para develar el antes y el después.
               </p>
-              <a
-                href="#agendar"
-                style={{
-                  backgroundColor: bgCard,
-                  borderColor,
-                  color: textPrimary,
-                }}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border text-xs font-medium hover:border-[#FF5B22]/50 transition-colors"
-              >
-                Aplicar al Modelo 80/20 <ChevronRight className="w-3.5 h-3.5" />
-              </a>
             </div>
           </motion.div>
 
-          <div className="grid lg:grid-cols-12 gap-8 sm:gap-10 items-center">
-            <motion.div
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-60px" }}
-              variants={staggerContainer}
-              className="lg:col-span-6 space-y-4"
+          {/* CONTENEDOR DE LA TARJETA INTERACTIVA */}
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-60px" }}
+            variants={staggerContainer}
+            style={{ backgroundColor: bgCard, borderColor }}
+            className="border p-3 sm:p-5 md:p-8 shadow-2xl transition-colors duration-200"
+          >
+            {/* TARJETA INTERACTIVA EN CSS GRID (Ambas capas comparten la celda 1/1 para que NUNCA se corte el alto) */}
+            <div
+              onPointerMove={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const pct = ((e.clientX - rect.left) / rect.width) * 100;
+                revealRaw.set(Math.max(0, Math.min(100, pct)));
+              }}
+              onTouchMove={(e) => {
+                const touch = e.touches[0];
+                if (!touch) return;
+                const rect = e.currentTarget.getBoundingClientRect();
+                const pct = ((touch.clientX - rect.left) / rect.width) * 100;
+                revealRaw.set(Math.max(0, Math.min(100, pct)));
+              }}
+              onClick={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const pct = ((e.clientX - rect.left) / rect.width) * 100;
+                revealRaw.set(pct > 50 ? 100 : 0);
+              }}
+              className="relative grid grid-cols-1 overflow-hidden border border-white/15 select-none cursor-ew-resize touch-pan-y group"
             >
-              {professionalPillars.map((pillar, index) => {
-                const isSelected = activeStep === index;
-                return (
-                  <motion.div
-                    key={index}
-                    variants={fadeUpBlur}
-                    onMouseEnter={() => setActiveStep(index)}
-                    onClick={() => setActiveStep(index)}
-                    style={{
-                      backgroundColor: isSelected ? bgCard : bgCardInner,
-                      borderColor: isSelected
-                        ? "rgba(255, 91, 34, 0.5)"
-                        : borderColor,
-                    }}
-                    className="cursor-pointer rounded-2xl p-5 sm:p-6 md:p-7 border transition-all duration-300 shadow-sm"
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <span
-                          style={
-                            !isSelected
-                              ? {
-                                  backgroundColor: bgCard,
-                                  color: textMuted,
-                                }
-                              : undefined
-                          }
-                          className={`font-mono text-xs px-2 py-0.5 rounded shrink-0 ${
-                            isSelected
-                              ? "bg-[#FF5B22]/20 text-[#FF6B35] border border-[#FF5B22]/40"
-                              : ""
-                          }`}
-                        >
-                          [{pillar.code}]
-                        </span>
-                        <h3 className="text-base sm:text-lg md:text-xl font-semibold leading-snug">
-                          {pillar.title}
-                        </h3>
+              {/* =========================================================
+                  CAPA 1 (BASE): ANTES DE DYNAMO SOLUTIONS (US$ 300 / MES)
+                 ========================================================= */}
+              <div className="col-start-1 row-start-1 w-full bg-gradient-to-br from-[#0B0B12] via-[#07070C] to-[#040407] text-white p-5 sm:p-10 md:p-12 flex flex-col justify-between relative">
+                <div className="absolute right-4 sm:right-8 bottom-4 sm:bottom-8 opacity-5 pointer-events-none">
+                  <BarChart3 className="w-36 h-36 sm:w-56 sm:h-56 text-zinc-400" />
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-2.5 sm:gap-4">
+                  <span className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] font-mono uppercase tracking-wider sm:tracking-widest text-zinc-300 bg-zinc-900/90 border border-zinc-700/80 px-3 py-1.5">
+                    <span className="w-2 h-2 rounded-full bg-zinc-500 shrink-0" />
+                    <span>BEFORE · ANTES DE DYNAMO SOLUTIONS</span>
+                  </span>
+                  <span className="text-[10px] sm:text-xs font-mono text-zinc-400 bg-white/[0.04] border border-white/10 px-3 py-1">
+                    ← Desliza hacia la derecha para revelar el Después →
+                  </span>
+                </div>
+
+                <div className="grid lg:grid-cols-12 gap-6 sm:gap-8 items-center my-6 sm:my-10">
+                  <div className="lg:col-span-6">
+                    <div className="text-[10px] sm:text-xs font-mono uppercase tracking-widest text-zinc-500 mb-2">
+                      Caso de Estudio · Diagnóstico Inicial
+                    </div>
+                    <h3 className="font-display font-extrabold uppercase text-2xl sm:text-4xl md:text-5xl tracking-tight text-zinc-200 mb-3">
+                      THE BELLACY STUDIO
+                    </h3>
+                    <p className="text-xs sm:text-sm md:text-base text-zinc-400 font-light leading-relaxed mb-5 sm:mb-6">
+                      Antes de contratar nuestros servicios, el estudio contaba
+                      con una excelente calidad de servicio pero carecía de
+                      visibilidad local estructurada en Google Maps y de campañas
+                      de adquisición digital.
+                    </p>
+
+                    <div className="flex flex-col sm:inline-flex sm:flex-row sm:flex-wrap sm:items-center gap-4 sm:gap-6 bg-black/75 border border-zinc-800 p-4 sm:p-5">
+                      <div>
+                        <div className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-zinc-500 mb-1">
+                          Facturación Mensual (Antes)
+                        </div>
+                        <div className="flex items-baseline gap-2.5 sm:gap-3">
+                          <span className="font-display font-extrabold text-3xl sm:text-4xl md:text-5xl text-zinc-300">
+                            US$ 300
+                          </span>
+                          <span className="text-xs font-mono text-zinc-500">
+                            / mes
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-4 pt-3 sm:pt-0 sm:pl-4 border-t sm:border-t-0 sm:border-l border-zinc-800">
+                        <div>
+                          <div className="font-display font-bold text-xl sm:text-2xl text-zinc-400">
+                            Baja
+                          </div>
+                          <div className="text-[11px] text-zinc-500 uppercase font-mono">
+                            BEFORE
+                          </div>
+                        </div>
+                        <div>
+                          <div className="font-display font-bold text-xl sm:text-2xl text-zinc-400">
+                            0 Ads
+                          </div>
+                          <div className="text-[11px] text-zinc-500">
+                            Pauta activa
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <p
-                      style={{ color: textSecondary }}
-                      className="text-sm md:text-[15px] font-light leading-relaxed"
-                    >
-                      {pillar.description}
-                    </p>
-                  </motion.div>
-                );
-              })}
-            </motion.div>
+                  </div>
 
-            {/* Escena de tarjetas flotantes en perspectiva */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-              style={{ backgroundColor: bgCardInner, borderColor }}
-              className="lg:col-span-6 relative min-h-[380px] sm:min-h-[460px] rounded-3xl border p-5 sm:p-6 md:p-10 flex flex-col justify-between overflow-hidden"
-            >
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 rounded-full bg-[#FF5B22]/15 blur-3xl pointer-events-none" />
+                  <div className="lg:col-span-6">
+                    <div className="text-[10px] sm:text-xs font-mono uppercase tracking-wider text-zinc-500 mb-3">
+                      Situación Previa a la Intervención
+                    </div>
+                    <div className="grid sm:grid-cols-2 gap-2.5 sm:gap-3 text-xs">
+                      {[
+                        {
+                          title: "Posicionamiento Google Maps",
+                          state: "Baja visibilidad local",
+                        },
+                        {
+                          title: "Campañas de Anuncios",
+                          state: "Sin pauta estructurada",
+                        },
+                        {
+                          title: "Captación de Clientes",
+                          state: "Dependiente del boca a boca",
+                        },
+                        {
+                          title: "Facturación Mensual",
+                          state: "Estancada en US$ 300 / mes",
+                        },
+                      ].map((item, i) => (
+                        <div
+                          key={i}
+                          className="bg-zinc-900/70 border border-zinc-800/90 p-3.5 sm:p-4 flex flex-col justify-between"
+                        >
+                          <span className="text-zinc-300 font-display uppercase text-xs font-bold mb-1.5">
+                            {item.title}
+                          </span>
+                          <span className="inline-flex items-center gap-1.5 text-[11px] font-mono text-zinc-500">
+                            <span className="w-1.5 h-1.5 rounded-full bg-zinc-600 shrink-0" />
+                            {item.state}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
 
+                <div className="pt-4 sm:pt-5 border-t border-zinc-800/80 flex flex-wrap items-center justify-between gap-2 sm:gap-4 text-[10px] sm:text-xs font-mono text-zinc-400">
+                  <span>ESTADO: PRE-OPTIMIZACIÓN (BEFORE)</span>
+                  <span>INGRESOS MENSUALES: US$ 300 / MES</span>
+                </div>
+              </div>
+
+              {/* =========================================================
+                  CAPA 2 (DEVELADA CON CORTE DIAGONAL Y SPRING): DESPUÉS (US$ 1.300 / MES)
+                  Estética DigitalPro: Gradiente Indigo -> Violeta -> Magenta -> Coral
+                 ========================================================= */}
               <motion.div
-                animate={{
-                  y: activeStep === 0 ? -4 : 0,
-                  borderColor:
-                    activeStep === 0 ? "rgba(255,91,34,0.6)" : borderColor,
+                style={{
+                  clipPath: afterClipPath,
+                  scale: afterScale,
                 }}
-                style={{ backgroundColor: bgCard }}
-                className="relative z-10 self-end w-full sm:w-80 rounded-2xl border p-4 sm:p-5 shadow-xl sm:-rotate-2"
+                className="col-start-1 row-start-1 w-full bg-gradient-to-br from-[#3729B2] via-[#7A22C9] to-[#D93870] text-white p-5 sm:p-10 md:p-12 flex flex-col justify-between relative z-10 origin-left"
               >
-                <div
-                  style={{ color: textMuted }}
-                  className="flex items-center justify-between text-xs mb-2"
-                >
-                  <span className="font-mono uppercase text-[10px]">
-                    [01] Modelo de Éxito Compartido
-                  </span>
-                  <ShieldCheck className="w-4 h-4 text-[#FF6B35] shrink-0" />
+                <div className="absolute right-4 sm:right-8 bottom-4 sm:bottom-8 opacity-15 pointer-events-none">
+                  <BarChart3 className="w-36 h-36 sm:w-56 sm:h-56 text-white" />
                 </div>
-                <div className="flex flex-wrap items-baseline gap-2.5 sm:gap-3">
-                  <span className="text-2xl sm:text-3xl font-bold">80 / 20</span>
-                  <span className="text-xs text-emerald-500 font-mono">
-                    +$0 Inversión Inicial
+
+                <div className="flex flex-wrap items-center justify-between gap-2.5 sm:gap-4">
+                  <span className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] font-mono uppercase tracking-wider sm:tracking-widest text-white bg-black/40 backdrop-blur-md border border-white/25 px-3 py-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#FF5864] animate-pulse shrink-0" />
+                    <span>AFTER · DESPUÉS DE DYNAMO SOLUTIONS (3 MESES)</span>
+                  </span>
+                  <span className="text-[10px] sm:text-xs font-mono text-white bg-black/35 px-3 py-1 border border-white/20">
+                    ROI VERIFICADO: +330%
                   </span>
                 </div>
-                <div
-                  style={{ color: textMuted }}
-                  className="text-[11px] mt-1"
-                >
-                  Si tú no ganas, nosotros tampoco
+
+                <div className="grid lg:grid-cols-12 gap-6 sm:gap-8 items-center my-6 sm:my-10">
+                  <div className="lg:col-span-6">
+                    <div className="text-[10px] sm:text-xs font-mono uppercase tracking-widest text-white/80 mb-2">
+                      Caso de Estudio · Ecosistema Activo
+                    </div>
+                    <h3 className="font-display font-extrabold uppercase text-2xl sm:text-4xl md:text-5xl tracking-tight text-white mb-3">
+                      THE BELLACY STUDIO
+                    </h3>
+                    <p className="text-xs sm:text-sm md:text-base text-white/90 font-light leading-relaxed mb-5 sm:mb-6">
+                      Posicionamiento local en Google Maps combinado con pauta
+                      inteligente de alta conversión. Sistema predecible y
+                      constante de adquisición de nuevos clientes.
+                    </p>
+
+                    <div className="flex flex-col sm:inline-flex sm:flex-row sm:flex-wrap sm:items-center gap-4 sm:gap-6 bg-black/45 backdrop-blur-md border border-white/25 p-4 sm:p-5 shadow-2xl">
+                      <div>
+                        <div className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-white/75 mb-1">
+                          Facturación Mensual (Después)
+                        </div>
+                        <div className="flex flex-wrap items-baseline gap-2 sm:gap-3">
+                          <span className="text-white/50 line-through text-sm sm:text-base font-mono">
+                            US$ 300
+                          </span>
+                          <span className="font-display font-extrabold text-3xl sm:text-4xl md:text-5xl text-white">
+                            US$ 1.300
+                          </span>
+                          <span className="text-xs font-mono text-white/80">
+                            / mes
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-4 pt-3 sm:pt-0 sm:pl-4 border-t sm:border-t-0 sm:border-l border-white/20">
+                        <div>
+                          <div className="font-display font-bold text-xl sm:text-2xl text-[#FF94A1]">
+                            +330%
+                          </div>
+                          <div className="text-[11px] text-white font-mono uppercase border-b border-[#FF5864]">
+                            AFTER
+                          </div>
+                        </div>
+                        <div>
+                          <div className="font-display font-bold text-xl sm:text-2xl text-white">
+                            3 Meses
+                          </div>
+                          <div className="text-[11px] text-white/80">
+                            Ejecución
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="lg:col-span-6">
+                    <div className="text-[10px] sm:text-xs font-mono uppercase tracking-wider text-white/85 mb-3">
+                      Estrategia Implementada con Éxito
+                    </div>
+                    <div className="grid sm:grid-cols-2 gap-2.5 sm:gap-3 text-xs">
+                      {[
+                        {
+                          title: "Posicionamiento Google Maps",
+                          state: "Activo · Top Local",
+                        },
+                        {
+                          title: "Campañas de Anuncios Precisas",
+                          state: "Activo · Alta Conversión",
+                        },
+                        {
+                          title: "Sistema Predecible de Clientes",
+                          state: "Activo · Flujo Constante",
+                        },
+                        {
+                          title: "Escala de Facturación",
+                          state: "De US$ 300 a US$ 1.300/mes",
+                        },
+                      ].map((item, i) => (
+                        <div
+                          key={i}
+                          className="bg-black/40 backdrop-blur-md border border-white/20 p-3.5 sm:p-4 flex flex-col justify-between"
+                        >
+                          <span className="text-white font-display uppercase text-xs font-bold mb-1.5">
+                            {item.title}
+                          </span>
+                          <span className="inline-flex items-center gap-1.5 text-[11px] font-mono text-[#FFB3BD]">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#FF5864] animate-pulse shrink-0" />
+                            {item.state}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4 sm:pt-5 border-t border-white/25 flex flex-wrap items-center justify-between gap-2 sm:gap-4 text-[10px] sm:text-xs font-mono text-white">
+                  <span>RESULTADO: ECOSISTEMA EN ESCALA AUTOMÁTICA (AFTER)</span>
+                  <span>FACTURACIÓN ALCANZADA: US$ 1.300 / MES (+330%)</span>
                 </div>
               </motion.div>
 
-              <div className="relative z-10 my-5 sm:my-6 flex items-center justify-center">
-                <div className="relative">
-                  <div className="absolute -inset-4 rounded-3xl bg-[#FF5B22]/25 blur-xl animate-pulse" />
-                  <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-[#FF6B35] to-[#D43800] border border-[#FF9B73]/50 flex items-center justify-center shadow-[0_0_40px_rgba(255,91,34,0.6)] rotate-6">
-                    <Zap className="w-7 h-7 sm:w-8 sm:h-8 text-white fill-white" />
-                  </div>
+              {/* =========================================================
+                  HAZ LÁSER ESCÁNER CON INERCIA SPRING (Onda Moderna DigitalPro)
+                 ========================================================= */}
+              <motion.div
+                style={{ left: beamLeft }}
+                className="absolute inset-y-0 z-20 pointer-events-none -translate-x-1/2 flex items-center justify-center"
+              >
+                <div className="absolute right-0 w-16 sm:w-28 h-full bg-gradient-to-l from-white/30 via-[#9E38F5]/35 to-transparent blur-xl -skew-x-3" />
+
+                <div className="w-[2.5px] h-[110%] bg-gradient-to-b from-[#5246FF] via-white to-[#FF5864] shadow-[0_0_20px_#ffffff,0_0_40px_#9E38F5] -rotate-[2.5deg]" />
+
+                <div className="relative w-10 h-10 sm:w-12 sm:h-12 bg-black/85 backdrop-blur-xl text-white shadow-[0_0_30px_rgba(158,56,245,0.9)] border border-white/40 flex items-center justify-center font-mono text-xs sm:text-sm group-hover:scale-110 transition-transform">
+                  <span className="text-digital-gradient font-bold">↔</span>
                 </div>
+              </motion.div>
+            </div>
+
+            {/* BLOQUE INFERIOR CON LA NARRATIVA COMPLETA Y CTA DE LA SECCIÓN (Inspirado en la cita de 00:06) */}
+            <div
+              style={{ backgroundColor: bgCardInner, borderColor }}
+              className="mt-5 sm:mt-6 border p-5 sm:p-6 md:p-8 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5 sm:gap-6"
+            >
+              <div className="max-w-4xl">
+                <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-[#E24497] mb-2">
+                  <span className="font-bold">01 / 01</span>
+                  <span>· IMPACTO REAL & MEDIBLE</span>
+                </div>
+                <p
+                  style={{ color: textSecondary }}
+                  className="text-sm md:text-base font-light leading-relaxed"
+                >
+                  &ldquo;Para{" "}
+                  <span style={{ color: textPrimary }} className="font-medium">
+                    The Bellacy Studio
+                  </span>
+                  , el desafío no era la calidad de su servicio, sino su
+                  visibilidad. Implementamos una reestructuración completa de su
+                  posicionamiento local en Google Maps y lo potenciamos con
+                  campañas de anuncios precisas. El resultado: en tan solo 3
+                  meses, pasaron de una facturación de{" "}
+                  <span style={{ color: textPrimary }} className="font-medium">
+                    $300 USD a $1.300 USD mensuales
+                  </span>
+                  , estableciendo un sistema predecible de adquisición de
+                  clientes.&rdquo;
+                </p>
               </div>
 
-              <div className="relative z-10 grid sm:grid-cols-2 gap-3.5 sm:gap-4">
-                <motion.div
-                  animate={{
-                    y: activeStep === 1 ? -4 : 0,
-                    borderColor:
-                      activeStep === 1 ? "rgba(255,91,34,0.6)" : borderColor,
-                  }}
-                  style={{ backgroundColor: bgCard }}
-                  className="rounded-2xl border p-4 shadow-lg sm:rotate-1"
+              <div className="shrink-0 w-full lg:w-auto">
+                <a
+                  href="#agendar"
+                  className="btn-digital-outline w-full sm:w-auto px-6 py-4 text-xs font-display font-bold uppercase tracking-wider text-white inline-flex items-center justify-center gap-2.5"
                 >
-                  <div className="flex items-center gap-2 text-xs font-medium mb-1.5">
-                    <BotMessageSquare className="w-4 h-4 text-[#FF6B35] shrink-0" />
-                    <span>Asistente IA WhatsApp</span>
-                  </div>
-                  <div
-                    style={{ color: textSecondary }}
-                    className="text-[11px] leading-snug mb-2"
-                  >
-                    Atiende consultas, perfila clientes y agenda citas
-                  </div>
-                  <div className="inline-flex items-center gap-1.5 text-[10px] font-mono text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded">
-                    <Clock className="w-3 h-3" /> Activo 24/7
-                  </div>
-                </motion.div>
-
-                <motion.div
-                  animate={{
-                    y: activeStep === 2 ? -4 : 0,
-                    borderColor:
-                      activeStep === 2 ? "rgba(255,91,34,0.6)" : borderColor,
-                  }}
-                  style={{ backgroundColor: bgCard }}
-                  className="rounded-2xl border p-4 shadow-lg sm:-rotate-1"
-                >
-                  <div className="flex items-center gap-2 text-xs font-medium mb-1.5">
-                    <MapPin className="w-4 h-4 text-[#FF6B35] shrink-0" />
-                    <span>Autoridad Google Maps</span>
-                  </div>
-                  <div
-                    style={{ color: textSecondary }}
-                    className="text-[11px] leading-snug mb-2"
-                  >
-                    Posicionamiento local sin exponer tu dirección personal
-                  </div>
-                  <div className="inline-flex items-center gap-1.5 text-[10px] font-mono text-[#FF6B35] bg-[#FF5B22]/15 px-2 py-0.5 rounded">
-                    ● Reservas Orgánicas
-                  </div>
-                </motion.div>
+                  <span className="w-2.5 h-2.5 rounded-full bg-digital-gradient shadow-[0_0_12px_#9E38F5]" />
+                  <span>REPLICAR ESTE SISTEMA</span>
+                  <ArrowRight className="w-4 h-4" />
+                </a>
               </div>
-            </motion.div>
-          </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* SECCIÓN EXCLUSIVA: EL CASO THE BELLACY STUDIO — Tarjeta Interactiva Antes / Después con física Spring */}
-      <section
-        id="caso-estudio"
-        className="py-20 sm:py-28 md:py-36 px-4 sm:px-6 max-w-7xl mx-auto scroll-mt-20"
-      >
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-80px" }}
-          variants={fadeUpBlur}
-          className="text-center max-w-3xl mx-auto mb-10 sm:mb-14"
-        >
-          <span
-            style={{
-              borderColor,
-              backgroundColor: bgCard,
-              color: textSecondary,
-            }}
-            className="inline-block font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.2em] border px-3 sm:px-3.5 py-1.5 rounded-md mb-4 sm:mb-5"
-          >
-            CASO DE ESTUDIO EXCLUSIVO · THE BELLACY STUDIO
-          </span>
-          <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight mb-4">
-            Transformación digital con{" "}
-            <span style={{ color: textSecondary }}>resultados medibles.</span>
-          </h2>
-          <p style={{ color: textSecondary }} className="text-xs sm:text-sm md:text-base font-light px-2">
-            Mueve el cursor o desliza de <strong style={{ color: textPrimary }} className="font-medium">izquierda a derecha</strong> sobre la tarjeta para develar el antes y el después.
-          </p>
-        </motion.div>
-
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-60px" }}
-          variants={staggerContainer}
-          style={{ backgroundColor: bgCard, borderColor }}
-          className="rounded-3xl sm:rounded-[2rem] border p-3 sm:p-5 md:p-8 shadow-2xl transition-colors duration-200"
-        >
-          {/* TARJETA INTERACTIVA EN CSS GRID (Ambas capas comparten la celda 1/1 para que NUNCA se corte el alto) */}
-          <div
-            onPointerMove={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              const pct = ((e.clientX - rect.left) / rect.width) * 100;
-              revealRaw.set(Math.max(0, Math.min(100, pct)));
-            }}
-            onTouchMove={(e) => {
-              const touch = e.touches[0];
-              if (!touch) return;
-              const rect = e.currentTarget.getBoundingClientRect();
-              const pct = ((touch.clientX - rect.left) / rect.width) * 100;
-              revealRaw.set(Math.max(0, Math.min(100, pct)));
-            }}
-            onClick={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              const pct = ((e.clientX - rect.left) / rect.width) * 100;
-              revealRaw.set(pct > 50 ? 100 : 0);
-            }}
-            className="relative grid grid-cols-1 rounded-2xl sm:rounded-3xl overflow-hidden border border-white/10 select-none cursor-ew-resize touch-pan-y group"
-          >
-            {/* =========================================================
-                CAPA 1 (BASE): ANTES DE DYNAMO SOLUTIONS (US$ 300 / MES)
-               ========================================================= */}
-            <div className="col-start-1 row-start-1 w-full bg-gradient-to-br from-[#141418] via-[#0D0D10] to-[#08080A] text-white p-5 sm:p-10 md:p-12 flex flex-col justify-between relative">
-              <div className="absolute right-4 sm:right-8 bottom-4 sm:bottom-8 opacity-5 pointer-events-none">
-                <BarChart3 className="w-36 h-36 sm:w-56 sm:h-56 text-zinc-400" />
-              </div>
-
-              <div className="flex flex-wrap items-center justify-between gap-2.5 sm:gap-4">
-                <span className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] font-mono uppercase tracking-wider sm:tracking-widest text-zinc-300 bg-zinc-900/90 border border-zinc-700/80 px-2.5 sm:px-3.5 py-1.5 rounded-lg">
-                  <span className="w-2 h-2 rounded-full bg-zinc-500 shrink-0" />
-                  <span>ANTES DE DYNAMO SOLUTIONS · ESTADO INICIAL</span>
-                </span>
-                <span className="text-[10px] sm:text-xs font-mono text-zinc-400 bg-white/[0.04] border border-white/10 px-2.5 sm:px-3 py-1 rounded-md">
-                  ← Desliza para revelar el Después →
-                </span>
-              </div>
-
-              <div className="grid lg:grid-cols-12 gap-6 sm:gap-8 items-center my-6 sm:my-10">
-                <div className="lg:col-span-6">
-                  <div className="text-[10px] sm:text-xs font-mono uppercase tracking-widest text-zinc-500 mb-2">
-                    Caso de Estudio · Diagnóstico Inicial
-                  </div>
-                  <h3 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight text-zinc-200 mb-3">
-                    The Bellacy Studio
-                  </h3>
-                  <p className="text-xs sm:text-sm md:text-base text-zinc-400 font-light leading-relaxed mb-5 sm:mb-6">
-                    Antes de contratar nuestros servicios, el estudio contaba con
-                    una excelente calidad de servicio pero carecía de visibilidad
-                    local estructurada en Google Maps y de campañas de adquisición
-                    digital.
-                  </p>
-
-                  <div className="flex flex-col sm:inline-flex sm:flex-row sm:flex-wrap sm:items-center gap-4 sm:gap-6 rounded-2xl bg-black/65 border border-zinc-800 p-4 sm:p-5">
-                    <div>
-                      <div className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-zinc-500 mb-1">
-                        Facturación Mensual (Antes)
-                      </div>
-                      <div className="flex items-baseline gap-2.5 sm:gap-3">
-                        <span className="text-3xl sm:text-4xl md:text-5xl font-bold text-zinc-300">
-                          US$ 300
-                        </span>
-                        <span className="text-xs font-mono text-zinc-500">
-                          / mes
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-4 pt-3 sm:pt-0 sm:pl-4 border-t sm:border-t-0 sm:border-l border-zinc-800">
-                      <div>
-                        <div className="text-xl sm:text-2xl font-bold text-zinc-400">
-                          Baja
-                        </div>
-                        <div className="text-[11px] text-zinc-500">
-                          Visibilidad
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-xl sm:text-2xl font-bold text-zinc-400">
-                          0 Ads
-                        </div>
-                        <div className="text-[11px] text-zinc-500">
-                          Pauta activa
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="lg:col-span-6">
-                  <div className="text-[10px] sm:text-xs font-mono uppercase tracking-wider text-zinc-500 mb-3">
-                    Situación Previa a la Intervención
-                  </div>
-                  <div className="grid sm:grid-cols-2 gap-2.5 sm:gap-3 text-xs">
-                    {[
-                      {
-                        title: "Posicionamiento Google Maps",
-                        state: "Baja visibilidad local",
-                      },
-                      {
-                        title: "Campañas de Anuncios",
-                        state: "Sin pauta estructurada",
-                      },
-                      {
-                        title: "Captación de Clientes",
-                        state: "Dependiente del boca a boca",
-                      },
-                      {
-                        title: "Facturación Mensual",
-                        state: "Estancada en US$ 300 / mes",
-                      },
-                    ].map((item, i) => (
-                      <div
-                        key={i}
-                        className="rounded-xl bg-zinc-900/70 border border-zinc-800/90 p-3.5 sm:p-4 flex flex-col justify-between"
-                      >
-                        <span className="text-zinc-300 font-medium mb-1">
-                          {item.title}
-                        </span>
-                        <span className="inline-flex items-center gap-1.5 text-[11px] font-mono text-zinc-500">
-                          <span className="w-1.5 h-1.5 rounded-full bg-zinc-600 shrink-0" />
-                          {item.state}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-4 sm:pt-5 border-t border-zinc-800/80 flex flex-wrap items-center justify-between gap-2 sm:gap-4 text-[10px] sm:text-xs font-mono text-zinc-400">
-                <span>ESTADO: PRE-OPTIMIZACIÓN</span>
-                <span>INGRESOS MENSUALES: US$ 300 / MES</span>
-              </div>
-            </div>
-
-            {/* =========================================================
-                CAPA 2 (DEVELADA CON CORTE DIAGONAL Y SPRING): DESPUÉS (US$ 1.300 / MES)
-               ========================================================= */}
-            <motion.div
-              style={{
-                clipPath: afterClipPath,
-                scale: afterScale,
-              }}
-              className="col-start-1 row-start-1 w-full bg-gradient-to-br from-[#FF7A45] via-[#D94B1A] to-[#1E0D07] text-white p-5 sm:p-10 md:p-12 flex flex-col justify-between relative z-10 origin-left"
-            >
-              <div className="absolute right-4 sm:right-8 bottom-4 sm:bottom-8 opacity-15 pointer-events-none">
-                <BarChart3 className="w-36 h-36 sm:w-56 sm:h-56 text-white" />
-              </div>
-
-              <div className="flex flex-wrap items-center justify-between gap-2.5 sm:gap-4">
-                <span className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] font-mono uppercase tracking-wider sm:tracking-widest text-white bg-black/35 backdrop-blur-md border border-white/25 px-2.5 sm:px-3.5 py-1.5 rounded-lg">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-                  <span>DESPUÉS DE DYNAMO SOLUTIONS · EN 3 MESES</span>
-                </span>
-                <span className="text-[10px] sm:text-xs font-mono text-white bg-black/30 px-2.5 sm:px-3 py-1 rounded-md border border-white/20">
-                  ROI VERIFICADO: +330%
-                </span>
-              </div>
-
-              <div className="grid lg:grid-cols-12 gap-6 sm:gap-8 items-center my-6 sm:my-10">
-                <div className="lg:col-span-6">
-                  <div className="text-[10px] sm:text-xs font-mono uppercase tracking-widest text-white/80 mb-2">
-                    Caso de Estudio · Ecosistema Activo
-                  </div>
-                  <h3 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white mb-3">
-                    The Bellacy Studio
-                  </h3>
-                  <p className="text-xs sm:text-sm md:text-base text-white/90 font-light leading-relaxed mb-5 sm:mb-6">
-                    Posicionamiento local en Google Maps combinado con pauta
-                    inteligente de alta conversión. Sistema predecible y
-                    constante de adquisición de nuevos clientes.
-                  </p>
-
-                  <div className="flex flex-col sm:inline-flex sm:flex-row sm:flex-wrap sm:items-center gap-4 sm:gap-6 rounded-2xl bg-black/45 backdrop-blur-md border border-white/25 p-4 sm:p-5 shadow-2xl">
-                    <div>
-                      <div className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-white/75 mb-1">
-                        Facturación Mensual (Después)
-                      </div>
-                      <div className="flex flex-wrap items-baseline gap-2 sm:gap-3">
-                        <span className="text-white/50 line-through text-sm sm:text-base font-mono">
-                          US$ 300
-                        </span>
-                        <span className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">
-                          US$ 1.300
-                        </span>
-                        <span className="text-xs font-mono text-white/80">
-                          / mes
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-4 pt-3 sm:pt-0 sm:pl-4 border-t sm:border-t-0 sm:border-l border-white/20">
-                      <div>
-                        <div className="text-xl sm:text-2xl font-bold text-emerald-300">
-                          +330%
-                        </div>
-                        <div className="text-[11px] text-white/80">
-                          Crecimiento
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-xl sm:text-2xl font-bold text-white">
-                          3 Meses
-                        </div>
-                        <div className="text-[11px] text-white/80">
-                          Ejecución
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="lg:col-span-6">
-                  <div className="text-[10px] sm:text-xs font-mono uppercase tracking-wider text-white/85 mb-3">
-                    Estrategia Implementada con Éxito
-                  </div>
-                  <div className="grid sm:grid-cols-2 gap-2.5 sm:gap-3 text-xs">
-                    {[
-                      {
-                        title: "Posicionamiento Google Maps",
-                        state: "Activo · Top Local",
-                      },
-                      {
-                        title: "Campañas de Anuncios Precisas",
-                        state: "Activo · Alta Conversión",
-                      },
-                      {
-                        title: "Sistema Predecible de Clientes",
-                        state: "Activo · Flujo Constante",
-                      },
-                      {
-                        title: "Escala de Facturación",
-                        state: "De US$ 300 a US$ 1.300/mes",
-                      },
-                    ].map((item, i) => (
-                      <div
-                        key={i}
-                        className="rounded-xl bg-black/40 backdrop-blur-md border border-white/20 p-3.5 sm:p-4 flex flex-col justify-between"
-                      >
-                        <span className="text-white font-medium mb-1">
-                          {item.title}
-                        </span>
-                        <span className="inline-flex items-center gap-1.5 text-[11px] font-mono text-emerald-300">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-                          {item.state}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-4 sm:pt-5 border-t border-white/25 flex flex-wrap items-center justify-between gap-2 sm:gap-4 text-[10px] sm:text-xs font-mono text-white">
-                <span>RESULTADO: ECOSISTEMA EN ESCALA AUTOMÁTICA</span>
-                <span>FACTURACIÓN ALCANZADA: US$ 1.300 / MES (+330%)</span>
-              </div>
-            </motion.div>
-
-            {/* =========================================================
-                HAZ LÁSER ESCÁNER CON INERCIA SPRING (Onda Moderna)
-               ========================================================= */}
-            <motion.div
-              style={{ left: beamLeft }}
-              className="absolute inset-y-0 z-20 pointer-events-none -translate-x-1/2 flex items-center justify-center"
-            >
-              {/* Estela de energía cálida detrás del haz */}
-              <div className="absolute right-0 w-16 sm:w-28 h-full bg-gradient-to-l from-white/30 via-[#FF6B35]/25 to-transparent blur-xl -skew-x-3" />
-
-              {/* Haz láser oblicuo que coincide con el ángulo del polygon */}
-              <div className="w-[2.5px] h-[110%] bg-gradient-to-b from-white/40 via-white to-white/40 shadow-[0_0_20px_#ffffff,0_0_40px_#FF5B22] -rotate-[2.5deg]" />
-
-              {/* Orbe magnético central */}
-              <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-black/80 backdrop-blur-xl text-white shadow-[0_0_30px_rgba(255,91,34,0.9)] border border-white/40 flex items-center justify-center font-mono text-xs sm:text-sm group-hover:scale-110 transition-transform">
-                <span className="text-[#FF6B35] font-bold">↔</span>
-              </div>
-            </motion.div>
-          </div>
-
-          {/* BLOQUE INFERIOR CON LA NARRATIVA COMPLETA Y CTA DE LA SECCIÓN */}
-          <div
-            style={{ backgroundColor: bgCardInner, borderColor }}
-            className="mt-5 sm:mt-6 rounded-2xl border p-5 sm:p-6 md:p-8 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5 sm:gap-6"
-          >
-            <div className="max-w-4xl">
-              <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-[#FF6B35] mb-2">
-                <Activity className="w-4 h-4 shrink-0" />
-                <span>Impacto Real & Medible · Resumen del Caso</span>
-              </div>
-              <p
-                style={{ color: textSecondary }}
-                className="text-sm md:text-base font-light leading-relaxed"
-              >
-                &ldquo;Para{" "}
-                <span style={{ color: textPrimary }} className="font-medium">
-                  The Bellacy Studio
-                </span>
-                , el desafío no era la calidad de su servicio, sino su
-                visibilidad. Implementamos una reestructuración completa de su
-                posicionamiento local en Google Maps y lo potenciamos con
-                campañas de anuncios precisas. El resultado: en tan solo 3
-                meses, pasaron de una facturación de{" "}
-                <span style={{ color: textPrimary }} className="font-medium">
-                  $300 USD a $1.300 USD mensuales
-                </span>
-                , estableciendo un sistema predecible de adquisición de
-                clientes.&rdquo;
-              </p>
-            </div>
-
-            <div className="shrink-0 flex flex-col sm:flex-row lg:flex-col items-stretch sm:items-center lg:items-end gap-3 w-full lg:w-auto">
-              <a
-                href="#agendar"
-                className="w-full sm:w-auto bg-gradient-to-b from-[#FF6B35] to-[#E54310] text-white px-6 py-3.5 rounded-xl text-xs md:text-sm font-medium inline-flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(255,91,34,0.35)] border border-[#FF8A61]/40 hover:brightness-110 transition-all"
-              >
-                Replicar este sistema <ArrowRight className="w-4 h-4" />
-              </a>
-            </div>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* CTA FINAL + FOOTER CON WATERMARK GIGANTE */}
+      {/* =====================================================================
+          6. CTA FINAL + FOOTER (Inspirado en 00:07-00:08 "LET'S BEGIN COOPERATION")
+         ===================================================================== */}
       <section
         id="agendar"
-        className="relative pt-20 sm:pt-28 pb-12 sm:pb-16 px-4 sm:px-6 overflow-hidden scroll-mt-20"
+        style={{ backgroundColor: bgPrimary, borderColor }}
+        className="relative pt-24 sm:pt-36 pb-12 sm:pb-16 px-4 sm:px-6 border-t overflow-hidden scroll-mt-20"
       >
-        <div className="max-w-5xl mx-auto mb-14 sm:mb-20 relative">
-          <div
-            style={{
-              background: `linear-gradient(to right, transparent, ${borderColor}, transparent)`,
-            }}
-            className="h-px w-full"
-          />
-          <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-48 h-6 bg-[#FF5B22]/25 blur-xl pointer-events-none" />
+        {/* Escultura de Onda Topográfica de Fondo como en "LET'S BEGIN COOPERATION" (00:08) */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-40 pointer-events-none">
+          <TopographicWaveSVG className="w-full h-full max-w-6xl animate-float-slow" />
         </div>
 
         <motion.div
@@ -1732,205 +1597,83 @@ export default function DynamoLanding() {
           whileInView="visible"
           viewport={{ once: true }}
           variants={fadeUpBlur}
-          className="max-w-3xl mx-auto text-center mb-16 sm:mb-24"
+          className="relative z-10 max-w-5xl mx-auto text-center mb-24 sm:mb-32"
         >
-          <span
-            style={{
-              borderColor,
-              backgroundColor: bgCard,
-              color: textSecondary,
-            }}
-            className="inline-block font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.2em] border px-3 sm:px-3.5 py-1.5 rounded-md mb-5 sm:mb-6"
+          <div
+            style={{ color: textMuted }}
+            className="text-xs font-mono uppercase tracking-[0.25em] mb-5"
           >
-            EMPIEZA HOY
-          </span>
-          <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight mb-5 sm:mb-6">
-            ¿Listo para <span style={{ color: textSecondary }}>escalar?</span>
+            EMPIEZA HOY · AUDITORÍA ESTRATÉGICA
+          </div>
+
+          <h2 className="font-display font-extrabold uppercase text-3xl sm:text-6xl md:text-7xl leading-[1.04] tracking-tight mb-6">
+            <span className="block">¿LISTO PARA</span>
+            <span className="text-digital-gradient inline-flex items-center justify-center">
+              ESCALAR TU NEGOCIO?
+              <span className="inline-block w-[4px] sm:w-[6px] h-[0.85em] bg-white ml-2 sm:ml-3 animate-cursor-blink" />
+            </span>
           </h2>
+
           <p
             style={{ color: textSecondary }}
-            className="text-sm sm:text-base md:text-lg font-light mb-8 sm:mb-10 max-w-xl mx-auto leading-relaxed"
+            className="text-sm sm:text-base md:text-lg font-light mb-10 max-w-xl mx-auto leading-relaxed"
           >
             Agenda una reunión estratégica de 30 minutos con nuestro equipo.
             Evaluaremos tu situación actual y diseñaremos un plan de acción a
             medida.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3.5 sm:gap-4 max-w-md sm:max-w-none mx-auto">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4 max-w-md sm:max-w-none mx-auto">
             <motion.button
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full sm:w-auto bg-gradient-to-b from-[#FF6B35] to-[#E54310] text-white px-7 sm:px-8 py-4 rounded-xl text-sm sm:text-base md:text-lg font-medium inline-flex items-center justify-center gap-2 shadow-[0_0_35px_rgba(255,91,34,0.45)] border border-[#FF8A61]/40 hover:brightness-110 transition-all cursor-pointer"
+              className="btn-digital-outline px-9 py-5 text-xs sm:text-sm font-display font-bold uppercase tracking-wider text-white inline-flex items-center justify-center gap-3 cursor-pointer"
             >
-              Agendar Auditoría Gratuita <ChevronRight className="w-5 h-5" />
+              <span className="w-3 h-3 rounded-full bg-digital-gradient shadow-[0_0_14px_#9E38F5]" />
+              <span>AGENDAR AUDITORÍA GRATUITA</span>
             </motion.button>
-            <a
-              href="#corporativo"
-              style={{
-                backgroundColor: bgCard,
-                borderColor,
-                color: textPrimary,
-              }}
-              className="w-full sm:w-auto border px-7 py-4 rounded-xl text-sm sm:text-base font-medium hover:opacity-85 transition-all inline-flex items-center justify-center"
-            >
-              Explorar Ecosistemas
-            </a>
           </div>
         </motion.div>
 
-        {/* Tarjeta Footer */}
-        <div
-          style={{ backgroundColor: bgCard, borderColor }}
-          className="max-w-7xl mx-auto rounded-3xl border p-6 sm:p-8 md:p-12 relative z-10 transition-colors duration-200"
+        {/* Footer Minimalista Arquitectónico estilo DigitalPro (00:08) */}
+        <footer
+          style={{ borderColor }}
+          className="relative z-10 max-w-7xl mx-auto pt-8 border-t flex flex-col md:flex-row items-start md:items-center justify-between gap-6 text-xs"
         >
+          <div className="flex items-center gap-2">
+            <span className="font-display font-extrabold text-base sm:text-lg uppercase tracking-wider">
+              DYNAMO<span className="text-digital-gradient">SOLUTIONS</span>
+            </span>
+            <sup className="text-[10px] font-mono text-[#9E38F5] font-bold">
+              ®
+            </sup>
+          </div>
+
           <div
-            style={{ borderColor }}
-            className="grid md:grid-cols-12 gap-8 sm:gap-10 pb-8 sm:pb-10 border-b"
+            style={{ color: textSecondary }}
+            className="flex flex-wrap gap-6 text-xs font-display uppercase tracking-wider"
           >
-            <div className="md:col-span-5">
-              <div className="flex items-center gap-2.5 mb-4">
-                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#FF6B35] to-[#D93800] flex items-center justify-center">
-                  <Zap className="w-4 h-4 text-white fill-white" />
-                </div>
-                <span className="text-lg sm:text-xl font-semibold tracking-tight">
-                  Dynamo Solutions<span className="text-[#FF5B22]">.</span>
-                </span>
-              </div>
-              <p
-                style={{ color: textSecondary }}
-                className="text-sm max-w-sm font-light leading-relaxed"
-              >
-                Arquitectos de ecosistemas digitales. Automatización,
-                posicionamiento y escalabilidad para empresas y profesionales.
-              </p>
-            </div>
-
-            <div className="md:col-span-7 grid sm:grid-cols-3 gap-6 sm:gap-8 text-sm">
-              <div>
-                <div className="font-medium mb-3">Ecosistema 01</div>
-                <ul
-                  style={{ color: textSecondary }}
-                  className="space-y-2 text-xs"
-                >
-                  <li>
-                    <a
-                      href="#corporativo"
-                      className="hover:opacity-100 transition-opacity"
-                    >
-                      Desarrollo E-commerce & Web
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="#corporativo"
-                      className="hover:opacity-100 transition-opacity"
-                    >
-                      SEO, GEO & Google Business
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="#corporativo"
-                      className="hover:opacity-100 transition-opacity"
-                    >
-                      SEM & Meta Ads
-                    </a>
-                  </li>
-                </ul>
-              </div>
-
-              <div>
-                <div className="font-medium mb-3">Ecosistema 02</div>
-                <ul
-                  style={{ color: textSecondary }}
-                  className="space-y-2 text-xs"
-                >
-                  <li>
-                    <a
-                      href="#profesionales"
-                      className="hover:opacity-100 transition-opacity"
-                    >
-                      Modelo 80/20 Riesgo Cero
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="#profesionales"
-                      className="hover:opacity-100 transition-opacity"
-                    >
-                      Reservas IA en WhatsApp
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="#profesionales"
-                      className="hover:opacity-100 transition-opacity"
-                    >
-                      Autoridad Local Google Maps
-                    </a>
-                  </li>
-                </ul>
-              </div>
-
-              <div>
-                <div className="font-medium mb-3">Compañía</div>
-                <ul
-                  style={{ color: textSecondary }}
-                  className="space-y-2 text-xs"
-                >
-                  <li>
-                    <a
-                      href="#manifiesto"
-                      className="hover:opacity-100 transition-opacity"
-                    >
-                      Sobre Nosotros · El Manifiesto
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="#caso-estudio"
-                      className="hover:opacity-100 transition-opacity"
-                    >
-                      Caso The Bellacy Studio
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="#agendar"
-                      className="hover:opacity-100 transition-opacity"
-                    >
-                      Agendar Auditoría Gratuita
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            </div>
+            <a href="#manifiesto" className="hover:text-[#E24497] transition-colors">
+              Manifiesto
+            </a>
+            <a href="#corporativo" className="hover:text-[#E24497] transition-colors">
+              Corporativo
+            </a>
+            <a href="#profesionales" className="hover:text-[#E24497] transition-colors">
+              Modelo 80/20
+            </a>
+            <a href="#caso-estudio" className="hover:text-[#E24497] transition-colors">
+              Caso Bellacy
+            </a>
           </div>
 
           <div
             style={{ color: textMuted }}
-            className="pt-6 flex flex-col sm:flex-row items-center justify-between text-center sm:text-left text-xs gap-3 sm:gap-4"
+            className="font-mono text-[11px] text-left md:text-right"
           >
-            <div>© 2026 Dynamo Solutions. Todos los derechos reservados.</div>
-            <div className="font-mono text-[11px]">
-              Automatización & Escalabilidad Digital
-            </div>
+            <div>© 2026 DYNAMO SOLUTIONS. TODOS LOS DERECHOS RESERVADOS.</div>
           </div>
-        </div>
-
-        {/* Marca de agua gigante inferior */}
-        <div className="max-w-7xl mx-auto text-center select-none pointer-events-none overflow-hidden -mt-2 sm:-mt-4">
-          <div
-            style={{
-              backgroundImage: isLightModeSide
-                ? "linear-gradient(to bottom, rgba(0,0,0,0.08), transparent)"
-                : "linear-gradient(to bottom, rgba(255,255,255,0.08), transparent)",
-            }}
-            className="font-sans font-bold text-[18vw] sm:text-[15vw] leading-none tracking-tighter bg-clip-text text-transparent"
-          >
-            Dynamo
-          </div>
-        </div>
+        </footer>
       </section>
     </div>
   );

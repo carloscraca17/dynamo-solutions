@@ -1,10 +1,17 @@
 import type { Metadata } from "next";
-import { Inter, Geist_Mono } from "next/font/google";
+import { Inter, Geist_Mono, Archivo } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
   variable: "--font-sans",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const archivo = Archivo({
+  variable: "--font-display",
+  subsets: ["latin"],
+  axes: ["wdth"],
   display: "swap",
 });
 
@@ -28,9 +35,9 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${inter.variable} ${geistMono.variable} dark scroll-smooth h-full antialiased`}
+      className={`${inter.variable} ${archivo.variable} ${geistMono.variable} dark scroll-smooth h-full antialiased`}
     >
-      <body className="min-h-screen flex flex-col bg-[#050505] text-white font-sans selection:bg-[#FF5B22]/30 selection:text-white">
+      <body className="min-h-screen flex flex-col bg-[#030305] text-white font-sans selection:bg-[#9E38F5]/35 selection:text-white">
         {children}
       </body>
     </html>
