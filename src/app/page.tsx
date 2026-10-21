@@ -72,6 +72,8 @@ export default function DynamoLanding() {
     y: number;
     active: boolean;
   }>({ x: 0, y: 0, active: false });
+  // Porcentaje de develado de izquierda a derecha (0 = Antes US$ 300, 100 = Después US$ 1.300)
+  const [bellacyReveal, setBellacyReveal] = useState<number>(35);
 
   // Cálculo continuo de la paleta según el nivel de luminosidad (0 - 100)
   const bgPrimaryRGB = sampleStops(
@@ -1256,7 +1258,7 @@ export default function DynamoLanding() {
         </div>
       </section>
 
-      {/* SECCIÓN EXCLUSIVA: EL CASO THE BELLACY STUDIO */}
+      {/* SECCIÓN EXCLUSIVA: EL CASO THE BELLACY STUDIO — Tarjeta Interactiva Antes / Después (Develado Izquierda a Derecha) */}
       <section
         id="caso-estudio"
         className="py-28 md:py-36 px-6 max-w-7xl mx-auto scroll-mt-20"
@@ -1266,7 +1268,7 @@ export default function DynamoLanding() {
           whileInView="visible"
           viewport={{ once: true, margin: "-80px" }}
           variants={fadeUpBlur}
-          className="text-center max-w-3xl mx-auto mb-16"
+          className="text-center max-w-3xl mx-auto mb-12"
         >
           <span
             style={{
@@ -1278,11 +1280,53 @@ export default function DynamoLanding() {
           >
             CASO DE ESTUDIO EXCLUSIVO · THE BELLACY STUDIO
           </span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight mb-4">
             Transformación digital con{" "}
             <span style={{ color: textSecondary }}>resultados medibles.</span>
           </h2>
+          <p style={{ color: textSecondary }} className="text-sm md:text-base font-light">
+            Desliza la tarjeta de <strong style={{ color: textPrimary }} className="font-medium">izquierda a derecha</strong> para develar el antes y el después de The Bellacy Studio.
+          </p>
         </motion.div>
+
+        {/* Controles rápidos de comparación Antes vs Después */}
+        <div className="flex flex-wrap items-center justify-center gap-3 mb-6">
+          <button
+            type="button"
+            onClick={() => setBellacyReveal(8)}
+            style={{
+              backgroundColor: bellacyReveal <= 15 ? "#27272a" : bgCard,
+              borderColor: bellacyReveal <= 15 ? "#71717a" : borderColor,
+              color: bellacyReveal <= 15 ? "#ffffff" : textSecondary,
+            }}
+            className="px-4 py-2 rounded-xl border text-xs font-mono uppercase tracking-wider transition-all cursor-pointer"
+          >
+            ← Ver Antes (US$ 300/mes)
+          </button>
+          <button
+            type="button"
+            onClick={() => setBellacyReveal(50)}
+            style={{
+              backgroundColor:
+                bellacyReveal > 15 && bellacyReveal < 85 ? bgCardInner : bgCard,
+              borderColor:
+                bellacyReveal > 15 && bellacyReveal < 85
+                  ? "#FF6B35"
+                  : borderColor,
+              color: textPrimary,
+            }}
+            className="px-4 py-2 rounded-xl border text-xs font-mono uppercase tracking-wider transition-all cursor-pointer"
+          >
+            Comparar 50 / 50
+          </button>
+          <button
+            type="button"
+            onClick={() => setBellacyReveal(94)}
+            className="px-4 py-2 rounded-xl border border-[#FF8559]/50 bg-gradient-to-r from-[#FF6B35] to-[#E54310] text-white text-xs font-mono uppercase tracking-wider shadow-[0_0_20px_rgba(255,91,34,0.35)] transition-all cursor-pointer"
+          >
+            Develar Después (US$ 1.300/mes) →
+          </button>
+        </div>
 
         <motion.div
           initial="hidden"
@@ -1290,169 +1334,302 @@ export default function DynamoLanding() {
           viewport={{ once: true, margin: "-60px" }}
           variants={staggerContainer}
           style={{ backgroundColor: bgCard, borderColor }}
-          className="rounded-[2rem] border p-6 md:p-10 shadow-2xl transition-colors duration-200"
+          className="rounded-[2rem] border p-5 md:p-8 shadow-2xl transition-colors duration-200"
         >
-          <div className="grid lg:grid-cols-12 gap-6 items-stretch">
-            {/* Panel Izquierdo */}
-            <motion.div
-              variants={fadeUpBlur}
-              style={{ backgroundColor: bgCardInner, borderColor }}
-              className="lg:col-span-4 rounded-2xl border p-6 flex flex-col justify-between"
-            >
-              <div>
-                <div
-                  style={{ color: textMuted }}
-                  className="text-xs font-mono uppercase tracking-wider mb-1"
-                >
-                  Facturación Mensual
-                </div>
-                <div className="flex items-baseline gap-3 mb-6">
-                  <span
-                    style={{ color: textMuted }}
-                    className="line-through text-base"
-                  >
-                    $300 USD
-                  </span>
-                  <span className="text-3xl md:text-4xl font-bold">
-                    $1.300 USD
-                  </span>
-                </div>
+          {/* TARJETA INTERACTIVA DE DEVELADO IZQUIERDA A DERECHA */}
+          <div className="relative rounded-3xl overflow-hidden border border-white/10 select-none min-h-[520px] md:min-h-[460px]">
+            {/* Input range invisible que cubre toda la tarjeta para arrastrar de izquierda a derecha con mouse o touch */}
+            <input
+              type="range"
+              min={0}
+              max={100}
+              value={bellacyReveal}
+              onChange={(e) => setBellacyReveal(Number(e.target.value))}
+              aria-label="Develar de izquierda a derecha el antes y después de The Bellacy Studio"
+              className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-30 m-0"
+            />
 
-                <div
-                  style={{ color: textSecondary }}
-                  className="text-xs font-medium mb-3"
-                >
-                  Estrategia Implementada
-                </div>
-                <div className="space-y-2.5 text-xs">
-                  {[
-                    { name: "Posicionamiento Google Maps", status: "Activo" },
-                    { name: "Campañas de Anuncios Precisas", status: "Activo" },
-                    { name: "Sistema Predecible de Clientes", status: "Activo" },
-                    { name: "Flujo Constante de Reservas", status: "Activo" },
-                  ].map((item, i) => (
-                    <div
-                      key={i}
-                      style={{ backgroundColor: bgCard, borderColor }}
-                      className="flex items-center justify-between px-3 py-2.5 rounded-xl border"
-                    >
-                      <span style={{ color: textSecondary }}>{item.name}</span>
-                      <span className="inline-flex items-center gap-1 text-[10px] font-mono text-emerald-500">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        {item.status}
+            {/* =========================================================
+                CAPA BASE (ANTES DE CONTRATAR NUESTROS SERVICIOS: US$ 300)
+               ========================================================= */}
+            <div className="w-full h-full min-h-[520px] md:min-h-[460px] bg-gradient-to-br from-[#141418] via-[#0D0D10] to-[#08080A] text-white p-7 md:p-12 flex flex-col justify-between relative">
+              <div className="absolute right-8 bottom-8 opacity-5 pointer-events-none">
+                <BarChart3 className="w-56 h-56 text-zinc-400" />
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <span className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-widest text-zinc-400 bg-zinc-900/90 border border-zinc-700/80 px-3.5 py-1.5 rounded-lg">
+                  <span className="w-2 h-2 rounded-full bg-zinc-500" />
+                  ANTES DE DYNAMO SOLUTIONS · ESTADO INICIAL
+                </span>
+                <span className="text-xs font-mono text-zinc-500">
+                  Desliza de izquierda a derecha para transformar →
+                </span>
+              </div>
+
+              <div className="grid lg:grid-cols-12 gap-8 items-center my-8">
+                <div className="lg:col-span-6">
+                  <div className="text-xs font-mono uppercase tracking-widest text-zinc-500 mb-2">
+                    Caso de Estudio · Diagnóstico Inicial
+                  </div>
+                  <h3 className="text-3xl md:text-5xl font-bold tracking-tight text-zinc-200 mb-3">
+                    The Bellacy Studio
+                  </h3>
+                  <p className="text-sm md:text-base text-zinc-400 font-light leading-relaxed mb-6">
+                    Antes de contratar nuestros servicios, el estudio contaba con
+                    una excelente calidad de servicio pero carecía de visibilidad
+                    local estructurada en Google Maps y de campañas de adquisición
+                    digital.
+                  </p>
+
+                  <div className="inline-block rounded-2xl bg-black/60 border border-zinc-800 p-5">
+                    <div className="text-[11px] font-mono uppercase tracking-wider text-zinc-500 mb-1">
+                      Facturación Mensual (Antes)
+                    </div>
+                    <div className="flex items-baseline gap-3">
+                      <span className="text-4xl md:text-5xl font-bold text-zinc-300">
+                        US$ 300
+                      </span>
+                      <span className="text-xs font-mono text-zinc-500">
+                        / mes
                       </span>
                     </div>
-                  ))}
+                    <div className="text-xs text-zinc-500 mt-1">
+                      Flujo limitado e impredecible de nuevos clientes
+                    </div>
+                  </div>
+                </div>
+
+                <div className="lg:col-span-6">
+                  <div className="text-xs font-mono uppercase tracking-wider text-zinc-500 mb-3">
+                    Situación Previa a la Intervención
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-3 text-xs">
+                    {[
+                      {
+                        title: "Posicionamiento Google Maps",
+                        state: "Baja visibilidad local",
+                      },
+                      {
+                        title: "Campañas de Anuncios",
+                        state: "Sin pauta estructurada",
+                      },
+                      {
+                        title: "Captación de Clientes",
+                        state: "Dependiente del boca a boca",
+                      },
+                      {
+                        title: "Facturación Mensual",
+                        state: "Estancada en US$ 300 / mes",
+                      },
+                    ].map((item, i) => (
+                      <div
+                        key={i}
+                        className="rounded-xl bg-zinc-900/70 border border-zinc-800/90 p-4 flex flex-col justify-between"
+                      >
+                        <span className="text-zinc-300 font-medium mb-1">
+                          {item.title}
+                        </span>
+                        <span className="inline-flex items-center gap-1.5 text-[11px] font-mono text-zinc-500">
+                          <span className="w-1.5 h-1.5 rounded-full bg-zinc-600" />
+                          {item.state}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              <div
-                style={{ borderColor, color: textMuted }}
-                className="mt-6 pt-4 border-t flex items-center justify-between text-xs font-mono"
-              >
-                <span>ROI VERIFICADO</span>
-                <span style={{ color: textPrimary }} className="font-bold">
-                  +330%
+              <div className="pt-4 border-t border-zinc-800/80 flex flex-wrap items-center justify-between gap-4 text-xs font-mono text-zinc-500">
+                <span>ESTADO: PRE-OPTIMIZACIÓN</span>
+                <span>INGRESOS MENSUALES: US$ 300</span>
+              </div>
+            </div>
+
+            {/* =========================================================
+                CAPA SUPERIOR DEVELADA (DESPUÉS DE DYNAMO SOLUTIONS: US$ 1.300)
+                Se devela de izquierda a derecha según bellacyReveal (%)
+               ========================================================= */}
+            <div
+              style={{
+                clipPath: `inset(0 ${100 - bellacyReveal}% 0 0)`,
+              }}
+              className="absolute inset-0 w-full h-full bg-gradient-to-br from-[#FF7A45] via-[#D94B1A] to-[#1E0D07] text-white p-7 md:p-12 flex flex-col justify-between z-10"
+            >
+              <div className="absolute right-8 bottom-8 opacity-15 pointer-events-none">
+                <BarChart3 className="w-56 h-56 text-white" />
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <span className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-widest text-white bg-black/35 backdrop-blur-md border border-white/25 px-3.5 py-1.5 rounded-lg">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  DESPUÉS DE DYNAMO SOLUTIONS · EN TAN SOLO 3 MESES
+                </span>
+                <span className="text-xs font-mono text-white/90 bg-black/25 px-3 py-1 rounded-md border border-white/15">
+                  ROI VERIFICADO: +330%
                 </span>
               </div>
-            </motion.div>
 
-            {/* Panel Central Naranja */}
-            <motion.div
-              variants={fadeUpBlur}
-              className="lg:col-span-4 rounded-2xl bg-gradient-to-br from-[#FF7A45] via-[#D94B1A] to-[#2A120A] border border-[#FF9B73]/30 p-7 flex flex-col justify-between relative overflow-hidden text-white"
-            >
-              <div className="absolute -right-8 -bottom-8 opacity-15 pointer-events-none">
-                <BarChart3 className="w-44 h-44 text-white" />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-white/80 bg-black/25 backdrop-blur-sm px-2.5 py-1 rounded-md border border-white/15">
-                  CASO DE ESTUDIO
-                </span>
-                <TrendingUp className="w-5 h-5 text-white" />
-              </div>
-
-              <div className="my-8">
-                <div className="text-3xl md:text-4xl font-bold tracking-tight text-white leading-tight mb-2">
-                  The Bellacy Studio
-                </div>
-                <p className="text-xs md:text-sm text-white/85 font-light">
-                  Posicionamiento local en Google Maps combinado con pauta
-                  inteligente de alta conversión.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 pt-4 border-t border-white/20">
-                <div>
-                  <div className="text-2xl md:text-3xl font-bold text-white">
-                    +330%
+              <div className="grid lg:grid-cols-12 gap-8 items-center my-8">
+                <div className="lg:col-span-6">
+                  <div className="text-xs font-mono uppercase tracking-widest text-white/80 mb-2">
+                    Caso de Estudio · Ecosistema Activo
                   </div>
-                  <div className="text-[11px] text-white/80">
-                    Crecimiento en ingresos
-                  </div>
-                </div>
-                <div>
-                  <div className="text-2xl md:text-3xl font-bold text-white">
-                    3 Meses
-                  </div>
-                  <div className="text-[11px] text-white/80">
-                    Tiempo de ejecución
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Panel Derecho */}
-            <motion.div
-              variants={fadeUpBlur}
-              style={{ backgroundColor: bgCardInner, borderColor }}
-              className="lg:col-span-4 rounded-2xl border p-7 flex flex-col justify-between"
-            >
-              <div>
-                <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-[#FF6B35] mb-4">
-                  <Activity className="w-4 h-4" />
-                  Impacto Real & Medible
-                </div>
-                <p
-                  style={{ color: textSecondary }}
-                  className="text-sm md:text-base font-light leading-relaxed"
-                >
-                  &ldquo;Para{" "}
-                  <span style={{ color: textPrimary }} className="font-medium">
+                  <h3 className="text-3xl md:text-5xl font-bold tracking-tight text-white mb-3">
                     The Bellacy Studio
-                  </span>
-                  , el desafío no era la calidad de su servicio, sino su
-                  visibilidad. Implementamos una reestructuración completa de su
-                  posicionamiento local en Google Maps y lo potenciamos con
-                  campañas de anuncios precisas. El resultado: en tan solo 3
-                  meses, pasaron de una facturación de{" "}
-                  <span style={{ color: textPrimary }} className="font-medium">
-                    $300 USD a $1.300 USD mensuales
-                  </span>
-                  , estableciendo un sistema predecible de adquisición de
-                  clientes.&rdquo;
-                </p>
-              </div>
+                  </h3>
+                  <p className="text-sm md:text-base text-white/90 font-light leading-relaxed mb-6">
+                    Posicionamiento local en Google Maps combinado con pauta
+                    inteligente de alta conversión. Sistema predecible y
+                    constante de adquisición de nuevos clientes.
+                  </p>
 
-              <div
-                style={{ borderColor }}
-                className="mt-8 pt-5 border-t flex items-center justify-between"
-              >
-                <div>
-                  <div className="text-xs font-medium">The Bellacy Studio</div>
-                  <div style={{ color: textMuted }} className="text-[11px]">
-                    Ecosistema Local + Pauta Digital
+                  <div className="inline-flex flex-wrap items-center gap-6 rounded-2xl bg-black/45 backdrop-blur-md border border-white/25 p-5 shadow-2xl">
+                    <div>
+                      <div className="text-[11px] font-mono uppercase tracking-wider text-white/75 mb-1">
+                        Facturación Mensual (Después)
+                      </div>
+                      <div className="flex items-baseline gap-3">
+                        <span className="text-white/50 line-through text-base font-mono">
+                          US$ 300
+                        </span>
+                        <span className="text-4xl md:text-5xl font-bold text-white">
+                          US$ 1.300
+                        </span>
+                        <span className="text-xs font-mono text-white/80">
+                          / mes
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-4 pl-4 border-l border-white/20">
+                      <div>
+                        <div className="text-2xl font-bold text-emerald-300">
+                          +330%
+                        </div>
+                        <div className="text-[11px] text-white/80">
+                          Crecimiento
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-2xl font-bold text-white">
+                          3 Meses
+                        </div>
+                        <div className="text-[11px] text-white/80">
+                          Ejecución
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <a
-                  href="#agendar"
-                  className="text-xs font-medium text-[#FF6B35] hover:opacity-80 transition-opacity inline-flex items-center gap-1"
-                >
-                  Replicar sistema <ArrowRight className="w-3.5 h-3.5" />
-                </a>
+
+                <div className="lg:col-span-6">
+                  <div className="text-xs font-mono uppercase tracking-wider text-white/85 mb-3">
+                    Estrategia Implementada con Éxito
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-3 text-xs">
+                    {[
+                      {
+                        title: "Posicionamiento Google Maps",
+                        state: "Activo · Top Local",
+                      },
+                      {
+                        title: "Campañas de Anuncios Precisas",
+                        state: "Activo · Alta Conversión",
+                      },
+                      {
+                        title: "Sistema Predecible de Clientes",
+                        state: "Activo · Flujo Constante",
+                      },
+                      {
+                        title: "Escala de Facturación",
+                        state: "De US$ 300 a US$ 1.300/mes",
+                      },
+                    ].map((item, i) => (
+                      <div
+                        key={i}
+                        className="rounded-xl bg-black/40 backdrop-blur-md border border-white/20 p-4 flex flex-col justify-between"
+                      >
+                        <span className="text-white font-medium mb-1">
+                          {item.title}
+                        </span>
+                        <span className="inline-flex items-center gap-1.5 text-[11px] font-mono text-emerald-300">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                          {item.state}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
-            </motion.div>
+
+              <div className="pt-4 border-t border-white/20 flex flex-wrap items-center justify-between gap-4 text-xs font-mono text-white/90">
+                <span>RESULTADO: ECOSISTEMA EN ESCALA AUTOMÁTICA</span>
+                <span>FACTURACIÓN ALCANZADA: US$ 1.300 / MES (+330%)</span>
+              </div>
+            </div>
+
+            {/* =========================================================
+                DIVISOR VERTICAL INTERACTIVO (CORTINA IZQUIERDA -> DERECHA)
+               ========================================================= */}
+            <div
+              style={{ left: `${bellacyReveal}%` }}
+              className="absolute inset-y-0 z-20 pointer-events-none -translate-x-1/2 flex flex-col items-center justify-center"
+            >
+              {/* Línea vertical luminosa */}
+              <div className="w-0.5 h-full bg-white shadow-[0_0_20px_#ffffff,0_0_35px_#FF5B22]" />
+
+              {/* Botón central de arrastre */}
+              <div className="absolute top-1/2 -translate-y-1/2 flex flex-col items-center gap-1.5">
+                <div className="w-12 h-12 rounded-full bg-white text-black shadow-[0_0_35px_rgba(0,0,0,0.8),0_0_25px_rgba(255,91,34,0.9)] border-2 border-[#FF6B35] flex items-center justify-center font-mono text-xs font-bold">
+                  ↔
+                </div>
+                <span className="px-2.5 py-0.5 rounded-full bg-black/85 text-white border border-white/20 text-[10px] font-mono whitespace-nowrap shadow-lg">
+                  {bellacyReveal}% develado
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* BLOQUE INFERIOR CON LA NARRATIVA COMPLETA Y CTA DE LA SECCIÓN */}
+          <div
+            style={{ backgroundColor: bgCardInner, borderColor }}
+            className="mt-6 rounded-2xl border p-6 md:p-8 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6"
+          >
+            <div className="max-w-4xl">
+              <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-[#FF6B35] mb-2">
+                <Activity className="w-4 h-4" />
+                Impacto Real & Medible · Resumen del Caso
+              </div>
+              <p
+                style={{ color: textSecondary }}
+                className="text-sm md:text-base font-light leading-relaxed"
+              >
+                &ldquo;Para{" "}
+                <span style={{ color: textPrimary }} className="font-medium">
+                  The Bellacy Studio
+                </span>
+                , el desafío no era la calidad de su servicio, sino su
+                visibilidad. Implementamos una reestructuración completa de su
+                posicionamiento local en Google Maps y lo potenciamos con
+                campañas de anuncios precisas. El resultado: en tan solo 3
+                meses, pasaron de una facturación de{" "}
+                <span style={{ color: textPrimary }} className="font-medium">
+                  $300 USD a $1.300 USD mensuales
+                </span>
+                , estableciendo un sistema predecible de adquisición de
+                clientes.&rdquo;
+              </p>
+            </div>
+
+            <div className="shrink-0 flex flex-col sm:flex-row lg:flex-col items-stretch sm:items-center lg:items-end gap-3 w-full lg:w-auto">
+              <a
+                href="#agendar"
+                className="bg-gradient-to-b from-[#FF6B35] to-[#E54310] text-white px-6 py-3.5 rounded-xl text-xs md:text-sm font-medium inline-flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(255,91,34,0.35)] border border-[#FF8A61]/40 hover:brightness-110 transition-all"
+              >
+                Replicar este sistema <ArrowRight className="w-4 h-4" />
+              </a>
+            </div>
           </div>
         </motion.div>
       </section>
