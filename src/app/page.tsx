@@ -9,13 +9,7 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion";
-import {
-  ArrowUpRight,
-  BarChart3,
-  Sun,
-  Moon,
-  X,
-} from "lucide-react";
+import { Sun, Moon, X, ArrowUpRight } from "lucide-react";
 
 const fadeUpBlur: Variants = {
   hidden: { opacity: 0, y: 24, filter: "blur(8px)" },
@@ -298,7 +292,6 @@ export default function DynamoLanding() {
   const bgPrimary = rgb(3, 3, 6, 246, 246, 250);
   const bgSecondary = rgb(7, 7, 12, 236, 236, 242);
   const bgCard = rgb(10, 10, 16, 255, 255, 255);
-  const bgCardInner = rgb(6, 6, 10, 240, 240, 246);
   const textPrimary = rgb(250, 250, 252, 12, 12, 18);
   const textSecondary = rgb(168, 168, 182, 75, 75, 90);
   const textMuted = rgb(110, 110, 128, 115, 115, 132);
@@ -312,75 +305,75 @@ export default function DynamoLanding() {
       : `rgba(${lerp(4, 245)}, ${lerp(4, 245)}, ${lerp(8, 250)}, 0.92)`;
   const isLightModeSide = luminosity > 58;
 
-  // MANIFIESTO — Frases cortas, palabras clave y conectores directos (Estilo 00:02 del video)
+  // MANIFIESTO — 01: Enfoque en Resultados primero + explicación clara de Democratizamos la Escala
   const manifestoItems = [
     {
       num: "01",
-      heading: "DEMOCRATIZAMOS LA ESCALA",
-      body: "Tecnología de alto nivel y captación masiva sin fricción operativa para multiplicar tu rentabilidad.",
+      heading: "ENFOQUE EN RESULTADOS",
+      body: "Nosotros diseñamos, posicionamos y aceleramos tu negocio; tú te enfocas en lo que mejor sabes hacer.",
     },
     {
       num: "02",
-      heading: "INFRAESTRUCTURA EN AUTOMÁTICO",
-      body: "Ecosistemas diseñados para convertir visitantes en clientes recurrentes las 24 horas.",
+      heading: "DEMOCRATIZAMOS LA ESCALA DIGITAL",
+      body: "Acercamos a tu empresa o profesión las mismas herramientas de automatización, IA y captación de clientes que antes solo podían pagar las grandes corporaciones.",
     },
     {
       num: "03",
-      heading: "DOS CAMINOS DE CRECIMIENTO",
-      body: "Potencia corporativa para empresas y modelo 80/20 sin inversión inicial para profesionales.",
+      heading: "INFRAESTRUCTURA EN AUTOMÁTICO",
+      body: "Ecosistemas diseñados para operar las 24 horas y convertir visitantes en clientes recurrentes sin fricción operativa.",
     },
     {
       num: "04",
-      heading: "ENFOQUE EN RESULTADOS",
-      body: "Nosotros diseñamos, posicionamos y aceleramos; tú te enfocas en lo que mejor sabes hacer.",
+      heading: "DOS CAMINOS DE CRECIMIENTO",
+      body: "Potencia corporativa a medida para empresas y modelo 80/20 sin inversión inicial para profesionales independientes.",
     },
   ];
 
-  // ECOSISTEMA 01: SOLUCIONES CORPORATIVAS — Iniciales gigantes + síntesis precisa (Estilo 00:04 A / B / G)
+  // JUEGO DE LETRAS D - Y - N (Ecosistema 01: Soluciones Corporativas)
   const corporatePillars = [
     {
       code: "01",
-      letter: "W",
-      title: "E-COMMERCE & WEB DE ALTO IMPACTO",
+      letter: "D",
+      title: "DISEÑO A MEDIDA DE E-COMMERCE & WEB DE ALTO IMPACTO",
       description:
         "Tiendas online y sitios corporativos rápidos, seguros y optimizados para la conversión (CRO). Cero límites técnicos.",
     },
     {
       code: "02",
-      letter: "G",
-      title: "POSICIONAMIENTO SEO, GEO & MAPS",
+      letter: "Y",
+      title: "YIELD & POSICIONAMIENTO ORGÁNICO (SEO, GEO & MAPS)",
       description:
-        "Dominio orgánico en Google, motores de Inteligencia Artificial (GEO) y Google Business justo cuando tus clientes buscan comprar.",
+        "Máximo rendimiento orgánico en Google, motores de Inteligencia Artificial (GEO) y Google Business justo cuando tus clientes buscan comprar.",
     },
     {
       code: "03",
-      letter: "A",
-      title: "TRÁFICO PAGADO · SEM & META ADS",
+      letter: "N",
+      title: "NEGOCIOS ESCALANDO CON SEM & META ADS",
       description:
-        "No compramos clics, compramos rentabilidad. Campañas de alta precisión enfocadas en ROI y leads calificados.",
+        "No compramos clics, compramos rentabilidad. Campañas de alta precisión en Google y Meta enfocadas en ROI y leads calificados.",
     },
   ];
 
-  // ECOSISTEMA 02: IMPULSO PROFESIONALES (MODELO 80/20) — Iniciales gigantes + síntesis directa
+  // JUEGO DE LETRAS A - M - O (Ecosistema 02: Impulso Modelo 80/20)
   const professionalPillars = [
     {
       code: "01",
-      letter: "E",
-      title: "ÉXITO COMPARTIDO · MODELO 80/20",
+      letter: "A",
+      title: "ALIANZA DE ÉXITO COMPARTIDO (MODELO 80/20)",
       description:
         "Cero inversión inicial en web. Construimos tu plataforma de reservas: 80% para ti, 20% por cita concretada. Si tú no ganas, nosotros tampoco.",
     },
     {
       code: "02",
-      letter: "I",
-      title: "RECEPCIONISTA IA EN WHATSAPP 24/7",
+      letter: "M",
+      title: "MENSAJERÍA & RECEPCIONISTA IA EN WHATSAPP 24/7",
       description:
         "Tu asistente con Inteligencia Artificial responde consultas, perfila clientes y agenda citas en automático mientras trabajas.",
     },
     {
       code: "03",
-      letter: "M",
-      title: "AUTORIDAD LOCAL EN GOOGLE MAPS",
+      letter: "O",
+      title: "OPTIMIZACIÓN & AUTORIDAD LOCAL EN GOOGLE MAPS",
       description:
         "Posicionamos tu oficio como Área de Servicio para dominar las búsquedas de tu zona sin exponer tu dirección personal.",
     },
@@ -397,7 +390,7 @@ export default function DynamoLanding() {
       {/* BARRA SUPERIOR DE PROGRESO CON EL GRADIENTE DIGITALPRO */}
       <div className="fixed top-0 inset-x-0 h-[3px] z-[60] bg-digital-gradient opacity-95 pointer-events-none" />
 
-      {/* NAVBAR MINIMALISTA ESTILO DIGITALPRO */}
+      {/* NAVBAR: Solo menú hamburguesa + Logo más a la izquierda + Botón AGENDAR con mayor protagonismo */}
       <header
         style={{
           backgroundColor: navBg,
@@ -405,9 +398,9 @@ export default function DynamoLanding() {
         }}
         className="fixed top-[3px] inset-x-0 z-50 border-b backdrop-blur-xl transition-colors duration-200"
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4">
-          {/* Izquierda: Menú Hamburguesa + Links directos */}
-          <div className="flex items-center gap-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-3 sm:gap-6">
+          {/* Izquierda: Solo Menú Hamburguesa + Logo DYNAMOSOLUTIONS® posicionado a la izquierda */}
+          <div className="flex items-center gap-4 sm:gap-6">
             <button
               type="button"
               onClick={() => setMobileMenuOpen((prev) => !prev)}
@@ -416,7 +409,7 @@ export default function DynamoLanding() {
                 color: textPrimary,
               }}
               aria-label="Abrir menú"
-              className="w-10 h-10 flex flex-col items-center justify-center gap-1.5 border hover:border-[#9E38F5] transition-colors cursor-pointer"
+              className="w-10 h-10 sm:w-11 sm:h-11 flex flex-col items-center justify-center gap-1.5 border hover:border-[#9E38F5] transition-colors cursor-pointer shrink-0"
             >
               {mobileMenuOpen ? (
                 <X className="w-4 h-4" />
@@ -434,37 +427,18 @@ export default function DynamoLanding() {
               )}
             </button>
 
-            <nav
-              style={{ color: textSecondary }}
-              className="hidden lg:flex items-center gap-6 text-[11px] uppercase tracking-[0.16em] font-medium"
-            >
-              <a href="#manifiesto" className="hover:text-white transition-colors">
-                Manifiesto
-              </a>
-              <a href="#corporativo" className="hover:text-white transition-colors">
-                Corporativo
-              </a>
-              <a href="#profesionales" className="hover:text-white transition-colors">
-                Modelo 80/20
-              </a>
-              <a href="#caso-estudio" className="hover:text-white transition-colors">
-                Casos
-              </a>
-            </nav>
+            <a href="#" className="flex items-center gap-1 shrink-0">
+              <span className="font-display font-extrabold text-base sm:text-2xl tracking-wider uppercase">
+                DYNAMO<span className="text-digital-gradient">SOLUTIONS</span>
+              </span>
+              <sup className="text-[10px] font-mono text-[#9E38F5] font-bold">
+                ®
+              </sup>
+            </a>
           </div>
 
-          {/* Centro: Marca DYNAMO® */}
-          <a href="#" className="flex items-center gap-1 shrink-0">
-            <span className="font-display font-extrabold text-lg sm:text-2xl tracking-wider uppercase">
-              DYNAMO<span className="text-digital-gradient">SOLUTIONS</span>
-            </span>
-            <sup className="text-[10px] font-mono text-[#9E38F5] font-bold">
-              ®
-            </sup>
-          </a>
-
-          {/* Derecha: Luminosidad + GET STARTED / AGENDAR */}
-          <div className="flex items-center gap-2.5 sm:gap-4">
+          {/* Derecha: Barra de Luminosidad + Botón AGENDAR protagonista */}
+          <div className="flex items-center gap-3 sm:gap-5">
             <div
               style={{
                 backgroundColor: isLightModeSide
@@ -500,15 +474,16 @@ export default function DynamoLanding() {
 
             <a
               href="#agendar"
-              className="hidden sm:inline-flex items-center gap-2 px-3.5 py-2 text-xs font-display font-bold uppercase tracking-wider hover:opacity-90 transition-opacity"
+              className="btn-digital-outline px-4 sm:px-7 py-2.5 sm:py-3 text-[11px] sm:text-xs font-display font-extrabold uppercase tracking-widest text-white inline-flex items-center gap-2.5 shadow-[0_0_25px_rgba(158,56,245,0.35)] hover:scale-[1.03] transition-all"
             >
-              <span className="w-2.5 h-2.5 rounded-full bg-digital-gradient shadow-[0_0_12px_#9E38F5]" />
+              <span className="w-2.5 h-2.5 rounded-full bg-digital-gradient shadow-[0_0_12px_#FF5864] animate-pulse" />
               <span>AGENDAR</span>
+              <ArrowUpRight className="w-3.5 h-3.5 hidden sm:inline-block text-[#FF5864]" />
             </a>
           </div>
         </div>
 
-        {/* Menú Desplegable */}
+        {/* Menú Hamburguesa Desplegable */}
         <AnimatePresence>
           {mobileMenuOpen && (
             <motion.div
@@ -519,13 +494,13 @@ export default function DynamoLanding() {
               style={{ backgroundColor: bgCard, borderColor }}
               className="border-t overflow-hidden"
             >
-              <div className="max-w-7xl mx-auto px-4 py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-8">
                   {[
                     { label: "01. Manifiesto", href: "#manifiesto" },
-                    { label: "02. Corporativo", href: "#corporativo" },
-                    { label: "03. Modelo 80/20", href: "#profesionales" },
-                    { label: "04. Caso Bellacy", href: "#caso-estudio" },
+                    { label: "02. Soluciones Corporativas", href: "#corporativo" },
+                    { label: "03. Impulso Modelo 80/20", href: "#profesionales" },
+                    { label: "04. Caso The Bellacy Studio", href: "#caso-estudio" },
                   ].map((item) => (
                     <a
                       key={item.href}
@@ -541,7 +516,7 @@ export default function DynamoLanding() {
                 <a
                   href="#agendar"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="btn-digital-outline px-5 py-3 text-xs font-display font-bold uppercase tracking-wider inline-flex items-center justify-center gap-2.5 text-white"
+                  className="btn-digital-outline px-6 py-3 text-xs font-display font-bold uppercase tracking-wider inline-flex items-center justify-center gap-2.5 text-white"
                 >
                   <span className="w-2.5 h-2.5 rounded-full bg-digital-gradient shadow-[0_0_10px_#9E38F5]" />
                   <span>AGENDAR REUNIÓN</span>
@@ -553,7 +528,7 @@ export default function DynamoLanding() {
       </header>
 
       {/* =====================================================================
-          1. HERO SECTION (Frase solicitada en el título + Video de Fondo + Menos es Más)
+          1. HERO SECTION (Sin signos de puntuación ";" y sin promesa genérica de +330%)
          ===================================================================== */}
       <section className="relative min-h-screen pt-28 sm:pt-36 pb-12 sm:pb-16 px-4 sm:px-6 flex flex-col justify-between overflow-hidden">
         {/* Video de Fondo con 50% de transparencia + Onda Topográfica */}
@@ -584,7 +559,7 @@ export default function DynamoLanding() {
 
         <div className="hidden sm:block" />
 
-        {/* TITULAR MONUMENTAL CON LA FRASE EXACTA PEDIDA POR EL USUARIO */}
+        {/* TITULAR MONUMENTAL SIN SIGNOS DE PUNTUACIÓN */}
         <div className="relative z-10 max-w-6xl mx-auto w-full my-auto py-12 sm:py-20 text-center">
           <motion.h1
             initial="hidden"
@@ -593,37 +568,37 @@ export default function DynamoLanding() {
             className="font-display font-extrabold uppercase text-2xl sm:text-5xl md:text-6xl lg:text-[4.25rem] leading-[1.06] tracking-tight text-white drop-shadow-[0_10px_40px_rgba(0,0,0,0.85)]"
           >
             <span className="block mb-1.5 sm:mb-2">
-              NO SOMOS UNA AGENCIA TRADICIONAL;
+              NO SOMOS UNA AGENCIA TRADICIONAL
             </span>
             <span className="block mb-1.5 sm:mb-2">
               SOMOS ARQUITECTOS DE
             </span>
             <span className="block">
               <span className="text-digital-gradient">
-                ECOSISTEMAS DIGITALES.
+                ECOSISTEMAS DIGITALES
               </span>
               <span className="inline-block w-[4px] sm:w-[6px] h-[0.82em] bg-white ml-2 sm:ml-3 animate-cursor-blink align-middle shadow-[0_0_15px_#ffffff]" />
             </span>
           </motion.h1>
         </div>
 
-        {/* BARRA INFERIOR EN 3 COLUMNAS MINIMALISTAS (Idéntica a 00:00 del video DigitalPro) */}
+        {/* BARRA INFERIOR EN 3 COLUMNAS (Sin promesa genérica de +330%) */}
         <motion.div
           initial="hidden"
           animate="visible"
           variants={staggerContainer}
           className="relative z-10 max-w-7xl mx-auto w-full pt-8 border-t border-white/15 grid grid-cols-1 md:grid-cols-12 gap-6 items-center"
         >
-          {/* Izquierda: Número clave en gradiente */}
+          {/* Izquierda: Operación continua 24/7 */}
           <motion.div
             variants={fadeUpBlur}
             className="md:col-span-3 flex items-center gap-3.5"
           >
             <span className="font-display font-extrabold text-4xl sm:text-5xl text-digital-gradient leading-none">
-              +330%
+              24/7
             </span>
-            <span className="text-xs text-zinc-300 font-light leading-snug max-w-[140px]">
-              retorno y escala comprobada
+            <span className="text-xs text-zinc-300 font-light leading-snug max-w-[150px]">
+              sistemas operando en piloto automático
             </span>
           </motion.div>
 
@@ -632,12 +607,12 @@ export default function DynamoLanding() {
             variants={fadeUpBlur}
             className="md:col-span-5 text-xs sm:text-sm text-zinc-200 font-light leading-relaxed"
           >
-            Tu negocio en piloto automático.Tu crecimiento, sin límites.
+            Tu negocio en piloto automático. Tu crecimiento, sin límites.
             Posicionamiento, automatización e IA que convierten visitas en
             clientes recurrentes.
           </motion.p>
 
-          {/* Derecha: Un único botón rectangular con borde gradiente como en "CONTACT US" */}
+          {/* Derecha: Botón rectangular con borde gradiente */}
           <motion.div
             variants={fadeUpBlur}
             className="md:col-span-4 flex md:justify-end"
@@ -654,7 +629,7 @@ export default function DynamoLanding() {
       </section>
 
       {/* =====================================================================
-          2. EL MANIFIESTO (Layout 00:02-00:03: 01, 02, 03, 04 Concisos + Anillos 3D + Cuadrícula Interactiva)
+          2. EL MANIFIESTO (01: Enfoque en Resultados primero + Democratizamos la Escala mejor explicado)
          ===================================================================== */}
       <section
         id="manifiesto"
@@ -713,7 +688,6 @@ export default function DynamoLanding() {
 
         <div className="relative z-10 max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-12 gap-12 items-center">
-            {/* Izquierda: Título "POR QUÉ DYNAMO PRO" + 4 puntos concisos */}
             <div className="lg:col-span-7">
               <motion.div
                 initial="hidden"
@@ -771,7 +745,6 @@ export default function DynamoLanding() {
               </motion.div>
             </div>
 
-            {/* Derecha: Escultura 3D limpia como en el segundo 00:02-00:03 del video */}
             <div className="lg:col-span-5 flex items-center justify-center">
               <IridescentRingsSculpture />
             </div>
@@ -780,7 +753,7 @@ export default function DynamoLanding() {
       </section>
 
       {/* =====================================================================
-          3. SOLUCIONES CORPORATIVAS (Tarjetas A / B / G limpias estilo 00:04 del video)
+          3. SOLUCIONES CORPORATIVAS — Iniciales D · Y · N
          ===================================================================== */}
       <section
         id="corporativo"
@@ -800,7 +773,7 @@ export default function DynamoLanding() {
                 style={{ color: textMuted }}
                 className="text-[11px] font-mono uppercase tracking-[0.22em] mb-2"
               >
-                01 // EMPRESAS & PYMES
+                01 // EMPRESAS & PYMES · [ D · Y · N ]
               </div>
               <h2 className="font-display font-extrabold uppercase text-3xl sm:text-5xl md:text-6xl leading-[1.02] tracking-tight">
                 SOLUCIONES{" "}
@@ -874,7 +847,7 @@ export default function DynamoLanding() {
       </section>
 
       {/* =====================================================================
-          4. IMPULSO PARA PROFESIONALES · MODELO 80/20 (Tarjetas E / I / M limpias)
+          4. IMPULSO PARA PROFESIONALES · MODELO 80/20 — Iniciales A · M · O
          ===================================================================== */}
       <section
         id="profesionales"
@@ -891,7 +864,7 @@ export default function DynamoLanding() {
           >
             <div>
               <div className="text-[11px] font-mono uppercase tracking-[0.22em] text-[#E24497] mb-2">
-                02 // BARBEROS · ESTÉTICA · TÉCNICOS · OFICIOS
+                02 // BARBEROS · ESTÉTICA · TÉCNICOS · OFICIOS · [ A · M · O ]
               </div>
               <h2 className="font-display font-extrabold uppercase text-3xl sm:text-5xl md:text-6xl leading-[1.02] tracking-tight">
                 IMPULSO{" "}
@@ -966,7 +939,8 @@ export default function DynamoLanding() {
       </section>
 
       {/* =====================================================================
-          5. CASO DE ESTUDIO: THE BELLACY STUDIO (Estilo "CASES" 00:06 + Tarjeta Interactiva Izquierda a Derecha Concisa)
+          5. CASO DE ESTUDIO: THE BELLACY STUDIO
+          (Presentado como antecedente real del caso y con combinación Naranja Vibrante en la tarjeta desvelable)
          ===================================================================== */}
       <section
         id="caso-estudio"
@@ -974,7 +948,6 @@ export default function DynamoLanding() {
         className="py-24 sm:py-32 px-4 sm:px-6 border-t scroll-mt-20 transition-colors duration-200"
       >
         <div className="max-w-7xl mx-auto">
-          {/* Cabecera idéntica en estructura a "CASES" (00:06 del video) */}
           <motion.div
             initial="hidden"
             whileInView="visible"
@@ -983,17 +956,14 @@ export default function DynamoLanding() {
             className="grid lg:grid-cols-12 gap-6 items-end mb-12 sm:mb-16"
           >
             <div className="lg:col-span-3">
-              <div className="text-xs font-mono uppercase tracking-wider">
-                <span className="text-digital-gradient font-bold text-base">
-                  +330%
-                </span>{" "}
-                <span style={{ color: textSecondary }}>en 3 meses</span>
+              <div className="text-xs font-mono uppercase tracking-wider text-[#FF6B35] font-bold">
+                ANTECEDENTE REAL DE ÉXITO
               </div>
               <p
                 style={{ color: textMuted }}
-                className="text-xs font-light mt-0.5"
+                className="text-xs font-light mt-1"
               >
-                De US$ 300 a US$ 1.300 / mes
+                Resultado documentado en The Bellacy Studio
               </p>
             </div>
 
@@ -1011,7 +981,7 @@ export default function DynamoLanding() {
             </div>
           </motion.div>
 
-          {/* TARJETA INTERACTIVA ANTES / DESPUÉS (Directa, limpia y sin exceso de texto como en 00:06) */}
+          {/* TARJETA INTERACTIVA ANTES / DESPUÉS (Con combinación Naranja Intenso + Coral + Púrpura para resaltar en la web) */}
           <div
             onPointerMove={(e) => {
               const rect = e.currentTarget.getBoundingClientRect();
@@ -1030,12 +1000,11 @@ export default function DynamoLanding() {
               const pct = ((e.clientX - rect.left) / rect.width) * 100;
               revealRaw.set(pct > 50 ? 100 : 0);
             }}
-            className="relative grid grid-cols-1 overflow-hidden border border-white/15 select-none cursor-ew-resize touch-pan-y group shadow-2xl"
+            className="relative grid grid-cols-1 overflow-hidden border border-[#FF6B35]/30 select-none cursor-ew-resize touch-pan-y group shadow-[0_20px_70px_rgba(255,91,34,0.18)]"
           >
             {/* CAPA 1: BEFORE (US$ 300 / MES) */}
-            <div className="col-start-1 row-start-1 w-full bg-[#07070C] text-white p-6 sm:p-12 md:p-14 flex flex-col justify-between relative">
+            <div className="col-start-1 row-start-1 w-full bg-[#08080D] text-white p-6 sm:p-12 md:p-14 flex flex-col justify-between relative">
               <div className="grid lg:grid-cols-12 gap-8 items-center">
-                {/* Columna Izquierda estilo ECOLINE 00:06 */}
                 <div className="lg:col-span-7">
                   <div className="flex items-center gap-3.5 mb-6">
                     <div className="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center font-display font-bold text-xs text-zinc-400">
@@ -1046,7 +1015,7 @@ export default function DynamoLanding() {
                         THE BELLACY STUDIO
                       </h3>
                       <p className="text-xs text-zinc-500">
-                        Estudio de Estética · Estado Inicial
+                        Antecedente Previo · Estado Inicial
                       </p>
                     </div>
                   </div>
@@ -1054,7 +1023,7 @@ export default function DynamoLanding() {
                   <div className="grid grid-cols-2 gap-6 sm:gap-10 py-6 border-y border-zinc-800/90 mb-6">
                     <div>
                       <div className="text-xs text-zinc-500 mb-1">
-                        Facturación mensual
+                        Facturación mensual (Antes)
                       </div>
                       <div className="font-display font-extrabold text-2xl sm:text-4xl text-zinc-300">
                         US$ 300{" "}
@@ -1069,7 +1038,7 @@ export default function DynamoLanding() {
 
                     <div>
                       <div className="text-xs text-zinc-500 mb-1">
-                        Diagnóstico previo
+                        Diagnóstico inicial
                       </div>
                       <p className="text-xs sm:text-sm text-zinc-400 font-light leading-relaxed">
                         Visibilidad local mínima en Google Maps y captación
@@ -1079,13 +1048,12 @@ export default function DynamoLanding() {
                   </div>
 
                   <p className="text-xs sm:text-sm text-zinc-500 font-light leading-relaxed max-w-xl">
-                    &ldquo;El desafío no era la calidad del servicio, sino su
-                    visibilidad digital. Sin pauta activa ni posicionamiento
-                    local estructurado.&rdquo;
+                    &ldquo;El desafío de The Bellacy Studio no era la calidad de
+                    su servicio, sino su visibilidad digital. Sin pauta activa
+                    ni posicionamiento local estructurado.&rdquo;
                   </p>
                 </div>
 
-                {/* Columna Derecha: Puntos clave concisos */}
                 <div className="lg:col-span-5 grid grid-cols-2 gap-3 text-xs">
                   {[
                     { k: "US$ 300", v: "Ingresos mensuales" },
@@ -1107,104 +1075,107 @@ export default function DynamoLanding() {
               </div>
 
               <div className="mt-8 pt-4 border-t border-zinc-800/80 flex items-center justify-between text-xs font-mono text-zinc-500">
-                <span>01 / 01 · BEFORE</span>
+                <span>CASO REAL: THE BELLACY STUDIO · BEFORE</span>
                 <span>← DESLIZA PARA REVELAR EL AFTER →</span>
               </div>
             </div>
 
-            {/* CAPA 2: AFTER (US$ 1.300 / MES - Gradiente DigitalPro) */}
+            {/* CAPA 2: AFTER (US$ 1.300 / MES - Combinación Naranja Intenso + Coral + Violeta Oscuro para resaltar) */}
             <motion.div
               style={{
                 clipPath: afterClipPath,
                 scale: afterScale,
               }}
-              className="col-start-1 row-start-1 w-full bg-gradient-to-br from-[#2B1FA8] via-[#6D1EB8] to-[#C82D67] text-white p-6 sm:p-12 md:p-14 flex flex-col justify-between relative z-10 origin-left"
+              className="col-start-1 row-start-1 w-full bg-gradient-to-br from-[#FF6A1A] via-[#E03E2D] to-[#6B1B9A] text-white p-6 sm:p-12 md:p-14 flex flex-col justify-between relative z-10 origin-left"
             >
-              <div className="grid lg:grid-cols-12 gap-8 items-center">
+              {/* Resplandor cálido naranja interior */}
+              <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-[#FF9E44]/25 blur-3xl pointer-events-none" />
+
+              <div className="relative z-10 grid lg:grid-cols-12 gap-8 items-center">
                 <div className="lg:col-span-7">
                   <div className="flex items-center gap-3.5 mb-6">
-                    <div className="w-10 h-10 rounded-full bg-white/15 border border-white/30 flex items-center justify-center font-display font-bold text-xs text-white">
+                    <div className="w-10 h-10 rounded-full bg-black/30 border border-[#FFB07B]/50 flex items-center justify-center font-display font-bold text-xs text-[#FFD1B3]">
                       BS
                     </div>
                     <div>
                       <h3 className="font-display font-bold uppercase text-lg sm:text-xl tracking-wide text-white">
                         THE BELLACY STUDIO
                       </h3>
-                      <p className="text-xs text-white/75">
+                      <p className="text-xs text-[#FFE2CF]">
                         Ecosistema Google Maps + Pauta Precisa
                       </p>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-6 sm:gap-10 py-6 border-y border-white/20 mb-6">
+                  <div className="grid grid-cols-2 gap-6 sm:gap-10 py-6 border-y border-white/25 mb-6">
                     <div>
-                      <div className="text-xs text-white/75 mb-1">
-                        Facturación alcanzada
+                      <div className="text-xs text-[#FFE2CF] mb-1">
+                        Facturación alcanzada (Después)
                       </div>
-                      <div className="font-display font-extrabold text-2xl sm:text-4xl text-white">
+                      <div className="font-display font-extrabold text-2xl sm:text-4xl text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.3)]">
                         US$ 1.300{" "}
-                        <span className="text-xs font-mono font-normal text-white/80">
+                        <span className="text-xs font-mono font-normal text-white/85">
                           /mes
                         </span>
                       </div>
-                      <div className="mt-3 inline-block text-xs font-display font-bold uppercase tracking-widest text-white border-b-2 border-[#FF5864] pb-0.5">
-                        AFTER (+330%)
+                      <div className="mt-3 inline-block text-xs font-display font-bold uppercase tracking-widest text-white border-b-2 border-[#FFD166] pb-0.5">
+                        AFTER · CASO BELLACY
                       </div>
                     </div>
 
                     <div>
-                      <div className="text-xs text-white/75 mb-1">
-                        Resultado en 3 meses
+                      <div className="text-xs text-[#FFE2CF] mb-1">
+                        Evolución del estudio
                       </div>
                       <p className="text-xs sm:text-sm text-white font-light leading-relaxed">
-                        De US$ 300 a US$ 1.300 mensuales con flujo constante y
-                        predecible de clientes.
+                        Pasaron de US$ 300 a US$ 1.300 mensuales en 3 meses con
+                        flujo predecible de clientes.
                       </p>
                     </div>
                   </div>
 
-                  <p className="text-xs sm:text-sm text-white/90 font-light leading-relaxed max-w-xl">
+                  <p className="text-xs sm:text-sm text-white/95 font-light leading-relaxed max-w-xl">
                     &ldquo;Reestructuración completa en Google Maps + campañas
-                    de anuncios precisas: de $300 USD a $1.300 USD mensuales en
-                    tan solo 3 meses.&rdquo;
+                    de anuncios precisas: en este caso real, el estudio pasó de
+                    $300 USD a $1.300 USD mensuales en 3 meses.&rdquo;
                   </p>
                 </div>
 
                 <div className="lg:col-span-5 grid grid-cols-2 gap-3 text-xs">
                   {[
-                    { k: "US$ 1.300", v: "Facturación mensual" },
-                    { k: "+330%", v: "Crecimiento directo" },
+                    { k: "US$ 1.300", v: "Facturación alcanzada" },
+                    { k: "+330%", v: "Crecimiento en este caso" },
                     { k: "3 MESES", v: "Tiempo de ejecución" },
                     { k: "TOP MAPS", v: "Flujo predecible" },
                   ].map((m, i) => (
                     <div
                       key={i}
-                      className="p-4 bg-black/35 backdrop-blur-md border border-white/20"
+                      className="p-4 bg-black/35 backdrop-blur-md border border-[#FFB07B]/35 shadow-lg"
                     >
-                      <div className="font-display font-bold text-base sm:text-lg text-white mb-1">
+                      <div className="font-display font-bold text-base sm:text-lg text-[#FFD6BA] mb-1">
                         {m.k}
                       </div>
-                      <div className="text-[11px] text-white/80">{m.v}</div>
+                      <div className="text-[11px] text-white/90">{m.v}</div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="mt-8 pt-4 border-t border-white/20 flex items-center justify-between text-xs font-mono text-white">
-                <span>01 / 01 · AFTER (VERIFIED ROI)</span>
+              <div className="relative z-10 mt-8 pt-4 border-t border-white/25 flex items-center justify-between text-xs font-mono text-white">
+                <span>ANTECEDENTE REAL: THE BELLACY STUDIO</span>
                 <span>DE US$ 300 A US$ 1.300 / MES</span>
               </div>
             </motion.div>
 
-            {/* HAZ LÁSER ESCÁNER CON INERCIA SPRING */}
+            {/* HAZ LÁSER ESCÁNER CON DESTELLO NARANJA CÁLIDO */}
             <motion.div
               style={{ left: beamLeft }}
               className="absolute inset-y-0 z-20 pointer-events-none -translate-x-1/2 flex items-center justify-center"
             >
-              <div className="absolute right-0 w-16 sm:w-24 h-full bg-gradient-to-l from-white/30 via-[#9E38F5]/35 to-transparent blur-xl -skew-x-3" />
-              <div className="w-[2px] h-[110%] bg-gradient-to-b from-[#5246FF] via-white to-[#FF5864] shadow-[0_0_20px_#ffffff,0_0_40px_#9E38F5] -rotate-[2deg]" />
-              <div className="relative w-10 h-10 bg-black/90 backdrop-blur-xl text-white shadow-[0_0_25px_rgba(158,56,245,0.9)] border border-white/40 flex items-center justify-center font-mono text-xs group-hover:scale-110 transition-transform">
-                <span className="text-digital-gradient font-bold">↔</span>
+              <div className="absolute right-0 w-16 sm:w-28 h-full bg-gradient-to-l from-white/35 via-[#FF6A1A]/40 to-transparent blur-xl -skew-x-3" />
+              <div className="w-[2.5px] h-[110%] bg-gradient-to-b from-[#FFB347] via-white to-[#FF5B22] shadow-[0_0_20px_#ffffff,0_0_40px_#FF6A1A] -rotate-[2deg]" />
+              <div className="relative w-10 h-10 sm:w-11 sm:h-11 bg-black/90 backdrop-blur-xl text-white shadow-[0_0_30px_rgba(255,106,26,0.95)] border border-[#FF9E44]/70 flex items-center justify-center font-mono text-xs group-hover:scale-110 transition-transform">
+                <span className="text-[#FF7A33] font-bold">↔</span>
               </div>
             </motion.div>
           </div>
