@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   motion,
   Variants,
@@ -9,7 +9,16 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion";
-import { Sun, Moon, X, ArrowUpRight } from "lucide-react";
+import {
+  Sun,
+  Moon,
+  X,
+  ArrowUpRight,
+  AlertTriangle,
+  CheckCircle2,
+  Shield,
+  Cookie,
+} from "lucide-react";
 
 const fadeUpBlur: Variants = {
   hidden: { opacity: 0, y: 24, filter: "blur(8px)" },
@@ -251,6 +260,57 @@ function WireframeSphereIcon({ index }: { index: number }) {
 export default function DynamoLanding() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
+  // Estado para Políticas de Cookies
+  const [showCookieBanner, setShowCookieBanner] = useState<boolean>(false);
+  const [cookieModalOpen, setCookieModalOpen] = useState<boolean>(false);
+  const [cookiePrefs, setCookiePrefs] = useState<{
+    essential: boolean;
+    analytics: boolean;
+    marketing: boolean;
+  }>({
+    essential: true,
+    analytics: true,
+    marketing: true,
+  });
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("dynamo_cookie_consent_v1");
+      if (!saved) {
+        setShowCookieBanner(true);
+      } else {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === "object") {
+          setCookiePrefs({
+            essential: true,
+            analytics: Boolean(parsed.analytics),
+            marketing: Boolean(parsed.marketing),
+          });
+        }
+      }
+    } catch {
+      setShowCookieBanner(true);
+    }
+  }, []);
+
+  const handleSaveCookies = (prefs: {
+    essential: boolean;
+    analytics: boolean;
+    marketing: boolean;
+  }) => {
+    setCookiePrefs(prefs);
+    setShowCookieBanner(false);
+    setCookieModalOpen(false);
+    try {
+      localStorage.setItem(
+        "dynamo_cookie_consent_v1",
+        JSON.stringify({ ...prefs, updatedAt: new Date().toISOString() })
+      );
+    } catch {
+      // ignore storage errors
+    }
+  };
+
   // Estado para la cuadrícula interactiva en la sección "El Manifiesto"
   const [manifestoMouse, setManifestoMouse] = useState<{
     x: number;
@@ -292,6 +352,7 @@ export default function DynamoLanding() {
   const bgPrimary = rgb(3, 3, 6, 246, 246, 250);
   const bgSecondary = rgb(7, 7, 12, 236, 236, 242);
   const bgCard = rgb(10, 10, 16, 255, 255, 255);
+  const bgCardInner = rgb(6, 6, 10, 240, 240, 246);
   const textPrimary = rgb(250, 250, 252, 12, 12, 18);
   const textSecondary = rgb(168, 168, 182, 75, 75, 90);
   const textMuted = rgb(110, 110, 128, 115, 115, 132);
@@ -326,6 +387,46 @@ export default function DynamoLanding() {
       num: "04",
       heading: "DOS CAMINOS DE CRECIMIENTO",
       body: "Potencia corporativa a medida para empresas y modelo 80/20 sin inversión inicial para profesionales independientes.",
+    },
+  ];
+
+  // NUEVA SECCIÓN: Fricciones cotidianas reales vs. Resolución Dynamo ("¿POR QUÉ SE ESCAPAN TUS VENTAS?")
+  const operationalBottleNecks = [
+    {
+      code: "01",
+      symptomTitle: "MENSAJES SIN RESPONDER EN WHATSAPP",
+      painPoint:
+        "Te escriben pidiendo precio o turno mientras estás trabajando. Cuando respondes dos horas tarde, el cliente ya reservó con otro.",
+      solutionTitle: "RECEPCIONISTA IA 24/7",
+      solutionText:
+        "Atiende en segundos, perfila al interesado y agenda el turno directo en tu calendario sin que toques el celular.",
+    },
+    {
+      code: "02",
+      symptomTitle: "EXCELENTE SERVICIO PERO INVISIBLE EN GOOGLE",
+      painPoint:
+        "Dependes del boca a boca o de subir historias todos los días. Quien busca tu servicio hoy en tu zona encuentra primero a tu competencia.",
+      solutionTitle: "DOMINIO SEO, GEO & MAPS",
+      solutionText:
+        "Posicionamos tu marca en Google Business, mapas locales y buscadores de IA justo cuando el cliente está listo para comprar.",
+    },
+    {
+      code: "03",
+      symptomTitle: "WEBS DECORATIVAS Y ANUNCIOS QUE QUEMAN DINERO",
+      painPoint:
+        "Páginas lentas que no convierten visitas en ventas y campañas en el botón 'Promocionar' que solo traen likes o curiosos.",
+      solutionTitle: "ARQUITECTURA CRO & ADS DE PRECISIÓN",
+      solutionText:
+        "E-commerce y sitios rápidos diseñados para vender, potenciados con campañas en Google y Meta Ads enfocadas en retorno real.",
+    },
+    {
+      code: "04",
+      symptomTitle: "COSTOS INICIALES QUE FRENAN AL PROFESIONAL",
+      painPoint:
+        "Agencias tradicionales que exigen miles de dólares por adelantado por desarrollar un sistema sin comprometerse con tus reservas.",
+      solutionTitle: "ALIANZA 80/20 SIN INVERSIÓN INICIAL",
+      solutionText:
+        "Para profesionales y oficios: construimos tu plataforma con $0 de costo inicial y solo ganamos el 20% por cita concretada.",
     },
   ];
 
@@ -376,6 +477,40 @@ export default function DynamoLanding() {
       title: "OPTIMIZACIÓN & AUTORIDAD LOCAL EN GOOGLE MAPS",
       description:
         "Posicionamos tu oficio como Área de Servicio para dominar las búsquedas de tu zona sin exponer tu dirección personal.",
+    },
+  ];
+
+  // LOGOS DE CLIENTES SIN FONDO (Procesados en /public/logos/)
+  const clientEcosystems = [
+    {
+      name: "Alfa 24 Spa",
+      category: "Mantenimientos & Servicios",
+      logo: "/logos/alfa24.png",
+      tag: "ECOSISTEMA ACTIVO",
+    },
+    {
+      name: "The Bellacy Studio",
+      category: "Estética & Cuidado Personal",
+      logo: "/logos/bellacy.png",
+      tag: "GOOGLE MAPS & ADS",
+    },
+    {
+      name: "Cartocentro",
+      category: "Industria & Soluciones Corporativas",
+      logo: "/logos/cartocentro.png",
+      tag: "INFRAESTRUCTURA B2B",
+    },
+    {
+      name: "Mag Barber Studio Vip",
+      category: "Barbería &Reservas Automatizadas",
+      logo: "/logos/magbarber.png",
+      tag: "AUTOMATIZACIÓN & TURNOS",
+    },
+    {
+      name: "Corbyte",
+      category: "Tecnología & Soluciones Digitales",
+      logo: "/logos/corbyte.png",
+      tag: "ESCALA DIGITAL",
     },
   ];
 
@@ -494,13 +629,15 @@ export default function DynamoLanding() {
               style={{ backgroundColor: bgCard, borderColor }}
               className="border-t overflow-hidden"
             >
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-8">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-6">
                   {[
                     { label: "01. Manifiesto", href: "#manifiesto" },
-                    { label: "02. Soluciones Corporativas", href: "#corporativo" },
-                    { label: "03. Impulso Modelo 80/20", href: "#profesionales" },
-                    { label: "04. Caso The Bellacy Studio", href: "#caso-estudio" },
+                    { label: "02. Diagnóstico", href: "#diagnostico" },
+                    { label: "03. Corporativo [D·Y·N]", href: "#corporativo" },
+                    { label: "04. Modelo 80/20 [A·M·O]", href: "#profesionales" },
+                    { label: "05. Ecosistemas Activos", href: "#clientes" },
+                    { label: "06. Caso Bellacy", href: "#caso-estudio" },
                   ].map((item) => (
                     <a
                       key={item.href}
@@ -516,7 +653,7 @@ export default function DynamoLanding() {
                 <a
                   href="#agendar"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="btn-digital-outline px-6 py-3 text-xs font-display font-bold uppercase tracking-wider inline-flex items-center justify-center gap-2.5 text-white"
+                  className="btn-digital-outline px-6 py-3 text-xs font-display font-bold uppercase tracking-wider inline-flex items-center justify-center gap-2.5 text-white shrink-0"
                 >
                   <span className="w-2.5 h-2.5 rounded-full bg-digital-gradient shadow-[0_0_10px_#9E38F5]" />
                   <span>AGENDAR REUNIÓN</span>
@@ -582,14 +719,13 @@ export default function DynamoLanding() {
           </motion.h1>
         </div>
 
-        {/* BARRA INFERIOR EN 3 COLUMNAS (Sin promesa genérica de +330%) */}
+        {/* BARRA INFERIOR EN 3 COLUMNAS */}
         <motion.div
           initial="hidden"
           animate="visible"
           variants={staggerContainer}
           className="relative z-10 max-w-7xl mx-auto w-full pt-8 border-t border-white/15 grid grid-cols-1 md:grid-cols-12 gap-6 items-center"
         >
-          {/* Izquierda: Operación continua 24/7 */}
           <motion.div
             variants={fadeUpBlur}
             className="md:col-span-3 flex items-center gap-3.5"
@@ -602,7 +738,6 @@ export default function DynamoLanding() {
             </span>
           </motion.div>
 
-          {/* Centro: Frase corta y punzante */}
           <motion.p
             variants={fadeUpBlur}
             className="md:col-span-5 text-xs sm:text-sm text-zinc-200 font-light leading-relaxed"
@@ -612,7 +747,6 @@ export default function DynamoLanding() {
             clientes recurrentes.
           </motion.p>
 
-          {/* Derecha: Botón rectangular con borde gradiente */}
           <motion.div
             variants={fadeUpBlur}
             className="md:col-span-4 flex md:justify-end"
@@ -753,11 +887,112 @@ export default function DynamoLanding() {
       </section>
 
       {/* =====================================================================
-          3. SOLUCIONES CORPORATIVAS — Iniciales D · Y · N
+          3. NUEVA SECCIÓN: ¿POR QUÉ SE ESCAPAN TUS VENTAS?
+             (Problemas cotidianos reales y cómo los resolvemos con arquitectura digital)
+         ===================================================================== */}
+      <section
+        id="diagnostico"
+        style={{ backgroundColor: bgSecondary, borderColor }}
+        className="py-24 sm:py-32 px-4 sm:px-6 border-t scroll-mt-20 transition-colors duration-200"
+      >
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-80px" }}
+            variants={fadeUpBlur}
+            className="flex flex-col md:flex-row md:items-end justify-between mb-14 sm:mb-16 gap-4"
+          >
+            <div>
+              <div className="text-[11px] font-mono uppercase tracking-[0.22em] text-[#FF5864] mb-2">
+                DIAGNÓSTICO DE FRICCIÓN · CUELLOS DE BOTELLA REALES
+              </div>
+              <h2 className="font-display font-extrabold uppercase text-3xl sm:text-5xl md:text-6xl leading-[1.02] tracking-tight">
+                ¿POR QUÉ SE ESCAPAN{" "}
+                <span className="text-digital-gradient">TUS VENTAS?</span>
+              </h2>
+            </div>
+            <p
+              style={{ color: textSecondary }}
+              className="text-xs sm:text-sm font-light max-w-xs"
+            >
+              Transformamos los puntos ciegos que hoy desgastan tu día a día en
+              sistemas automatizados de captación.
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-60px" }}
+            variants={staggerContainer}
+            className="grid md:grid-cols-2 gap-6"
+          >
+            {operationalBottleNecks.map((item, idx) => (
+              <motion.div
+                key={idx}
+                variants={fadeUpBlur}
+                whileHover={{ y: -5 }}
+                style={{ backgroundColor: bgCard, borderColor }}
+                className="group relative border p-6 sm:p-8 flex flex-col justify-between overflow-hidden transition-all"
+              >
+                {/* Línea superior de gradiente en hover */}
+                <div className="absolute top-0 inset-x-0 h-[2px] bg-digital-gradient opacity-40 group-hover:opacity-100 transition-opacity" />
+
+                {/* Bloque Superior: El Problema Cotidiano */}
+                <div className="mb-6 pb-6 border-b border-white/10">
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest text-[#FF5864] bg-[#FF5864]/10 border border-[#FF5864]/30 px-2.5 py-1">
+                      <AlertTriangle className="w-3 h-3 shrink-0" />
+                      <span>FRICCIÓN {item.code}</span>
+                    </span>
+                    <span
+                      style={{ color: textMuted }}
+                      className="font-mono text-xs"
+                    >
+                      /{item.code}
+                    </span>
+                  </div>
+
+                  <h3 className="font-display font-bold uppercase text-base sm:text-lg tracking-wide mb-2">
+                    {item.symptomTitle}
+                  </h3>
+                  <p
+                    style={{ color: textSecondary }}
+                    className="text-xs sm:text-sm font-light leading-relaxed"
+                  >
+                    {item.painPoint}
+                  </p>
+                </div>
+
+                {/* Bloque Inferior: Cómo lo resolvemos en Dynamo */}
+                <div
+                  style={{ backgroundColor: bgCardInner, borderColor }}
+                  className="p-4 sm:p-5 border relative overflow-hidden"
+                >
+                  <div className="flex items-center gap-2 text-[11px] font-display font-bold uppercase tracking-wider text-[#B832F5] mb-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-[#9E38F5] shrink-0" />
+                    <span>SOLUCIÓN DYNAMO: {item.solutionTitle}</span>
+                  </div>
+                  <p
+                    style={{ color: textPrimary }}
+                    className="text-xs sm:text-sm font-light leading-relaxed opacity-90"
+                  >
+                    {item.solutionText}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* =====================================================================
+          4. SOLUCIONES CORPORATIVAS — Iniciales D · Y · N
          ===================================================================== */}
       <section
         id="corporativo"
-        style={{ backgroundColor: bgSecondary, borderColor }}
+        style={{ backgroundColor: bgPrimary, borderColor }}
         className="py-24 sm:py-32 px-4 sm:px-6 border-t scroll-mt-20 transition-colors duration-200"
       >
         <div className="max-w-7xl mx-auto">
@@ -847,11 +1082,11 @@ export default function DynamoLanding() {
       </section>
 
       {/* =====================================================================
-          4. IMPULSO PARA PROFESIONALES · MODELO 80/20 — Iniciales A · M · O
+          5. IMPULSO PARA PROFESIONALES · MODELO 80/20 — Iniciales A · M · O
          ===================================================================== */}
       <section
         id="profesionales"
-        style={{ backgroundColor: bgPrimary, borderColor }}
+        style={{ backgroundColor: bgSecondary, borderColor }}
         className="py-24 sm:py-32 px-4 sm:px-6 border-t scroll-mt-20 transition-colors duration-200"
       >
         <div className="max-w-7xl mx-auto">
@@ -939,8 +1174,121 @@ export default function DynamoLanding() {
       </section>
 
       {/* =====================================================================
-          5. CASO DE ESTUDIO: THE BELLACY STUDIO
-          (Presentado como antecedente real del caso y con combinación Naranja Vibrante en la tarjeta desvelable)
+          6. NUEVA SECCIÓN: MARCAS QUE YA CREARON SUS ECOSISTEMAS DIGITALES
+             (Logos sin fondo + Efectos + Animaciones acordes a la plantilla)
+         ===================================================================== */}
+      <section
+        id="clientes"
+        style={{ backgroundColor: bgPrimary, borderColor }}
+        className="relative py-24 sm:py-32 px-4 sm:px-6 border-t overflow-hidden scroll-mt-20 transition-colors duration-200"
+      >
+        {/* Resplandor ambiental de fondo */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[520px] h-[240px] rounded-full bg-gradient-to-r from-[#5246FF]/15 via-[#9E38F5]/15 to-[#FF5864]/15 blur-3xl pointer-events-none" />
+
+        <div className="relative z-10 max-w-7xl mx-auto">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-80px" }}
+            variants={fadeUpBlur}
+            className="text-center max-w-4xl mx-auto mb-14 sm:mb-16"
+          >
+            <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.22em] text-[#B832F5] mb-3">
+              <span className="w-2 h-2 rounded-full bg-digital-gradient animate-pulse" />
+              <span>CONFIANZA & EJECUCIÓN REAL</span>
+            </div>
+            <h2 className="font-display font-extrabold uppercase text-2xl sm:text-4xl md:text-5xl leading-[1.06] tracking-tight">
+              NEGOCIOS QUE YA CREARON SUS{" "}
+              <span className="text-digital-gradient">
+                ECOSISTEMAS DIGITALES
+              </span>
+            </h2>
+          </motion.div>
+
+          {/* Banda Marquee Infinita con los Logos sin fondo */}
+          <div
+            style={{ borderColor, backgroundColor: "rgba(10, 10, 18, 0.55)" }}
+            className="relative overflow-hidden border-y py-7 mb-12 backdrop-blur-md"
+          >
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-16 sm:w-28 bg-gradient-to-r from-[#030306] to-transparent z-10" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-16 sm:w-28 bg-gradient-to-l from-[#030306] to-transparent z-10" />
+
+            <div className="animate-marquee flex items-center gap-14 sm:gap-24 px-8">
+              {[...clientEcosystems, ...clientEcosystems].map((client, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-4 opacity-80 hover:opacity-100 transition-opacity shrink-0 group"
+                >
+                  <div className="h-12 sm:h-14 w-32 sm:w-40 flex items-center justify-center">
+                    <img
+                      src={client.logo}
+                      alt={client.name}
+                      className="max-h-11 sm:max-h-13 max-w-full object-contain filter drop-shadow-[0_0_14px_rgba(158,56,245,0.35)] group-hover:scale-110 transition-transform duration-300"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Grilla de 5 Tarjetas Holográficas Interactivas para cada Marca */}
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-60px" }}
+            variants={staggerContainer}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5"
+          >
+            {clientEcosystems.map((client, idx) => (
+              <motion.div
+                key={client.name}
+                variants={fadeUpBlur}
+                whileHover={{ y: -8, scale: 1.02 }}
+                style={{ backgroundColor: bgCard, borderColor }}
+                className="group relative border p-6 flex flex-col items-center justify-between min-h-[230px] overflow-hidden transition-all"
+              >
+                {/* Borde luminoso superior */}
+                <div className="absolute top-0 inset-x-0 h-[2px] bg-digital-gradient opacity-30 group-hover:opacity-100 transition-opacity" />
+
+                {/* Halo cromático detrás del logo al hacer hover */}
+                <div className="absolute inset-0 bg-gradient-to-b from-[#5246FF]/0 via-[#9E38F5]/0 to-[#FF5864]/0 group-hover:from-[#5246FF]/10 group-hover:via-[#9E38F5]/10 group-hover:to-[#FF5864]/15 transition-all duration-500 pointer-events-none" />
+
+                <div className="w-full flex items-center justify-between text-[10px] font-mono text-zinc-500 relative z-10">
+                  <span>0{idx + 1}</span>
+                  <span className="text-[#B832F5] group-hover:text-[#FF5864] transition-colors">
+                    ● ACTIVO
+                  </span>
+                </div>
+
+                {/* Contenedor del Logo sin fondo */}
+                <div className="relative z-10 my-5 h-24 w-full flex items-center justify-center px-2">
+                  <img
+                    src={client.logo}
+                    alt={client.name}
+                    className="max-h-20 max-w-[160px] w-auto object-contain transition-all duration-500 filter drop-shadow-[0_6px_20px_rgba(139,61,255,0.3)] group-hover:drop-shadow-[0_0_28px_rgba(255,88,100,0.6)] group-hover:scale-110"
+                  />
+                </div>
+
+                <div className="w-full text-center relative z-10 pt-3 border-t border-white/10">
+                  <div className="font-display font-bold uppercase text-xs tracking-wider mb-0.5">
+                    {client.name}
+                  </div>
+                  <div
+                    style={{ color: textMuted }}
+                    className="text-[10px] font-mono uppercase tracking-widest"
+                  >
+                    {client.tag}
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* =====================================================================
+          7. CASO DE ESTUDIO: THE BELLACY STUDIO
+             (Presentado como antecedente real del caso y con combinación Naranja Vibrante en la tarjeta desvelable)
          ===================================================================== */}
       <section
         id="caso-estudio"
@@ -1007,8 +1355,12 @@ export default function DynamoLanding() {
               <div className="grid lg:grid-cols-12 gap-8 items-center">
                 <div className="lg:col-span-7">
                   <div className="flex items-center gap-3.5 mb-6">
-                    <div className="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center font-display font-bold text-xs text-zinc-400">
-                      BS
+                    <div className="w-12 h-12 rounded-full bg-zinc-900 border border-zinc-700 flex items-center justify-center p-1.5">
+                      <img
+                        src="/logos/bellacy.png"
+                        alt="The Bellacy Studio"
+                        className="w-full h-full object-contain"
+                      />
                     </div>
                     <div>
                       <h3 className="font-display font-bold uppercase text-lg sm:text-xl tracking-wide text-zinc-200">
@@ -1080,7 +1432,7 @@ export default function DynamoLanding() {
               </div>
             </div>
 
-            {/* CAPA 2: AFTER (US$ 1.300 / MES - Combinación Naranja Intenso + Coral + Violeta Oscuro para resaltar) */}
+            {/* CAPA 2: AFTER (US$ 1.300 / MES - Combinación Naranja Intenso + Coral + Violeta Oscuro) */}
             <motion.div
               style={{
                 clipPath: afterClipPath,
@@ -1088,14 +1440,17 @@ export default function DynamoLanding() {
               }}
               className="col-start-1 row-start-1 w-full bg-gradient-to-br from-[#FF6A1A] via-[#E03E2D] to-[#6B1B9A] text-white p-6 sm:p-12 md:p-14 flex flex-col justify-between relative z-10 origin-left"
             >
-              {/* Resplandor cálido naranja interior */}
               <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-[#FF9E44]/25 blur-3xl pointer-events-none" />
 
               <div className="relative z-10 grid lg:grid-cols-12 gap-8 items-center">
                 <div className="lg:col-span-7">
                   <div className="flex items-center gap-3.5 mb-6">
-                    <div className="w-10 h-10 rounded-full bg-black/30 border border-[#FFB07B]/50 flex items-center justify-center font-display font-bold text-xs text-[#FFD1B3]">
-                      BS
+                    <div className="w-12 h-12 rounded-full bg-black/40 border border-[#FFB07B]/60 flex items-center justify-center p-1.5">
+                      <img
+                        src="/logos/bellacy.png"
+                        alt="The Bellacy Studio"
+                        className="w-full h-full object-contain"
+                      />
                     </div>
                     <div>
                       <h3 className="font-display font-bold uppercase text-lg sm:text-xl tracking-wide text-white">
@@ -1183,7 +1538,7 @@ export default function DynamoLanding() {
       </section>
 
       {/* =====================================================================
-          6. CTA FINAL + FOOTER (Idéntico a 00:07-00:08 "LET'S BEGIN COOPERATION")
+          8. CTA FINAL + FOOTER CON POLÍTICA DE COOKIES
          ===================================================================== */}
       <section
         id="agendar"
@@ -1242,14 +1597,282 @@ export default function DynamoLanding() {
             </sup>
           </div>
 
-          <div
-            style={{ color: textMuted }}
-            className="font-mono text-[11px] text-center sm:text-right"
-          >
-            © 2026 DYNAMO SOLUTIONS. TODOS LOS DERECHOS RESERVADOS.
+          <div className="flex flex-wrap items-center justify-center gap-5 text-[11px] font-mono">
+            <button
+              type="button"
+              onClick={() => setCookieModalOpen(true)}
+              style={{ color: textSecondary }}
+              className="hover:text-[#FF5864] transition-colors inline-flex items-center gap-1.5 cursor-pointer underline underline-offset-4"
+            >
+              <Cookie className="w-3.5 h-3.5 text-[#B832F5]" />
+              <span>Política de Cookies</span>
+            </button>
+            <span style={{ color: textMuted }}>
+              © 2026 DYNAMO SOLUTIONS. TODOS LOS DERECHOS RESERVADOS.
+            </span>
           </div>
         </footer>
       </section>
+
+      {/* =====================================================================
+          BANNER FLOTANTE DE CONSENTIMIENTO DE COOKIES
+         ===================================================================== */}
+      <AnimatePresence>
+        {showCookieBanner && (
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 40 }}
+            transition={{ duration: 0.35 }}
+            style={{ backgroundColor: bgCard, borderColor }}
+            className="fixed bottom-4 inset-x-4 sm:left-auto sm:right-6 sm:max-w-md z-50 border p-5 sm:p-6 shadow-[0_20px_60px_rgba(0,0,0,0.85)] backdrop-blur-xl"
+          >
+            <div className="absolute top-0 inset-x-0 h-[2px] bg-digital-gradient" />
+
+            <div className="flex items-start gap-3.5 mb-4">
+              <div className="w-9 h-9 border border-[#9E38F5]/40 bg-[#9E38F5]/10 flex items-center justify-center shrink-0">
+                <Cookie className="w-4 h-4 text-[#E24497]" />
+              </div>
+              <div>
+                <h4 className="font-display font-bold uppercase text-xs sm:text-sm tracking-wider mb-1">
+                  PRIVACIDAD & USO DE COOKIES
+                </h4>
+                <p
+                  style={{ color: textSecondary }}
+                  className="text-xs font-light leading-relaxed"
+                >
+                  Utilizamos cookies propias y de terceros para optimizar la
+                  experiencia en nuestro ecosistema digital, analizar métricas
+                  de tráfico y medir campañas (Google & Meta Ads).{" "}
+                  <button
+                    type="button"
+                    onClick={() => setCookieModalOpen(true)}
+                    className="text-[#E24497] hover:underline font-medium cursor-pointer"
+                  >
+                    Ver Política y Configurar
+                  </button>
+                  .
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() =>
+                  handleSaveCookies({
+                    essential: true,
+                    analytics: false,
+                    marketing: false,
+                  })
+                }
+                style={{ borderColor, color: textSecondary }}
+                className="px-3.5 py-2 text-[11px] font-mono uppercase tracking-wider border hover:text-white transition-colors cursor-pointer"
+              >
+                Solo Esenciales
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  handleSaveCookies({
+                    essential: true,
+                    analytics: true,
+                    marketing: true,
+                  })
+                }
+                className="btn-digital-outline px-5 py-2 text-[11px] font-display font-bold uppercase tracking-wider text-white inline-flex items-center gap-2 cursor-pointer"
+              >
+                <span className="w-2 h-2 rounded-full bg-digital-gradient" />
+                <span>ACEPTAR TODAS</span>
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* =====================================================================
+          MODAL COMPLETO DE POLÍTICA Y CONFIGURACIÓN DE COOKIES
+         ===================================================================== */}
+      <AnimatePresence>
+        {cookieModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[70] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto"
+            onClick={() => setCookieModalOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{ backgroundColor: bgCard, borderColor }}
+              className="relative w-full max-w-2xl border p-6 sm:p-8 max-h-[88vh] overflow-y-auto shadow-2xl"
+            >
+              <div className="absolute top-0 inset-x-0 h-[3px] bg-digital-gradient" />
+
+              <div className="flex items-center justify-between gap-4 pb-4 border-b border-white/10 mb-6">
+                <div className="flex items-center gap-2.5">
+                  <Shield className="w-5 h-5 text-[#B832F5]" />
+                  <h3 className="font-display font-extrabold uppercase text-base sm:text-xl tracking-wide">
+                    POLÍTICA DE COOKIES ·{" "}
+                    <span className="text-digital-gradient">DYNAMO</span>
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setCookieModalOpen(false)}
+                  style={{ borderColor, color: textSecondary }}
+                  className="w-8 h-8 border flex items-center justify-center hover:text-white cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div
+                style={{ color: textSecondary }}
+                className="space-y-4 text-xs sm:text-sm font-light leading-relaxed mb-6"
+              >
+                <p>
+                  En <strong style={{ color: textPrimary }}>Dynamo Solutions®</strong>{" "}
+                  empleamos cookies y tecnologías similares de almacenamiento
+                  local para garantizar el correcto funcionamiento de nuestra
+                  plataforma, recordar tus preferencias visuales (como el nivel
+                  de luminosidad) y analizar el rendimiento de nuestros
+                  ecosistemas digitales.
+                </p>
+
+                <div className="space-y-3 pt-2">
+                  {/* Categoría 1: Técnicas */}
+                  <div
+                    style={{ backgroundColor: bgCardInner, borderColor }}
+                    className="p-4 border flex items-start justify-between gap-4"
+                  >
+                    <div>
+                      <div
+                        style={{ color: textPrimary }}
+                        className="font-display font-bold uppercase text-xs tracking-wider mb-1"
+                      >
+                        1. Cookies Técnicas y Estrictamente Necesarias
+                      </div>
+                      <p className="text-xs">
+                        Esenciales para la navegación, seguridad del sitio,
+                        preferencia de luminosidad y almacenamiento de tu
+                        consentimiento de privacidad. No pueden desactivarse.
+                      </p>
+                    </div>
+                    <span className="text-[10px] font-mono uppercase px-2.5 py-1 bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shrink-0">
+                      Siempre Activas
+                    </span>
+                  </div>
+
+                  {/* Categoría 2: Analíticas */}
+                  <div
+                    style={{ backgroundColor: bgCardInner, borderColor }}
+                    className="p-4 border flex items-start justify-between gap-4"
+                  >
+                    <div>
+                      <div
+                        style={{ color: textPrimary }}
+                        className="font-display font-bold uppercase text-xs tracking-wider mb-1"
+                      >
+                        2. Cookies Analíticas y de Rendimiento (SEO / CRO)
+                      </div>
+                      <p className="text-xs">
+                        Nos permiten medir de forma agregada las visitas, el
+                        tiempo de permanencia y la interacción con las secciones
+                        de la web para mejorar continuamente la experiencia.
+                      </p>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={cookiePrefs.analytics}
+                      onChange={(e) =>
+                        setCookiePrefs((p) => ({
+                          ...p,
+                          analytics: e.target.checked,
+                        }))
+                      }
+                      className="mt-1 w-4 h-4 accent-[#9E38F5] cursor-pointer shrink-0"
+                    />
+                  </div>
+
+                  {/* Categoría 3: Marketing */}
+                  <div
+                    style={{ backgroundColor: bgCardInner, borderColor }}
+                    className="p-4 border flex items-start justify-between gap-4"
+                  >
+                    <div>
+                      <div
+                        style={{ color: textPrimary }}
+                        className="font-display font-bold uppercase text-xs tracking-wider mb-1"
+                      >
+                        3. Cookies de Publicidad y Conversión (SEM & Meta Ads)
+                      </div>
+                      <p className="text-xs">
+                        Utilizadas para medir la efectividad de nuestras
+                        campañas publicitarias y presentar anuncios relevantes
+                        acordes a tus intereses empresariales.
+                      </p>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={cookiePrefs.marketing}
+                      onChange={(e) =>
+                        setCookiePrefs((p) => ({
+                          ...p,
+                          marketing: e.target.checked,
+                        }))
+                      }
+                      className="mt-1 w-4 h-4 accent-[#9E38F5] cursor-pointer shrink-0"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-white/10 flex flex-wrap items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleSaveCookies({
+                      essential: true,
+                      analytics: false,
+                      marketing: false,
+                    })
+                  }
+                  style={{ borderColor, color: textSecondary }}
+                  className="px-4 py-2.5 text-xs font-mono uppercase border hover:text-white cursor-pointer"
+                >
+                  Rechazar Opcionales
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSaveCookies(cookiePrefs)}
+                  style={{ borderColor, color: textPrimary }}
+                  className="px-5 py-2.5 text-xs font-display font-bold uppercase border hover:border-[#9E38F5] cursor-pointer"
+                >
+                  Guardar Selección
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleSaveCookies({
+                      essential: true,
+                      analytics: true,
+                      marketing: true,
+                    })
+                  }
+                  className="btn-digital-outline px-6 py-2.5 text-xs font-display font-bold uppercase tracking-wider text-white inline-flex items-center gap-2 cursor-pointer"
+                >
+                  <span className="w-2 h-2 rounded-full bg-digital-gradient" />
+                  <span>ACEPTAR TODAS</span>
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
