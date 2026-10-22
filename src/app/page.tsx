@@ -670,9 +670,9 @@ export default function DynamoLanding() {
                     { label: "01. Manifiesto", href: "#manifiesto" },
                     { label: "02. Diagnóstico", href: "#diagnostico" },
                     { label: "03. Corporativo", href: "#corporativo" },
-                    { label: "04. Modelo a Comisión", href: "#profesionales" },
+                    { label: "04. Crecemos Contigo", href: "#profesionales" },
                     { label: "05. Ecosistemas Activos", href: "#clientes" },
-                    { label: "06. Caso Bellacy", href: "#caso-estudio" },
+                    { label: "06. Casos de Éxito", href: "#caso-estudio" },
                   ].map((item) => (
                     <a
                       key={item.href}
@@ -1134,7 +1134,7 @@ export default function DynamoLanding() {
       </section>
 
       {/* =====================================================================
-          5. IMPULSO PARA PROFESIONALES · MODELO A COMISIÓN — Iniciales A · M · O
+          5. CRECEMOS CONTIGO · MODELO A COMISIÓN — Iniciales A · M · O
          ===================================================================== */}
       <section
         id="profesionales"
@@ -1154,8 +1154,8 @@ export default function DynamoLanding() {
                 02 // BARBEROS · ESTÉTICA · TÉCNICOS · OFICIOS
               </div>
               <h2 className="font-display font-extrabold uppercase text-3xl sm:text-5xl md:text-6xl leading-[1.02] tracking-tight">
-                IMPULSO{" "}
-                <span className="text-digital-gradient">A COMISIÓN</span>
+                CRECEMOS{" "}
+                <span className="text-digital-gradient">CONTIGO</span>
               </h2>
             </div>
             <p
@@ -1321,8 +1321,8 @@ export default function DynamoLanding() {
       </section>
 
       {/* =====================================================================
-          7. CASO DE ESTUDIO: THE BELLACY STUDIO
-             (Presentado como antecedente real del caso y con combinación Naranja Vibrante en la tarjeta desvelable)
+          7. CASOS DE ÉXITO
+             (Preparado para múltiples tarjetas; actualmente con el caso The Bellacy Studio)
          ===================================================================== */}
       <section
         id="caso-estudio"
@@ -1339,20 +1339,20 @@ export default function DynamoLanding() {
           >
             <div className="lg:col-span-3">
               <div className="text-xs font-mono uppercase tracking-wider text-[#FF6B35] font-bold">
-                ANTECEDENTE REAL DE ÉXITO
+                ANTECEDENTES REALES
               </div>
               <p
                 style={{ color: textMuted }}
                 className="text-xs font-light mt-1"
               >
-                Resultado documentado en The Bellacy Studio
+                Resultados documentados en nuestros ecosistemas
               </p>
             </div>
 
             <div className="lg:col-span-9 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
               <h2 className="font-display font-extrabold uppercase text-3xl sm:text-5xl md:text-6xl leading-[1.02] tracking-tight">
-                CASO{" "}
-                <span className="text-digital-gradient">BELLACY STUDIO</span>
+                CASOS DE{" "}
+                <span className="text-digital-gradient">ÉXITO</span>
               </h2>
               <span
                 style={{ color: textMuted }}
@@ -1363,27 +1363,29 @@ export default function DynamoLanding() {
             </div>
           </motion.div>
 
-          {/* TARJETA INTERACTIVA ANTES / DESPUÉS (Con combinación Naranja Intenso + Coral + Púrpura para resaltar en la web) */}
-          <div
-            onPointerMove={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              const pct = ((e.clientX - rect.left) / rect.width) * 100;
-              revealRaw.set(Math.max(0, Math.min(100, pct)));
-            }}
-            onTouchMove={(e) => {
-              const touch = e.touches[0];
-              if (!touch) return;
-              const rect = e.currentTarget.getBoundingClientRect();
-              const pct = ((touch.clientX - rect.left) / rect.width) * 100;
-              revealRaw.set(Math.max(0, Math.min(100, pct)));
-            }}
-            onClick={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              const pct = ((e.clientX - rect.left) / rect.width) * 100;
-              revealRaw.set(pct > 50 ? 100 : 0);
-            }}
-            className="relative grid grid-cols-1 overflow-hidden border border-[#FF6B35]/30 select-none cursor-ew-resize touch-pan-y group shadow-[0_20px_70px_rgba(255,91,34,0.18)]"
-          >
+          {/* CONTENEDOR DE TARJETAS DE CASOS DE ÉXITO (Actualmente: Caso 01 · The Bellacy Studio) */}
+          <div className="space-y-10">
+            {/* TARJETA 01: THE BELLACY STUDIO (Interactiva Antes / Después con combinación Naranja Intenso + Coral + Púrpura) */}
+            <div
+              onPointerMove={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const pct = ((e.clientX - rect.left) / rect.width) * 100;
+                revealRaw.set(Math.max(0, Math.min(100, pct)));
+              }}
+              onTouchMove={(e) => {
+                const touch = e.touches[0];
+                if (!touch) return;
+                const rect = e.currentTarget.getBoundingClientRect();
+                const pct = ((touch.clientX - rect.left) / rect.width) * 100;
+                revealRaw.set(Math.max(0, Math.min(100, pct)));
+              }}
+              onClick={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const pct = ((e.clientX - rect.left) / rect.width) * 100;
+                revealRaw.set(pct > 50 ? 100 : 0);
+              }}
+              className="relative grid grid-cols-1 overflow-hidden border border-[#FF6B35]/30 select-none cursor-ew-resize touch-pan-y group shadow-[0_20px_70px_rgba(255,91,34,0.18)]"
+            >
             {/* CAPA 1: BEFORE (US$ 300 / MES) */}
             <div className="col-start-1 row-start-1 w-full bg-[#08080D] text-white p-6 sm:p-12 md:p-14 flex flex-col justify-between relative">
               <div className="grid lg:grid-cols-12 gap-8 items-center">
@@ -1567,6 +1569,7 @@ export default function DynamoLanding() {
                 <span className="text-[#FF7A33] font-bold">↔</span>
               </div>
             </motion.div>
+            </div>
           </div>
         </div>
       </section>
