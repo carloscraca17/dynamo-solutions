@@ -416,7 +416,7 @@ export default function DynamoLanding() {
     {
       num: "04",
       heading: "DOS CAMINOS DE CRECIMIENTO",
-      body: "Potencia corporativa a medida para empresas y modelo 80/20 sin inversión inicial para profesionales independientes.",
+      body: "Potencia corporativa a medida para empresas y modelo a comisión con $0 de inversión inicial para profesionales independientes.",
     },
   ];
 
@@ -454,9 +454,9 @@ export default function DynamoLanding() {
       symptomTitle: "COSTOS INICIALES QUE FRENAN AL PROFESIONAL",
       painPoint:
         "Agencias tradicionales que exigen miles de dólares por adelantado por desarrollar un sistema sin comprometerse con tus reservas.",
-      solutionTitle: "ALIANZA 80/20 SIN INVERSIÓN INICIAL",
+      solutionTitle: "MODELO A COMISIÓN SIN INVERSIÓN INICIAL",
       solutionText:
-        "Para profesionales y oficios: construimos tu plataforma con $0 de costo inicial y solo ganamos el 20% por cita concretada.",
+        "Para profesionales y oficios: construimos tu plataforma con $0 de inversión inicial y operamos bajo un modelo a comisión por reserva concretada.",
     },
   ];
 
@@ -485,14 +485,14 @@ export default function DynamoLanding() {
     },
   ];
 
-  // JUEGO DE LETRAS A - M - O (Ecosistema 02: Impulso Modelo 80/20)
+  // JUEGO DE LETRAS A - M - O (Ecosistema 02: Impulso Modelo a Comisión)
   const professionalPillars = [
     {
       code: "01",
       letter: "A",
-      title: "ALIANZA DE ÉXITO COMPARTIDO (MODELO 80/20)",
+      title: "ALIANZA DE ÉXITO COMPARTIDO (MODELO A COMISIÓN)",
       description:
-        "Cero inversión inicial en web. Construimos tu plataforma de reservas: 80% para ti, 20% por cita concretada. Si tú no ganas, nosotros tampoco.",
+        "Cero inversión inicial. Construimos tu plataforma de reservas y trabajamos bajo un modelo a comisión por cada cita concretada. Si tú no ganas, nosotros tampoco.",
     },
     {
       code: "02",
@@ -669,8 +669,8 @@ export default function DynamoLanding() {
                   {[
                     { label: "01. Manifiesto", href: "#manifiesto" },
                     { label: "02. Diagnóstico", href: "#diagnostico" },
-                    { label: "03. Corporativo [D·Y·N]", href: "#corporativo" },
-                    { label: "04. Modelo 80/20 [A·M·O]", href: "#profesionales" },
+                    { label: "03. Corporativo", href: "#corporativo" },
+                    { label: "04. Modelo a Comisión", href: "#profesionales" },
                     { label: "05. Ecosistemas Activos", href: "#clientes" },
                     { label: "06. Caso Bellacy", href: "#caso-estudio" },
                   ].map((item) => (
@@ -1060,7 +1060,7 @@ export default function DynamoLanding() {
                 style={{ color: textMuted }}
                 className="text-[11px] font-mono uppercase tracking-[0.22em] mb-2"
               >
-                01 // EMPRESAS & PYMES · [ D · Y · N ]
+                01 // EMPRESAS & PYMES
               </div>
               <h2 className="font-display font-extrabold uppercase text-3xl sm:text-5xl md:text-6xl leading-[1.02] tracking-tight">
                 SOLUCIONES{" "}
@@ -1134,7 +1134,7 @@ export default function DynamoLanding() {
       </section>
 
       {/* =====================================================================
-          5. IMPULSO PARA PROFESIONALES · MODELO 80/20 — Iniciales A · M · O
+          5. IMPULSO PARA PROFESIONALES · MODELO A COMISIÓN — Iniciales A · M · O
          ===================================================================== */}
       <section
         id="profesionales"
@@ -1151,11 +1151,11 @@ export default function DynamoLanding() {
           >
             <div>
               <div className="text-[11px] font-mono uppercase tracking-[0.22em] text-[#E24497] mb-2">
-                02 // BARBEROS · ESTÉTICA · TÉCNICOS · OFICIOS · [ A · M · O ]
+                02 // BARBEROS · ESTÉTICA · TÉCNICOS · OFICIOS
               </div>
               <h2 className="font-display font-extrabold uppercase text-3xl sm:text-5xl md:text-6xl leading-[1.02] tracking-tight">
                 IMPULSO{" "}
-                <span className="text-digital-gradient">MODELO 80/20</span>
+                <span className="text-digital-gradient">A COMISIÓN</span>
               </h2>
             </div>
             <p
@@ -1216,7 +1216,7 @@ export default function DynamoLanding() {
                     className="inline-flex items-center gap-2 text-xs font-display font-bold uppercase tracking-wider group-hover:text-[#E24497] transition-colors"
                   >
                     <span className="w-2.5 h-2.5 rounded-full bg-digital-gradient shadow-[0_0_12px_#9E38F5]" />
-                    <span>APLICAR AL 80/20</span>
+                    <span>APLICAR AL MODELO</span>
                   </a>
                 </div>
               </motion.div>
