@@ -1222,30 +1222,63 @@ export default function DynamoLanding() {
             </h2>
           </motion.div>
 
-          {/* Banda Marquee Infinita con los Logos sin fondo */}
+          {/* Banda Marquee Infinita con fondo y bordes adaptados dinámicamente al tema (Oscuro / Gris / Claro) */}
           <div
-            style={{ borderColor, backgroundColor: "rgba(10, 10, 18, 0.55)" }}
-            className="relative overflow-hidden border-y py-10 sm:py-12 backdrop-blur-md"
+            style={{
+              borderColor,
+              backgroundColor: bgSecondary,
+            }}
+            className="relative overflow-hidden border-y py-10 sm:py-12 transition-colors duration-200"
           >
-            <div className="pointer-events-none absolute inset-y-0 left-0 w-16 sm:w-32 bg-gradient-to-r from-[#030306] to-transparent z-10" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-16 sm:w-32 bg-gradient-to-l from-[#030306] to-transparent z-10" />
+            <div
+              style={{
+                background: `linear-gradient(to right, ${bgPrimary}, transparent)`,
+              }}
+              className="pointer-events-none absolute inset-y-0 left-0 w-16 sm:w-32 z-10"
+            />
+            <div
+              style={{
+                background: `linear-gradient(to left, ${bgPrimary}, transparent)`,
+              }}
+              className="pointer-events-none absolute inset-y-0 right-0 w-16 sm:w-32 z-10"
+            />
 
             <div className="animate-marquee flex items-center gap-16 sm:gap-28 px-8">
               {[...clientEcosystems, ...clientEcosystems, ...clientEcosystems].map(
-                (client, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-center opacity-85 hover:opacity-100 transition-all duration-300 shrink-0 group"
-                  >
-                    <div className="h-16 sm:h-24 w-40 sm:w-52 flex items-center justify-center">
-                      <img
-                        src={client.logo}
-                        alt={client.name}
-                        className="max-h-14 sm:max-h-20 max-w-full object-contain filter drop-shadow-[0_0_18px_rgba(158,56,245,0.4)] group-hover:drop-shadow-[0_0_28px_rgba(255,88,100,0.65)] group-hover:scale-110 transition-all duration-300"
-                      />
+                (client, i) => {
+                  const isMagBarber = client.name === "Mag Barber Studio Vip";
+                  const isCorbyte = client.name === "Corbyte";
+                  const isBellacy = client.name === "The Bellacy Studio";
+
+                  const logoSrc =
+                    isCorbyte && isLightModeSide
+                      ? "/logos/corbyte-light.png"
+                      : client.logo;
+
+                  return (
+                    <div
+                      key={i}
+                      className="flex items-center justify-center opacity-90 hover:opacity-100 transition-all duration-300 shrink-0 group"
+                    >
+                      <div className="h-16 sm:h-24 w-40 sm:w-52 flex items-center justify-center">
+                        <img
+                          src={logoSrc}
+                          alt={client.name}
+                          style={{
+                            filter: isLightModeSide
+                              ? isMagBarber
+                                ? "brightness(0.12) drop-shadow(0 4px 12px rgba(82,70,255,0.18))"
+                                : isBellacy
+                                  ? "brightness(0.75) contrast(1.25) drop-shadow(0 4px 12px rgba(82,70,255,0.18))"
+                                  : "drop-shadow(0 4px 14px rgba(82,70,255,0.18))"
+                              : "drop-shadow(0 0 18px rgba(158,56,245,0.4))",
+                          }}
+                          className="max-h-14 sm:max-h-20 max-w-full object-contain group-hover:scale-110 transition-all duration-300"
+                        />
+                      </div>
                     </div>
-                  </div>
-                )
+                  );
+                }
               )}
             </div>
           </div>
