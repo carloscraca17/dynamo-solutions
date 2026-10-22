@@ -318,6 +318,36 @@ export default function DynamoLanding() {
     active: boolean;
   }>({ x: 500, y: 300, active: false });
 
+  // Navegación suave garantizada al tocar cualquier sección del menú desplegable (Móvil y Escritorio)
+  const handleNavScroll = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string
+  ) => {
+    e.preventDefault();
+    setMobileMenuOpen(false);
+
+    if (href === "#") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.history.pushState(null, "", window.location.pathname);
+      return;
+    }
+
+    const targetId = href.replace("#", "");
+    // Pequeña espera para permitir que el menú inicie el cierre sin cancelar el scroll en navegadores móviles
+    setTimeout(() => {
+      const el = document.getElementById(targetId);
+      if (el) {
+        const headerOffset = 76;
+        const elementTop = el.getBoundingClientRect().top + window.scrollY;
+        window.scrollTo({
+          top: Math.max(0, elementTop - headerOffset),
+          behavior: "smooth",
+        });
+        window.history.pushState(null, "", href);
+      }
+    }, 60);
+  };
+
   // Física Spring para la tarjeta interactiva "BEFORE / AFTER" de The Bellacy Studio
   const revealRaw = useMotionValue(52);
   const revealSpring = useSpring(revealRaw, {
@@ -562,7 +592,11 @@ export default function DynamoLanding() {
               )}
             </button>
 
-            <a href="#" className="flex items-center gap-1 shrink-0">
+            <a
+              href="#"
+              onClick={(e) => handleNavScroll(e, "#")}
+              className="flex items-center gap-1 shrink-0"
+            >
               <span className="font-display font-extrabold text-base sm:text-2xl tracking-wider uppercase">
                 DYNAMO<span className="text-digital-gradient">SOLUTIONS</span>
               </span>
@@ -609,6 +643,7 @@ export default function DynamoLanding() {
 
             <a
               href="#agendar"
+              onClick={(e) => handleNavScroll(e, "#agendar")}
               className="btn-digital-outline px-4 sm:px-7 py-2.5 sm:py-3 text-[11px] sm:text-xs font-display font-extrabold uppercase tracking-widest text-white inline-flex items-center gap-2.5 shadow-[0_0_25px_rgba(158,56,245,0.35)] hover:scale-[1.03] transition-all"
             >
               <span className="w-2.5 h-2.5 rounded-full bg-digital-gradient shadow-[0_0_12px_#FF5864] animate-pulse" />
@@ -642,9 +677,9 @@ export default function DynamoLanding() {
                     <a
                       key={item.href}
                       href={item.href}
-                      onClick={() => setMobileMenuOpen(false)}
+                      onClick={(e) => handleNavScroll(e, item.href)}
                       style={{ color: textPrimary }}
-                      className="text-xs font-display uppercase tracking-wider py-1.5 hover:text-[#B832F5] transition-colors"
+                      className="text-xs font-display uppercase tracking-wider py-1.5 hover:text-[#B832F5] transition-colors cursor-pointer"
                     >
                       {item.label}
                     </a>
@@ -652,8 +687,8 @@ export default function DynamoLanding() {
                 </div>
                 <a
                   href="#agendar"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="btn-digital-outline px-6 py-3 text-xs font-display font-bold uppercase tracking-wider inline-flex items-center justify-center gap-2.5 text-white shrink-0"
+                  onClick={(e) => handleNavScroll(e, "#agendar")}
+                  className="btn-digital-outline px-6 py-3 text-xs font-display font-bold uppercase tracking-wider inline-flex items-center justify-center gap-2.5 text-white shrink-0 cursor-pointer"
                 >
                   <span className="w-2.5 h-2.5 rounded-full bg-digital-gradient shadow-[0_0_10px_#9E38F5]" />
                   <span>AGENDAR REUNIÓN</span>
