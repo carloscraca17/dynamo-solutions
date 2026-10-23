@@ -274,6 +274,18 @@ export default function DynamoLanding() {
   });
 
   useEffect(() => {
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+    if (window.location.hash) {
+      window.history.replaceState(
+        null,
+        "",
+        window.location.pathname + window.location.search
+      );
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+
     try {
       const saved = localStorage.getItem("dynamo_cookie_consent_v1");
       if (!saved) {
@@ -328,7 +340,11 @@ export default function DynamoLanding() {
 
     if (href === "#") {
       window.scrollTo({ top: 0, behavior: "smooth" });
-      window.history.pushState(null, "", window.location.pathname);
+      window.history.replaceState(
+        null,
+        "",
+        window.location.pathname + window.location.search
+      );
       return;
     }
 
@@ -343,7 +359,11 @@ export default function DynamoLanding() {
           top: Math.max(0, elementTop - headerOffset),
           behavior: "smooth",
         });
-        window.history.pushState(null, "", href);
+        window.history.replaceState(
+          null,
+          "",
+          window.location.pathname + window.location.search
+        );
       }
     }, 60);
   };
@@ -805,6 +825,7 @@ export default function DynamoLanding() {
           >
             <a
               href="#agendar"
+              onClick={(e) => handleNavScroll(e, "#agendar")}
               className="btn-digital-outline w-full sm:w-auto px-8 py-4 text-xs font-display font-bold uppercase tracking-wider text-white inline-flex items-center justify-center gap-2.5"
             >
               <span className="w-2.5 h-2.5 rounded-full bg-digital-gradient shadow-[0_0_12px_#9E38F5]" />
@@ -1121,6 +1142,7 @@ export default function DynamoLanding() {
                 <div className="relative z-10 pt-6">
                   <a
                     href="#agendar"
+                    onClick={(e) => handleNavScroll(e, "#agendar")}
                     className="inline-flex items-center gap-2 text-xs font-display font-bold uppercase tracking-wider group-hover:text-[#E24497] transition-colors"
                   >
                     <span className="w-2.5 h-2.5 rounded-full bg-digital-gradient shadow-[0_0_12px_#9E38F5]" />
@@ -1213,6 +1235,7 @@ export default function DynamoLanding() {
                 <div className="relative z-10 pt-6">
                   <a
                     href="#agendar"
+                    onClick={(e) => handleNavScroll(e, "#agendar")}
                     className="inline-flex items-center gap-2 text-xs font-display font-bold uppercase tracking-wider group-hover:text-[#E24497] transition-colors"
                   >
                     <span className="w-2.5 h-2.5 rounded-full bg-digital-gradient shadow-[0_0_12px_#9E38F5]" />
