@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   description:
     "Diseñamos ecosistemas digitales, optimizamos tu posicionamiento y construimos soluciones tecnológicas que convierten visitantes en clientes recurrentes.",
   verification: {
-    google: "kfCXvHzQxQTntUaSsq6p-9sIS_G2o3coMdOJDoTTNkg",
+    google: "R0KvHBMKjN907552FPxigVywXdNr5i8CFju70I4P2Vc",
   },
 };
 
