@@ -257,6 +257,10 @@ function WireframeSphereIcon({ index }: { index: number }) {
   );
 }
 
+// Enlace de WhatsApp directo con mensaje preconfigurado
+const WHATSAPP_URL =
+  "https://wa.me/5491153159517?text=Hola%20Dynamo%20Solutions%2C%20estoy%20interesado%20en%20automatizar%20mi%20negocio";
+
 export default function DynamoLanding() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
@@ -662,9 +666,10 @@ export default function DynamoLanding() {
             </div>
 
             <a
-              href="#agendar"
-              onClick={(e) => handleNavScroll(e, "#agendar")}
-              className="btn-digital-outline px-4 sm:px-7 py-2.5 sm:py-3 text-[11px] sm:text-xs font-display font-extrabold uppercase tracking-widest text-white inline-flex items-center gap-2.5 shadow-[0_0_25px_rgba(158,56,245,0.35)] hover:scale-[1.03] transition-all"
+              href={WHATSAPP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-digital-outline px-4 sm:px-7 py-2.5 sm:py-3 text-[11px] sm:text-xs font-display font-extrabold uppercase tracking-widest text-white inline-flex items-center gap-2.5 shadow-[0_0_25px_rgba(158,56,245,0.35)] hover:scale-[1.03] transition-all cursor-pointer"
             >
               <span className="w-2.5 h-2.5 rounded-full bg-digital-gradient shadow-[0_0_12px_#FF5864] animate-pulse" />
               <span>AGENDAR</span>
@@ -706,8 +711,10 @@ export default function DynamoLanding() {
                   ))}
                 </div>
                 <a
-                  href="#agendar"
-                  onClick={(e) => handleNavScroll(e, "#agendar")}
+                  href={WHATSAPP_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setMobileMenuOpen(false)}
                   className="btn-digital-outline px-6 py-3 text-xs font-display font-bold uppercase tracking-wider inline-flex items-center justify-center gap-2.5 text-white shrink-0 cursor-pointer"
                 >
                   <span className="w-2.5 h-2.5 rounded-full bg-digital-gradient shadow-[0_0_10px_#9E38F5]" />
@@ -824,9 +831,10 @@ export default function DynamoLanding() {
             className="md:col-span-4 flex md:justify-end"
           >
             <a
-              href="#agendar"
-              onClick={(e) => handleNavScroll(e, "#agendar")}
-              className="btn-digital-outline w-full sm:w-auto px-8 py-4 text-xs font-display font-bold uppercase tracking-wider text-white inline-flex items-center justify-center gap-2.5"
+              href={WHATSAPP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-digital-outline w-full sm:w-auto px-8 py-4 text-xs font-display font-bold uppercase tracking-wider text-white inline-flex items-center justify-center gap-2.5 hover:scale-[1.02] transition-all cursor-pointer"
             >
               <span className="w-2.5 h-2.5 rounded-full bg-digital-gradient shadow-[0_0_12px_#9E38F5]" />
               <span>AGENDAR AUDITORÍA</span>
@@ -1141,9 +1149,10 @@ export default function DynamoLanding() {
 
                 <div className="relative z-10 pt-6">
                   <a
-                    href="#agendar"
-                    onClick={(e) => handleNavScroll(e, "#agendar")}
-                    className="inline-flex items-center gap-2 text-xs font-display font-bold uppercase tracking-wider group-hover:text-[#E24497] transition-colors"
+                    href={WHATSAPP_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-xs font-display font-bold uppercase tracking-wider group-hover:text-[#E24497] transition-colors cursor-pointer"
                   >
                     <span className="w-2.5 h-2.5 rounded-full bg-digital-gradient shadow-[0_0_12px_#9E38F5]" />
                     <span>EMPEZAR</span>
@@ -1234,9 +1243,10 @@ export default function DynamoLanding() {
 
                 <div className="relative z-10 pt-6">
                   <a
-                    href="#agendar"
-                    onClick={(e) => handleNavScroll(e, "#agendar")}
-                    className="inline-flex items-center gap-2 text-xs font-display font-bold uppercase tracking-wider group-hover:text-[#E24497] transition-colors"
+                    href={WHATSAPP_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-xs font-display font-bold uppercase tracking-wider group-hover:text-[#E24497] transition-colors cursor-pointer"
                   >
                     <span className="w-2.5 h-2.5 rounded-full bg-digital-gradient shadow-[0_0_12px_#9E38F5]" />
                     <span>APLICAR AL MODELO</span>
@@ -1633,14 +1643,17 @@ export default function DynamoLanding() {
           </p>
 
           <div className="flex justify-center">
-            <motion.button
+            <motion.a
+              href={WHATSAPP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.98 }}
               className="btn-digital-outline px-10 py-5 text-xs sm:text-sm font-display font-bold uppercase tracking-wider text-white inline-flex items-center justify-center gap-3 cursor-pointer"
             >
               <span className="w-2.5 h-2.5 rounded-full bg-digital-gradient shadow-[0_0_14px_#9E38F5]" />
               <span>CONTACTAR AHORA</span>
-            </motion.button>
+            </motion.a>
           </div>
         </motion.div>
 
